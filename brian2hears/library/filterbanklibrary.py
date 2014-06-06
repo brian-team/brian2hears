@@ -1,7 +1,5 @@
-from brian2hears.core.firfilterbank import FIRFilterbankGroup
+from brian2hears.core.linearfilterbank import *
 import numpy as np
-
-__all__ = ['DelayFilterbank', 'GammatoneFilterbank']
 
 class DelayFilterbank(FIRFilterbankGroup):
     '''
@@ -24,24 +22,31 @@ class DelayFilterbank(FIRFilterbankGroup):
 
         FIRFilterbankGroup.__init__(self, sound, coeficients)
 
-class FIRGammatoneFilterbank(FIRFilterbankGroup):
+class FIRAveragingFilter(FIRFilterbankGroup):
     '''
-    A Filterbank that differentially delays input signals
-
     Parameters
     ----------
     sound
         As in the main FIRFilterbankGroup
-    delays
+    Ntaps
         integer delays
     '''
-    def __init__(self, sound, delays):
-        Ntaps = delays.max()+1
-        Nchannels = len(delays)
-
-        coeficients = np.zeros((Nchannels, Ntaps))
-        for k in range(Nchannels):
-            coeficients[k, delays[k]] = 1.
+    def __init__(self, sound, Ntaps):
+        coeficients = np.ones((1, Ntaps))/float(Ntaps)
 
         FIRFilterbankGroup.__init__(self, sound, coeficients)
+
+class IIRAveragingFilter(IIRFilterbankGroup):
+    '''
+    Parameters
+    ----------
+    sound
+        As in the main FIRFilterbankGroup
+    Ntaps
+        integer delays
+    '''
+    def __init__(self, sound, Ntaps):
+        b = np.array([0, 1/float(Ntaps)])
+        a = np.array([1, -(1-1/float(Ntaps))])
         
+        IIRFilterbankGroup.__init__(self, sound, b, a)
