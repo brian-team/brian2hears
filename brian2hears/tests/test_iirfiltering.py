@@ -40,7 +40,7 @@ if False:
 if True:
     a, b = a.reshape((1, 2)), b.reshape((1, 2))
     print a, b
-    iir_filter = ExplicitIIRFilterbankGroup(sound, b, a)
+    iir_filter = LinearFilterbankGroup(sound, b, a)
     Miir = StateMonitor(iir_filter, 'out', record = [0])
     iir_net = Network(iir_filter, Miir)
     t0 = time.time()
@@ -57,7 +57,7 @@ if True:
     show()
 
 if True:
-    iir_filter = ExplicitIIRAveragingFilter(sound, Ntaps)
+    iir_filter = IIRAveragingFilter(sound, Ntaps)
     Miir = StateMonitor(iir_filter, 'out', record = [0])
     iir_net = Network(iir_filter, Miir)
     t0 = time.time()

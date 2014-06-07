@@ -46,8 +46,8 @@ class IIRAveragingFilter(LinearFilterbankGroup):
         integer delays
     '''
     def __init__(self, sound, Ntaps, method = 'explicit'):
-        self.b = np.array([0., 1/float(Ntaps)])
-        self.a = np.array([1., -(1-1/float(Ntaps))])
+        self.b = np.array([0., 1/float(Ntaps)]).reshape((1,2))
+        self.a = np.array([1., -(1-1/float(Ntaps))]).reshape((1,2))
         
         LinearFilterbankGroup.__init__(self, sound, self.b, self.a)
 
