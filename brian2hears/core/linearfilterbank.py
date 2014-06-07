@@ -170,7 +170,147 @@ class FIRFilterbankGroup(Group):
         # this should probably not be needed in the future
         return self.N
 
-class IIRFilterbankGroup(Group):
+
+class LinearFilterbankGroup(Group):
+    '''
+    A filterbank of Infinite Impulse Response (IIR) filters.
+
+    Parameters
+    ----------
+    source : (TimedArray or LinearFilterbankGroup)
+        The time varying signal to which the filters are applied.
+    a, b : (TimedArray)
+        Matrices of size (Nchannels, Ntaps) giving the values of the a and b IIR coeficients
+        
+
+    Generalised linear filterbank
+    
+    Initialisation arguments:
+
+    ``source``
+        The input to the filterbank, must have the same number of channels or
+        just a single channel. In the latter case, the channels will be
+        replicated.
+    ``b``, ``a``
+        The coeffs b, a must be of shape ``(nchannels, m)`` or
+        ``(nchannels, m, p)``. Here ``m`` is
+        the order of the filters, and ``p`` is the number of filters in a
+        chain (first you apply ``[:, :, 0]``, then ``[:, :, 1]``, etc.).
+    
+    The filter parameters are stored in the modifiable attributes ``filt_b``,
+    ``filt_a`` and ``filt_state`` (the variable ``z`` in the section below).
+    
+    **Notes**
+    
+    These notes adapted from scipy's :func:`~scipy.signal.lfilter` function.
+    
+    The filterbank is implemented as a direct II transposed structure.
+    This means that for a single channel and element of the filter cascade,
+    the output y for an input x is defined by::
+
+        a[0]*y[m] = b[0]*x[m] + b[1]*x[m-1] + ... + b[m]*x[0]
+                              - a[1]*y[m-1] - ... - a[m]*y[0]
+
+    using the following difference equations::
+
+    y[m] = b[0]*x[m] + z[0,m-1]
+    z[0,m] = b[1]*x[m] + z[1,m-1] - a[1]*y[m]
+    ...
+    z[n-3,m] = b[n-2]*x[m] + z[n-2,m-1] - a[n-2]*y[m]
+    z[n-2,m] = b[n-1]*x[m] - a[n-1]*y[m]
+
+    where m is the output sample number.
+
+    The rational transfer function describing this filter in the
+    z-transform domain is::
+    
+                                -1              -nb
+                    b[0] + b[1]z  + ... + b[m] z
+            Y(z) = --------------------------------- X(z)
+                                -1              -na
+                    a[0] + a[1]z  + ... + a[m] z
+
+    '''
+    add_to_magic_network = True
+    invalidates_magic_network = True
+    def __init__(self, source, b, a, 
+                 codeobj_class = None, when = None, name = 'iirfilterbankgroup*'):
+
+        BrianObject.__init__(self, when = when, name = name)
+
+        Nchannels, Ntaps = b.shape[0], b.shape[1]
+
+        if isinstance(source, TimedArray):
+            sound = source
+            is_cascaded = False
+        elif isinstance(source, LinearFilterbankGroup):
+            source = source
+            is_cascaded = True
+            
+        self.filt_a = a
+        self.filt_b = b
+
+        if is_cascaded:
+            z_equations = ''#x : 1 \n'
+        else:
+            z_equations = 'x : 1 (scalar) \n'
+
+        z_equations += 'y : 1 \n'
+        for ktap in range(Ntaps):
+            z_equations += 'z%d_m : 1 \n' % ktap
+            z_equations += 'a_%d : 1 (constant) \n' % ktap
+            z_equations += 'b_%d : 1 (constant) \n' % ktap
+
+        
+        z_updates = ''
+        if not is_cascaded:
+            z_updates += 'x = sound(t) \n'
+            main_namespace =  {'sound': sound}
+        else:
+            main_namespace =  {}
+
+
+        z_updates += 'y=b_0*x+z0_m \n'
+        for kupdate in range(0, Ntaps-2):
+            z_updates += 'z%d_m = b_%d*x + z%d_m - a_%d*y \n' % (kupdate, kupdate+1, kupdate+1, kupdate+1) 
+        z_updates += 'z%d_m = b_%d*x- a_%d*y \n' % (Ntaps-2, Ntaps-1, Ntaps - 1)
+
+        main_group = NeuronGroup(Nchannels, model = z_equations, 
+                          codeobj_class = codeobj_class, clock = self.clock, namespace = main_namespace)
+        main_group_updates = main_group.runner(z_updates,
+                                                   when = (self.clock, 'start', 0))
+        
+        for k in range(Ntaps):
+            exec('main_group.a_%d = a[:,%d]' % (k,k))
+            exec('main_group.b_%d = b[:,%d]' % (k,k))
+
+        if is_cascaded:
+            main_group.variables.add_reference('x', source.variables['out'])
+            
+        ####################################
+        # Brian Group infrastructure stuff #
+        ####################################
+        # add contained objects
+        self._contained_objects += [main_group, main_group_updates]#main_group_compute_y, 
+
+        # set up the variables
+        self.variables = Variables(self)
+        # this line gives the name of the output variable
+
+        self.variables.add_reference('out', main_group.variables['y']) # here goes the fancy indexing for Repeat/Tile etc.
+#        self.variables.add_reference('out', main_group.variables['x']) # here goes the fancy indexing for Repeat/Tile etc.
+        self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
+        self.variables.add_clock_variables(self.clock)
+
+        # creates natural naming scheme for attributes
+        # has to be after all variables are set
+        self._enable_group_attributes()
+
+    def __len__(self):
+        # this should probably not be needed in the future
+        return self.N
+
+class OldIIRFilterbankGroup(Group):
     '''
     A filterbank of Infinite Impulse Response (IIR) filters.
 
@@ -204,61 +344,31 @@ class IIRFilterbankGroup(Group):
     
     .. automethod:: decascade
     
-    **Notes**
-    
-    These notes adapted from scipy's :func:`~scipy.signal.lfilter` function.
-    
-    The filterbank is implemented as a direct II transposed structure.
-    This means that for a single channel and element of the filter cascade,
-    the output y for an input x is defined by::
 
-        a[0]*y[m] = b[0]*x[m] + b[1]*x[m-1] + ... + b[m]*x[0]
-                              - a[1]*y[m-1] - ... - a[m]*y[0]
-
-    using the following difference equations::
-
-y[m] = b[0]*x[m] + z[0,m-1]
-z[0,m] = b[1]*x[m] + z[1,m-1] - a[1]*y[m]
-...
-z[n-3,m] = b[n-2]*x[m] + z[n-2,m-1] - a[n-2]*y[m]
-z[n-2,m] = b[n-1]*x[m] - a[n-1]*y[m]
-
-    where m is the output sample number.
-
-    The rational transfer function describing this filter in the
-    z-transform domain is::
-    
-                                -1              -nb
-                    b[0] + b[1]z  + ... + b[m] z
-            Y(z) = --------------------------------- X(z)
-                                -1              -na
-                    a[0] + a[1]z  + ... + a[m] z
     '''
     add_to_magic_network = True
     invalidates_magic_network = True
     def __init__(self, sound, b, a, 
                  codeobj_class = None, when = None, name = 'iirfilterbankgroup*'):
         BrianObject.__init__(self, when = when, name = name)
+
         Ntaps = b.shape[0]
-        
+
         z_equations = '''
         x : 1 (scalar)
-        y : 1 (scalar)
-        b0 : 1 (scalar)
-        z0m1 : 1 (scalar)
         z : 1
+        y : 1
         '''
-        main_group = NeuronGroup(Ntaps-1, model = z_equations, 
+        main_group = NeuronGroup(Ntaps, model = z_equations, 
                           codeobj_class = codeobj_class, clock = self.clock, namespace = {'sound': sound})
-
         # First, write the signal value to the x scalar
         main_group_write_sound = main_group.runner('x = sound(t)',
                                      when = (self.clock, 'start', 0))
 
         # second, compute y[m]
-        main_group_compute_y = main_group.runner('y = b0 * x + z0m1', 
-                                                 when = (self.clock, 'start', 1))
-        main_group.b0 = b[0]
+#        main_group_compute_y = main_group.runner('y = b0 * x + z0m1', 
+#                                                 when = (self.clock, 'start', 1))
+#        main_group.b0 = b[0]
 
 
 
@@ -273,44 +383,44 @@ b : 1
         S_diffeq = Synapses(main_group, main_group, model = S_model,
                             codeobj_class = codeobj_class, clock = self.clock, 
                             namespace = {})
-        S_diffeq.connect('(i + 1 == j) and (j != Ntaps - 1)') # explicitly should be better I suppose
+        #'(i + 1 == j) and (j != Ntaps - 1)') # explicitly should be better I suppose
+        S_diffeq.connect(np.roll(np.arange(Ntaps), -1), np.arange(Ntaps))
         S_diffeq_code = S_diffeq.runner('z_post = b * x_pre + z_pre*zflag - a * y_pre',
                                         when = (self.clock, 'start', 2))
-        S_diffeq.a = a[1:]
-        S_diffeq.b = b[1:]
-
+        S_diffeq.a = a
+#        S_diffeq.a[0] = 0
+        S_diffeq.b = b
 
         # To implement the last equation
         # z[Ntaps-2,m] = b[Ntaps-1]*x[m] - a[Ntaps-1]*y[m]
         # I first have to make sure that the term in the diffeq with z[Ntaps-1,m-1] (i.e. z_pre[Ntaps-1]) vanishes
         # this is what zflag does
-        print "len diffeq", len(S_diffeq)
-        flags = np.ones(Ntaps-1)
-        flags[Ntaps-2] = 0
+        flags = np.ones(Ntaps)
+        flags[-1] = 0
         S_diffeq.zflag = flags
 
 
-        S_write_z0m1 = Synapses(main_group, main_group,
-                                codeobj_class = codeobj_class, clock = self.clock, 
-                                namespace = {})
-        S_write_z0m1.connect(0, 0)
-        S_write_z0m1_code = S_write_z0m1.runner('z0m1 = z_post',
-                                                when = (self.clock, 'start', 3))
+#        S_write_z0m1 = Synapses(main_group, main_group,
+#                                codeobj_class = codeobj_class, clock = self.clock, 
+#                                namespace = {})
+#        S_write_z0m1.connect(np.arange(Ntaps-1), 0)
+#        S_write_z0m1_code = S_write_z0m1.runner('z0m1 = z_post',
+#                                                when = (self.clock, 'start', 3))
         
         ####################################
         # Brian Group infrastructure stuff #
         ####################################
         # add contained objects
-        self._contained_objects += [main_group, main_group_compute_y, main_group_write_sound]
+        self._contained_objects += [main_group, main_group_write_sound]#main_group_compute_y, 
         self._contained_objects += [S_diffeq_code, S_diffeq]
-        self._contained_objects += [S_write_z0m1_code, S_write_z0m1]
-
+#        self._contained_objects += [S_write_z0m1_code, S_write_z0m1]
 
         # set up the variables
         self.variables = Variables(self)
         # this line gives the name of the output variable
-        self.variables.add_reference('out', main_group.variables['y']) # here goes the fancy indexing for Repeat/Tile etc.
-        self.variables.add_constant('N', Unit(1), 1) # a group has to have an N
+        self.variables.add_reference('out', main_group.variables['z']) # here goes the fancy indexing for Repeat/Tile etc.
+#        self.variables.add_reference('out', main_group.variables['x']) # here goes the fancy indexing for Repeat/Tile etc.
+        self.variables.add_constant('N', Unit(1), Ntaps) # a group has to have an N
         self.variables.add_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes

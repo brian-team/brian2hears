@@ -36,7 +36,7 @@ class FIRAveragingFilter(FIRFilterbankGroup):
 
         FIRFilterbankGroup.__init__(self, sound, coeficients)
 
-class IIRAveragingFilter(IIRFilterbankGroup):
+class IIRAveragingFilter(LinearFilterbankGroup):
     '''
     Parameters
     ----------
@@ -45,8 +45,11 @@ class IIRAveragingFilter(IIRFilterbankGroup):
     Ntaps
         integer delays
     '''
-    def __init__(self, sound, Ntaps):
-        b = np.array([0, 1/float(Ntaps)])
-        a = np.array([1, -(1-1/float(Ntaps))])
+    def __init__(self, sound, Ntaps, method = 'explicit'):
+        self.b = np.array([0., 1/float(Ntaps)])
+        self.a = np.array([1., -(1-1/float(Ntaps))])
         
-        IIRFilterbankGroup.__init__(self, sound, b, a)
+        LinearFilterbankGroup.__init__(self, sound, self.b, self.a)
+
+
+
