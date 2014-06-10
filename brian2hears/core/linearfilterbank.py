@@ -234,7 +234,7 @@ class LinearFilterbankGroup(Group):
     add_to_magic_network = True
     invalidates_magic_network = True
     def __init__(self, source, b, a, 
-                 codeobj_class = None, when = None, name = 'iirfilterbankgroup*'):
+                 codeobj_class = None, when = None, name = 'linearfilterbankgroup*'):
 
         BrianObject.__init__(self, when = when, name = name)
 

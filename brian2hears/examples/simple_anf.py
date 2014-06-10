@@ -25,5 +25,5 @@ M = SpikeMonitor(anf)
 run(len(sound.values)*defaultclock.dt)
 i, t = M.it
 plot(np.array(t), i, '.', color = 'k')
-show()
 
+show()

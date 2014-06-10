@@ -8,24 +8,53 @@ from brian2.core.clocks import defaultclock
 import numpy as np
 
 class GammatoneFilterbank(Group):
-    add_to_magic_network = True
-    invalidates_magic_network = True
     '''
     A Gammatone filterbank consisting of len(cf) channels.
     The implementation uses the LinearFilterbankGroup and the filter coeficients as in brian.hears.
     
     The filterbank has a variable 'out' which holds the output of the filterbank.
+
+    Bank of gammatone filters.
     
-    Parameters
-    ----------
-    sound:
+    They are implemented as cascades of four 2nd-order IIR filters (this
+    8th-order digital filter corresponds to a 4th-order gammatone filter).
+    
+    The approximated impulse response :math:`\\mathrm{IR}` is defined as follow
+    :math:`\\mathrm{IR}(t)=t^3\\exp(-2\\pi b \\mathrm{ERB}(f)t)\\cos(2\\pi f t)`
+    where :math:`\\mathrm{ERB}(f)=24.7+0.108 f` [Hz] is the equivalent
+    rectangular bandwidth of the filter centered at :math:`f`.
+
+    It comes from Slaney's exact gammatone implementation (Slaney, M., 1993,
+    "An Efficient Implementation of the Patterson-Holdsworth 
+    Auditory Filter Bank". Apple Computer Technical Report #35). The code is
+    based on
+    `Slaney's Matlab implementation <http://cobweb.ecn.purdue.edu/~malcolm/interval/1998-010/>`__.
+    
+    Initialised with arguments:
+    
+    ``source``
         a sound in the TimedArray format
-    cf:
-        an array of center frequencies
-    rest: 
-    Same as in brian.hears for the gammatone stuff
-    
+        
+    ``cf``
+        List or array of center frequencies.
+        
+    ``b=1.019``
+        parameter which determines the bandwidth of the filters (and
+        reciprocally the duration of its impulse response). In particular, the
+        bandwidth = b.ERB(cf), where ERB(cf) is the equivalent bandwidth at
+        frequency ``cf``. The default value of ``b`` to a best fit
+        (Patterson et al., 1992). ``b`` can either be a scalar and will be the
+        same for every channel or an array of the same length as ``cf``.
+        
+    ``erb_order=1``, ``ear_Q=9.26449``, ``min_bw=24.7``
+        Parameters used to compute the ERB bandwidth.
+        :math:`\\mathrm{ERB} = ((\mathrm{cf}/\mathrm{ear\\_Q})^{\\mathrm{erb}\\_\\mathrm{order}} + \\mathrm{min\\_bw}^{\\mathrm{erb}\\_\\mathrm{order}})^{(1/\\mathrm{erb}\\_\\mathrm{order})}`.
+        Their default values are the ones recommended in
+        Glasberg and Moore, 1990. 
+
     '''
+    add_to_magic_network = True
+    invalidates_magic_network = True
     def __init__(self, sound, cf, b=1.019, erb_order=1, ear_Q=9.26449,
                  min_bw=24.7,
                  codeobj_class = None, when = None, name = 'gammatonefilterbank*'):

@@ -3,14 +3,14 @@ import numpy as np
 
 class DelayFilterbank(FIRFilterbankGroup):
     '''
-    A Filterbank that differentially delays input signals
+    An FIR Filterbank that differentially delays input signals. 
 
     Parameters
     ----------
-    sound
-        As in the main FIRFilterbankGroup
+    `sound`
+        As in LinearFilterbankGroup
     delays
-        integer delays
+        integer delays in samples
     '''
     def __init__(self, sound, delays):
         Ntaps = delays.max()+1
@@ -27,9 +27,9 @@ class FIRAveragingFilter(FIRFilterbankGroup):
     Parameters
     ----------
     sound
-        As in the main FIRFilterbankGroup
+        As in LinearFilterbankGroup
     Ntaps
-        integer delays
+        Number of taps to average over
     '''
     def __init__(self, sound, Ntaps):
         coeficients = np.ones((1, Ntaps))/float(Ntaps)
@@ -38,12 +38,14 @@ class FIRAveragingFilter(FIRFilterbankGroup):
 
 class IIRAveragingFilter(LinearFilterbankGroup):
     '''
+    An implementation of an IIR filter that performs averaring. It should be the IIR formulation of the FIR filter above, but I'm not so sure it is
+
     Parameters
     ----------
-    sound
-        As in the main FIRFilterbankGroup
+    source
+        As in LinearFilterbankGroup
     Ntaps
-        integer delays
+        Number of taps to average over (the equivalent of, this filterbank is IIR with 2 taps)
     '''
     def __init__(self, sound, Ntaps, method = 'explicit'):
         self.b = np.array([0., 1/float(Ntaps)]).reshape((1,2))
