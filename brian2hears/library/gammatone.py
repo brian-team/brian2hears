@@ -65,6 +65,7 @@ class GammatoneFilterbank(Group):
 
         T = float(defaultclock.dt)# samplerate goes here
         self.b,self.erb_order,self.EarQ,self.min_bw=b,erb_order,ear_Q,min_bw
+        cf = np.asarray(cf)
         erb = ((cf/ear_Q)**erb_order + min_bw**erb_order)**(1/erb_order)
         B = b*2*np.pi*erb
 #        B = 2*pi*b

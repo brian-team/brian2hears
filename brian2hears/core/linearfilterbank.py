@@ -6,6 +6,7 @@ from brian2.utils import TimedArray
 from brian2.units import Unit
 from brian2.core.clocks import defaultclock
 
+from brian2hears.core.filterbank import IndexedFilterbank, FunctionFilterbank
 
 import numpy as np
 
