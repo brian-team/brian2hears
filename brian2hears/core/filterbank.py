@@ -6,6 +6,8 @@ from brian2.utils import TimedArray
 from brian2.units import Unit
 from brian2.core.clocks import defaultclock
 
+from brian2hears.core.linearfilterbank import LinearFilterbank
+
 class IndexedFilterbank(Group):
     '''
     Formerly "RestructureFilterbank"
@@ -40,15 +42,24 @@ class IndexedFilterbank(Group):
         return self.N
 
 class Repeat(IndexedFilterbank):
+    '''
+    * Repeating
+
+    LLLRRR
+    '''
+
     def __init__(self, source, N, when = None, name = 'repeatfilterbank*'):
-        indices = np.zeros(len(source)*N, dtype = int)
-        for k in range(N):
-            indices[k::N] = np.arange(len(source), dtype = int)
+        indices = np.repeat(np.arange(len(source), dtype = int), N)
         IndexedFilterbank.__init__(self, source, indices, when = when, name = name)
 
 class Tile(IndexedFilterbank):
-    
+    '''
+    * Tiling 
 
+    LRLRLR
+    '''
+    add_to_magic_network = True
+    invalidates_magic_network = True
     def __init__(self, source, N, when = None, name = 'tilefilterbank*'):
         indices = np.tile(np.arange(len(source), dtype = int), N)
         IndexedFilterbank.__init__(self, source, indices, when = when, name = name)
@@ -94,3 +105,47 @@ class FunctionFilterbank(Group):
     def __len__(self):
         # this should probably not be needed in the future
         return self.N            
+
+class FilterbankCascade(Group):
+    '''
+    A cascade of filters
+    '''
+    add_to_magic_network = True
+    invalidates_magic_network = True
+    def __init__(self, source, b, a,
+                 codeobj_class = None, when = None, name = 'filterbankcascade*'):
+        BrianObject.__init__(self, when = when, name = name)
+
+        Nchannels = a.shape[0]
+        Nchain = a.shape[2]
+
+        # deal with chaining the filterbank
+        self.filt_a = a
+        self.filt_b = b
+        
+        filters = [LinearFilterbank(source, self.filt_b[:,:,0], self.filt_a[:,:,0])]
+        for k in range(1, Nchain):
+            filters += [LinearFilterbank(filters[-1], self.filt_b[:,:,k], self.filt_a[:,:,k])]
+        
+        ####################################
+        # Brian Group infrastructure stuff #
+        ####################################
+        # add contained objects
+        self._contained_objects += filters
+
+        # set up the variables
+        self.variables = Variables(self)
+
+        # this line gives the name of the output variable
+        self.variables.add_reference('out', filters[-1].variables['out']) # here goes the fancy indexing for Repeat/Tile etc.
+
+        self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
+        self.variables.add_clock_variables(self.clock)
+
+        # creates natural naming scheme for attributes
+        # has to be after all variables are set
+        self._enable_group_attributes()
+
+    def __len__(self):
+        # this should probably not be needed in the future
+        return self.N

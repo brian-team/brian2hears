@@ -6,11 +6,11 @@ from brian2.utils import TimedArray
 from brian2.units import Unit
 from brian2.core.clocks import defaultclock
 
-from brian2hears.core.filterbank import IndexedFilterbank, FunctionFilterbank
+#from brian2hears.core.filterbank import IndexedFilterbank, FunctionFilterbank
 
 import numpy as np
 
-class ShiftRegisterGroup(Group):
+class ShiftRegister(Group):
     '''
     A shift register
 
@@ -92,7 +92,7 @@ class ShiftRegisterGroup(Group):
         # this should probably not be needed in the future
         return self.N
 
-class FIRFilterbankGroup(Group):
+class FIRFilterbank(Group):
     '''
     A filterbank of Finite Impulse Response (FIR) filters.
 
@@ -106,7 +106,7 @@ class FIRFilterbankGroup(Group):
 
     Notes
     -----
-    The FIRFilterbankGroup has an "out" Variable that can be therefore
+    The `FIRFilterbank` has an "out" Variable that can be therefore
     used to be linked to another Brian NeuronGroup object for example.
     '''
     add_to_magic_network = True
@@ -127,7 +127,7 @@ class FIRFilterbankGroup(Group):
         # then gets the time-shifted values, multiply them by the FIR filter coeficients, and 
         # return the sum of the values.
 
-        sr_g = ShiftRegisterGroup(sound, Ntaps, 
+        sr_g = ShiftRegister(sound, Ntaps, 
                                   codeobj_class = None, 
                                   when = None, 
                                   name = 'shiftregistergroup*', 
@@ -171,8 +171,7 @@ class FIRFilterbankGroup(Group):
         # this should probably not be needed in the future
         return self.N
 
-
-class LinearFilterbankGroup(Group):
+class LinearFilterbank(Group):
     '''
     A filterbank of Infinite Impulse Response (IIR) filters.
 
@@ -239,19 +238,21 @@ class LinearFilterbankGroup(Group):
 
         BrianObject.__init__(self, when = when, name = name)
 
+
         Nchannels, Ntaps = b.shape[0], b.shape[1]
 
         if isinstance(source, TimedArray):
             sound = source
-            is_cascaded = False
-        elif isinstance(source, LinearFilterbankGroup):
+            source_is_fb = False
+        elif isinstance(source, Group):
             source = source
-            is_cascaded = True
-            
+            source_is_fb = True
+
         self.filt_a = a
         self.filt_b = b
+#        assert (self.filt_a.ndim == 2) and (self.filt_b.ndim == 2)
 
-        if is_cascaded:
+        if source_is_fb:
             z_equations = ''#x : 1 \n'
         else:
             z_equations = 'x : 1 (scalar) \n'
@@ -264,7 +265,7 @@ class LinearFilterbankGroup(Group):
 
         
         z_updates = ''
-        if not is_cascaded:
+        if not source_is_fb:
             z_updates += 'x = sound(t) \n'
             main_namespace =  {'sound': sound}
         else:
@@ -285,9 +286,10 @@ class LinearFilterbankGroup(Group):
             exec('main_group.a_%d = a[:,%d]' % (k,k))
             exec('main_group.b_%d = b[:,%d]' % (k,k))
 
-        if is_cascaded:
+        if source_is_fb:
             main_group.variables.add_reference('x', source.variables['out'])
             
+
         ####################################
         # Brian Group infrastructure stuff #
         ####################################
@@ -303,13 +305,18 @@ class LinearFilterbankGroup(Group):
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
         self.variables.add_clock_variables(self.clock)
 
+#        if is_cascaded:
+#            self._contained_objects += [LinearFilterbank(self, b[:,:,1:], a[:,:,1:])]
+
         # creates natural naming scheme for attributes
         # has to be after all variables are set
         self._enable_group_attributes()
 
+
     def __len__(self):
         # this should probably not be needed in the future
         return self.N
+
 
 class OldIIRFilterbankGroup(Group):
     '''
