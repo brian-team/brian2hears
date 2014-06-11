@@ -3,7 +3,7 @@ from brian2hears import *
 import time
 
 def test_indexing():
-    cf = erbspace(10*Hz, 1000*Hz, 32)
+o    cf = erbspace(10*Hz, 1000*Hz, 32)
     signal = np.random.randn(1000)
     sound = TimedArray(signal, dt = defaultclock.dt)
 
