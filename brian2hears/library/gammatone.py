@@ -1,4 +1,4 @@
-from brian2hears.core.linearfilterbank import LinearFilterbankGroup
+from brian2hears.core.linearfilterbank import LinearFilterbank
 from brian2.core.variables import Variables
 from brian2.core.base import BrianObject
 from brian2.groups import Group
@@ -68,7 +68,6 @@ class GammatoneFilterbank(Group):
         cf = np.asarray(cf)
         erb = ((cf/ear_Q)**erb_order + min_bw**erb_order)**(1/erb_order)
         B = b*2*np.pi*erb
-#        B = 2*pi*b
 
         A0 = T
         A2 = 0
@@ -118,10 +117,10 @@ class GammatoneFilterbank(Group):
                          np.array([A0*np.ones(len(cf)), A14, np.zeros(len(cf))]).T))
 
         # The filterbank is a cascade of 4 IIR filters
-        f0 = LinearFilterbankGroup(sound, self.filt_b[:,:,0], self.filt_a[:,:,0])
-        f1 = LinearFilterbankGroup(f0, self.filt_b[:,:,1], self.filt_a[:,:,1])
-        f2 = LinearFilterbankGroup(f1, self.filt_b[:,:,2], self.filt_a[:,:,2])
-        f3 = LinearFilterbankGroup(f2, self.filt_b[:,:,3], self.filt_a[:,:,3])
+        f0 = LinearFilterbank(sound, self.filt_b[:,:,0], self.filt_a[:,:,0])
+        f1 = LinearFilterbank(f0, self.filt_b[:,:,1], self.filt_a[:,:,1])
+        f2 = LinearFilterbank(f1, self.filt_b[:,:,2], self.filt_a[:,:,2])
+        f3 = LinearFilterbank(f2, self.filt_b[:,:,3], self.filt_a[:,:,3])
         
         ####################################
         # Brian Group infrastructure stuff #
