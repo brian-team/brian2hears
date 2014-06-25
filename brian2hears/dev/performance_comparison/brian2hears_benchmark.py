@@ -37,9 +37,11 @@ if __name__ == '__main__':
     for kncf in range(len(Ncfs)):    
         print kncf
         for kduration in range(len(durations)):
+            print kduration
             t0 = time.time()
             do_one(Ncfs[kncf],durations[kduration]*second)
             results[kncf, kduration] = time.time()-t0
+            print results[kncf, kduration]
 
     np.savez(fn, results)
     print 'All done'

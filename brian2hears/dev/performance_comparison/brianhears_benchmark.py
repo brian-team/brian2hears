@@ -6,8 +6,10 @@ from brian.hears import *
 from brian2hears.dev.performance_comparison.benchmark_parameters import parameters
 
 def do_one(Ncf, duration):
+    clear()
+    reinit_default_clock()
     sound = whitenoise(duration)
-    
+
     cf = erbspace(20*Hz, 20*kHz, Ncf)
     cochlea = Gammatone(sound, cf)
     # Half-wave rectification and compression [x]^(1/3)
@@ -36,9 +38,11 @@ if __name__ == '__main__':
     for kncf in range(len(Ncfs)):    
         print kncf
         for kduration in range(len(durations)):
+            print kduration
             t0 = time.time()
             do_one(Ncfs[kncf],durations[kduration]*second)
             results[kncf, kduration] = time.time()-t0
+            print results[kncf, kduration]
 
     np.savez(fn, results)
     print 'All done'
