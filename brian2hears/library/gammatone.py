@@ -132,7 +132,7 @@ class GammatoneFilterbank(Group):
         self.variables = Variables(self)
 
         # this line gives the name of the output variable
-        self.variables.add_reference('out', f3.variables['out']) # here goes the fancy indexing for Repeat/Tile etc.
+        self.variables.add_reference('out', f3, 'out') # here goes the fancy indexing for Repeat/Tile etc.
 
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
         self.variables.add_clock_variables(self.clock)
