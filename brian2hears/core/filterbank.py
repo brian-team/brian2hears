@@ -8,6 +8,8 @@ from brian2.core.clocks import defaultclock
 
 from brian2hears.core.linearfilterbank import LinearFilterbank
 
+import numpy as np
+
 class IndexedFilterbank(Group):
     '''
     Formerly "RestructureFilterbank"
