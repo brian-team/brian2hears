@@ -29,7 +29,7 @@ class IndexedFilterbank(Group):
         self.variables.add_array('shift_indices', Unit(1), Nout, dtype = int, constant = True)
         self.variables['shift_indices'].set_value(shift_indices)
 
-        self.variables.add_reference('out', source.variables['out'], index = 'shift_indices')
+        self.variables.add_reference('out', source, 'out', index = 'shift_indices')
 
         self.variables.add_clock_variables(self.clock)
 
@@ -83,7 +83,7 @@ class FunctionFilterbank(Group):
         Nchannels = len(source)
 
         g = NeuronGroup(source.N, model = 'y:1', clock = self.clock, namespace = {})
-        g.variables.add_reference('x', source.variables['out'])
+        g.variables.add_reference('x', source, 'out')
         custom_code = g.runner('y = '+function_statement)
 
         self._contained_objects += [g, custom_code]
@@ -94,7 +94,7 @@ class FunctionFilterbank(Group):
         self.variables.add_constant('start', Unit(1), 0) 
         self.variables.add_arange('i', Nchannels)
 
-        self.variables.add_reference('out', g.variables['y'])
+        self.variables.add_reference('out', g, 'y')
 
         self.variables.add_clock_variables(self.clock)
 
@@ -137,7 +137,7 @@ class FilterbankCascade(Group):
         self.variables = Variables(self)
 
         # this line gives the name of the output variable
-        self.variables.add_reference('out', filters[-1].variables['out']) # here goes the fancy indexing for Repeat/Tile etc.
+        self.variables.add_reference('out', filters[-1], 'out') # here goes the fancy indexing for Repeat/Tile etc.
 
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
         self.variables.add_clock_variables(self.clock)
@@ -149,3 +149,4 @@ class FilterbankCascade(Group):
     def __len__(self):
         # this should probably not be needed in the future
         return self.N
+

@@ -29,8 +29,7 @@ class ShiftRegister(Group):
     -----
     The ShiftRegisterGoup has an "out" Variable.
     '''
-    add_to_magic_network = True
-    invalidates_magic_network = True
+
     def __init__(self, sound, Ntaps, codeobj_class = None, when = None, name = 'shiftregistergroup*', reverse_output = True):
         # Shift-register group
         # 
@@ -50,7 +49,7 @@ class ShiftRegister(Group):
         sr_g = NeuronGroup(Ntaps, model = sr_equations, 
                            codeobj_class = codeobj_class, clock = self.clock, namespace = {})
         sr_g.shift_indices = np.roll(np.arange(Ntaps, dtype = int), -1)
-        sr_g.variables.add_reference('shifted', sr_g.variables['x'], index = 'shift_indices')
+        sr_g.variables.add_reference('shifted', sr_g, 'x', index = 'shift_indices')
         sr_g_custom_code = sr_g.runner('x = shifted', 
                                        when = (self.clock, 'start', 0))
 
@@ -77,11 +76,11 @@ class ShiftRegister(Group):
 
         # the output variable
         if reverse_output:
-            self.variables.add_reference('out', sr_g.variables['x'])
+            self.variables.add_reference('out', sr_g, 'x')
         else:
             self.variables.add_array('final_shift_indices', Unit(1), Ntaps, dtype = int, constant = True)
             self.variables['final_shift_indices'].set_value(np.arange(Ntaps, dtype = int)[::-1])
-            self.variables.add_reference('out', sr_g.variables['x'], index = 'final_shift_indices') # here should go the fancy indexing for Repeat/Tile etc.
+            self.variables.add_reference('out', sr_g, 'x', index = 'final_shift_indices') # here should go the fancy indexing for Repeat/Tile etc.
         self.variables.add_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
@@ -159,7 +158,7 @@ class FIRFilterbank(Group):
         # set up the variables
         self.variables = Variables(self)
         # this line gives the name of the output variable
-        self.variables.add_reference('out', out_g.variables['filtered']) # here goes the fancy indexing for Repeat/Tile etc.
+        self.variables.add_reference('out', out_g, 'filtered') # here goes the fancy indexing for Repeat/Tile etc.
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
         self.variables.add_clock_variables(self.clock)
 
@@ -238,7 +237,6 @@ class LinearFilterbank(Group):
 
         BrianObject.__init__(self, when = when, name = name)
 
-
         Nchannels, Ntaps = b.shape[0], b.shape[1]
 
         if isinstance(source, TimedArray):
@@ -287,7 +285,7 @@ class LinearFilterbank(Group):
             exec('main_group.b_%d = b[:,%d]' % (k,k))
 
         if source_is_fb:
-            main_group.variables.add_reference('x', source.variables['out'])
+            main_group.variables.add_reference('x', source, 'out')
             
 
         ####################################
@@ -300,13 +298,10 @@ class LinearFilterbank(Group):
         self.variables = Variables(self)
         # this line gives the name of the output variable
 
-        self.variables.add_reference('out', main_group.variables['y']) # here goes the fancy indexing for Repeat/Tile etc.
-#        self.variables.add_reference('out', main_group.variables['x']) # here goes the fancy indexing for Repeat/Tile etc.
+        self.variables.add_reference('out', main_group, 'y') 
+
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
         self.variables.add_clock_variables(self.clock)
-
-#        if is_cascaded:
-#            self._contained_objects += [LinearFilterbank(self, b[:,:,1:], a[:,:,1:])]
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set
@@ -426,7 +421,7 @@ b : 1
         # set up the variables
         self.variables = Variables(self)
         # this line gives the name of the output variable
-        self.variables.add_reference('out', main_group.variables['z']) # here goes the fancy indexing for Repeat/Tile etc.
+        self.variables.add_reference('out', main_group, 'z') # here goes the fancy indexing for Repeat/Tile etc.
 #        self.variables.add_reference('out', main_group.variables['x']) # here goes the fancy indexing for Repeat/Tile etc.
         self.variables.add_constant('N', Unit(1), Ntaps) # a group has to have an N
         self.variables.add_clock_variables(self.clock)
