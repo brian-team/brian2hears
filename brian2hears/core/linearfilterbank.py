@@ -50,7 +50,7 @@ class ShiftRegister(Group):
                            codeobj_class = codeobj_class, clock = self.clock, namespace = {})
         sr_g.shift_indices = np.roll(np.arange(Ntaps, dtype = int), -1)
         sr_g.variables.add_reference('shifted', sr_g, 'x', index = 'shift_indices')
-        sr_g_custom_code = sr_g.runner('x = shifted', 
+        sr_g_custom_operation = sr_g.custom_operation('x = shifted', 
                                        when = (self.clock, 'start', 0))
 
         # something to input the sound
@@ -59,13 +59,13 @@ class ShiftRegister(Group):
                         namespace = {'sound':sound,
                                      'Ntaps':Ntaps})
         sr_S.connect(Ntaps - 1, Ntaps - 1)
-        sr_custom_code = sr_S.runner('x_post = sound(t)', 
+        sr_custom_operation = sr_S.custom_operation('x_post = sound(t)', 
                                      when = (self.clock, 'start', 1))
 
 
 
         # add contained objects
-        self._contained_objects += [sr_g, sr_S, sr_g_custom_code, sr_custom_code]
+        self._contained_objects += [sr_g, sr_S, sr_g_custom_operation, sr_custom_operation]
 
         # set up the variables
         self.variables = Variables(self)
@@ -253,7 +253,7 @@ class LinearFilterbank(Group):
         if source_is_fb:
             z_equations = ''#x : 1 \n'
         else:
-            z_equations = 'x : 1 (scalar) \n'
+            z_equations = 'x : 1 (shared) \n'
 
         z_equations += 'y : 1 \n'
         for ktap in range(Ntaps):
@@ -277,7 +277,7 @@ class LinearFilterbank(Group):
 
         main_group = NeuronGroup(Nchannels, model = z_equations, 
                           codeobj_class = codeobj_class, clock = self.clock, namespace = main_namespace)
-        main_group_updates = main_group.runner(z_updates,
+        main_group_updates = main_group.custom_operation(z_updates,
                                                    when = (self.clock, 'start', 0))
         
         for k in range(Ntaps):
@@ -358,18 +358,18 @@ class OldIIRFilterbankGroup(Group):
         Ntaps = b.shape[0]
 
         z_equations = '''
-        x : 1 (scalar)
+        x : 1 (shared)
         z : 1
         y : 1
         '''
         main_group = NeuronGroup(Ntaps, model = z_equations, 
                           codeobj_class = codeobj_class, clock = self.clock, namespace = {'sound': sound})
         # First, write the signal value to the x scalar
-        main_group_write_sound = main_group.runner('x = sound(t)',
+        main_group_write_sound = main_group.custom_operation('x = sound(t)',
                                      when = (self.clock, 'start', 0))
 
         # second, compute y[m]
-#        main_group_compute_y = main_group.runner('y = b0 * x + z0m1', 
+#        main_group_compute_y = main_group.custom_operation('y = b0 * x + z0m1', 
 #                                                 when = (self.clock, 'start', 1))
 #        main_group.b0 = b[0]
 
@@ -388,7 +388,7 @@ b : 1
                             namespace = {})
         #'(i + 1 == j) and (j != Ntaps - 1)') # explicitly should be better I suppose
         S_diffeq.connect(np.roll(np.arange(Ntaps), -1), np.arange(Ntaps))
-        S_diffeq_code = S_diffeq.runner('z_post = b * x_pre + z_pre*zflag - a * y_pre',
+        S_diffeq_code = S_diffeq.custom_operation('z_post = b * x_pre + z_pre*zflag - a * y_pre',
                                         when = (self.clock, 'start', 2))
         S_diffeq.a = a
 #        S_diffeq.a[0] = 0
@@ -407,7 +407,7 @@ b : 1
 #                                codeobj_class = codeobj_class, clock = self.clock, 
 #                                namespace = {})
 #        S_write_z0m1.connect(np.arange(Ntaps-1), 0)
-#        S_write_z0m1_code = S_write_z0m1.runner('z0m1 = z_post',
+#        S_write_z0m1_code = S_write_z0m1.custom_operation('z0m1 = z_post',
 #                                                when = (self.clock, 'start', 3))
         
         ####################################
