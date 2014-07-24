@@ -32,8 +32,8 @@ class GammatoneFilterbank(Group):
     
     Initialised with arguments:
     
-    ``source``
-        a sound in the TimedArray format
+    ``source``,     ``source_varname``
+        a sound in the TimedArray format, alternatively a group with a varialbe 'out' or source_varname
         
     ``cf``
         List or array of center frequencies.
@@ -57,7 +57,7 @@ class GammatoneFilterbank(Group):
     invalidates_magic_network = True
     def __init__(self, sound, cf, b=1.019, erb_order=1, ear_Q=9.26449,
                  min_bw=24.7,
-                 codeobj_class = None, when = None, name = 'gammatonefilterbank*'):
+                 codeobj_class = None, when = None, name = 'gammatonefilterbank*', source_varname = 'out'):
         BrianObject.__init__(self, when = when, name = name)
 
         cf = np.atleast_1d(cf)
@@ -117,10 +117,10 @@ class GammatoneFilterbank(Group):
                          np.array([A0*np.ones(len(cf)), A14, np.zeros(len(cf))]).T))
 
         # The filterbank is a cascade of 4 IIR filters
-        f0 = LinearFilterbank(sound, self.filt_b[:,:,0], self.filt_a[:,:,0])
-        f1 = LinearFilterbank(f0, self.filt_b[:,:,1], self.filt_a[:,:,1])
-        f2 = LinearFilterbank(f1, self.filt_b[:,:,2], self.filt_a[:,:,2])
-        f3 = LinearFilterbank(f2, self.filt_b[:,:,3], self.filt_a[:,:,3])
+        f0 = LinearFilterbank(sound, self.filt_b[:,:,0], self.filt_a[:,:,0], source_varname = source_varname)
+        f1 = LinearFilterbank(f0, self.filt_b[:,:,1], self.filt_a[:,:,1], source_varname = 'out')
+        f2 = LinearFilterbank(f1, self.filt_b[:,:,2], self.filt_a[:,:,2], source_varname = 'out')
+        f3 = LinearFilterbank(f2, self.filt_b[:,:,3], self.filt_a[:,:,3], source_varname = 'out')
         
         ####################################
         # Brian Group infrastructure stuff #

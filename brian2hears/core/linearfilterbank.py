@@ -1,14 +1,86 @@
-from brian2.core.variables import Variables
+from brian2.core.variables import Variables, linked_var
 from brian2.core.base import BrianObject
 from brian2.groups import Group, NeuronGroup
 from brian2.synapses import Synapses
 from brian2.utils import TimedArray
 from brian2.units import Unit
 from brian2.core.clocks import defaultclock
+from brian2.core.clocks import defaultclock
+
 
 #from brian2hears.core.filterbank import IndexedFilterbank, FunctionFilterbank
 
 import numpy as np
+
+class NewShiftRegister(Group):
+    '''
+    A shift register
+
+    Parameters
+    ----------
+    sound : (TimedArray)
+        The time varying signal to be delayed
+
+    Keywords
+    --------
+    reverse_output : (bool)
+        If set to True, then the output is in reverse order (but it requires one less reference indexing).
+        It is True. This is convienient because of the shape of fir filter coeficients, so this may change.
+        
+    Notes
+    -----
+    The ShiftRegisterGoup has an "out" Variable.
+    '''
+
+    def __init__(self, sound, Ntaps, codeobj_class = None, when = None, name = 'shiftregistergroup*', reverse_output = True):
+        # Shift-register group
+        # 
+        # The sound is written (thanks to the synapses sr_S) to the last neuron of the neurongroup, 
+        # and a custom code operation is run within sr_g that shifts all values 
+        # (i.e. does sr_g[i] = sr_g[i-1] for all i)
+        # This makes use of the new indexing scheme: so it relies on the add_reference thing.
+
+        BrianObject.__init__(self, when = when, name = name)
+
+        G  = NeuronGroup(Ntaps, '''x : 1
+                                   out_itd : integer''')
+
+        G2 = NeuronGroup(1, '''inp_idx : integer''')
+
+
+        G2.variables.add_reference('inp', G, 'x', index='inp_idx')
+        G2.variables.add_reference('out', G, 'x', index='out_idx')
+
+        update = G2.custom_operation('''inp_idx = (inp_idx + 1) % 10
+                                        out_idx = (inp_idx - delay) % 10
+                                        inp = rand()''')
+
+        # add contained objects
+        self._contained_objects += [G, G2]
+
+        # set up the variables
+        self.variables = Variables(self)
+        self.variables.add_constant('N', Unit(1), Ntaps) # a group has to have an N
+        self.variables.add_constant('start', Unit(1), 0) 
+#        self.variables.add_constant('N', Unit(1), Ntaps) 
+        self.variables.add_arange('i', Ntaps)
+
+        # the output variable
+        if reverse_output:
+            self.variables.add_reference('out', sr_g, 'x')
+        else:
+            self.variables.add_array('final_shift_indices', Unit(1), Ntaps, dtype = int, constant = True)
+            self.variables['final_shift_indices'].set_value(np.arange(Ntaps, dtype = int)[::-1])
+            self.variables.add_reference('out', sr_g, 'x', index = 'final_shift_indices') # here should go the fancy indexing for Repeat/Tile etc.
+        self.variables.add_clock_variables(self.clock)
+
+        # creates natural naming scheme for attributes
+        # has to be after all variables are set
+        self._enable_group_attributes()
+
+    def __len__(self):
+        # this should probably not be needed in the future
+        return self.N
 
 class ShiftRegister(Group):
     '''
@@ -195,6 +267,9 @@ class LinearFilterbank(Group):
         ``(nchannels, m, p)``. Here ``m`` is
         the order of the filters, and ``p`` is the number of filters in a
         chain (first you apply ``[:, :, 0]``, then ``[:, :, 1]``, etc.).
+
+    ``source_varname``
+        The variable name to link to in the source group
     
     The filter parameters are stored in the modifiable attributes ``filt_b``,
     ``filt_a`` and ``filt_state`` (the variable ``z`` in the section below).
@@ -233,7 +308,8 @@ class LinearFilterbank(Group):
     add_to_magic_network = True
     invalidates_magic_network = True
     def __init__(self, source, b, a, 
-                 codeobj_class = None, when = None, name = 'linearfilterbankgroup*'):
+                 codeobj_class = None, when = None, name = 'linearfilterbankgroup*', 
+                 source_varname = 'out'):
 
         BrianObject.__init__(self, when = when, name = name)
 
@@ -242,7 +318,7 @@ class LinearFilterbank(Group):
         if isinstance(source, TimedArray):
             sound = source
             source_is_fb = False
-        elif isinstance(source, Group):
+        else:
             source = source
             source_is_fb = True
 
@@ -251,7 +327,7 @@ class LinearFilterbank(Group):
 #        assert (self.filt_a.ndim == 2) and (self.filt_b.ndim == 2)
 
         if source_is_fb:
-            z_equations = ''#x : 1 \n'
+            z_equations = 'x : 1 (linked)'#x : 1 \n'
         else:
             z_equations = 'x : 1 (shared) \n'
 
@@ -285,7 +361,7 @@ class LinearFilterbank(Group):
             exec('main_group.b_%d = b[:,%d]' % (k,k))
 
         if source_is_fb:
-            main_group.variables.add_reference('x', source, 'out')
+            main_group.x = linked_var(source, source_varname)
             
 
         ####################################
