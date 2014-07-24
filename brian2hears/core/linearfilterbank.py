@@ -309,7 +309,7 @@ class LinearFilterbank(Group):
     invalidates_magic_network = True
     def __init__(self, source, b, a, 
                  codeobj_class = None, when = None, name = 'linearfilterbankgroup*', 
-                 source_varname = 'out'):
+                 source_varname = 'out', source_index = None):
 
         BrianObject.__init__(self, when = when, name = name)
 
@@ -327,7 +327,7 @@ class LinearFilterbank(Group):
 #        assert (self.filt_a.ndim == 2) and (self.filt_b.ndim == 2)
 
         if source_is_fb:
-            z_equations = 'x : 1 (linked)'#x : 1 \n'
+            z_equations = '''x : 1 (linked) \n'''
         else:
             z_equations = 'x : 1 (shared) \n'
 
@@ -361,8 +361,10 @@ class LinearFilterbank(Group):
             exec('main_group.b_%d = b[:,%d]' % (k,k))
 
         if source_is_fb:
-            main_group.x = linked_var(source, source_varname)
-            
+            #main_group.variables.add_array('x_index', Unit(1), Nchannels, dtype = int, constant = True)
+            #main_group.variables['x_index'].set_value(np.array(Nchannels*[0]))
+            main_group.x = linked_var(source, source_varname, index=source_index)#np.array(Nchannels*[0]))
+            #main_group.variables.add_reference('x', source, source_varname, index=np.array(Nchannels*[0]))
 
         ####################################
         # Brian Group infrastructure stuff #
@@ -382,7 +384,6 @@ class LinearFilterbank(Group):
         # creates natural naming scheme for attributes
         # has to be after all variables are set
         self._enable_group_attributes()
-
 
     def __len__(self):
         # this should probably not be needed in the future
