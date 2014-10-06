@@ -17,7 +17,7 @@ dv/dt = (I_in-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1
 I_in = 3*clip(I, 0, Inf)**(1./3.) : 1
 '''
 anf = NeuronGroup(len(cf), eqs, reset='v=0', threshold='v>1')#, refractory=5*ms)
-anf.variables.add_reference('I', cochlea.variables['out'])
+anf.variables.add_reference('I', cochlea, 'out')
 
 M = SpikeMonitor(anf)
 

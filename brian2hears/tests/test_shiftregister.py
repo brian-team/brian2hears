@@ -3,7 +3,7 @@ from brian2 import *
 
 def test_with_noise():
     s = np.random.randn(10000)
-    g = ShiftRegisterGroup(TimedArray(s, dt = defaultclock.dt), 100)
+    g = ShiftRegister(TimedArray(s, dt = defaultclock.dt), 100)
 
     M = StateMonitor(g, 'out', record = True)
 
@@ -21,7 +21,7 @@ def test_with_noise():
 def test_with_click():
     s = np.zeros(10000)
     s[0] = 1.
-    g = ShiftRegisterGroup(TimedArray(s, dt = defaultclock.dt), 100)
+    g = ShiftRegister(TimedArray(s, dt = defaultclock.dt), 100)
 
     M = StateMonitor(g, 'out', record = True)
 
@@ -39,7 +39,7 @@ def test_with_tone():
     times = np.arange(10000)*defaultclock.dt
     s = np.sin(2*np.pi*20.*Hz*times + 0.1)
 
-    g = ShiftRegisterGroup(TimedArray(s, dt = defaultclock.dt), 100)
+    g = ShiftRegister(TimedArray(s, dt = defaultclock.dt), 100)
 
     M = StateMonitor(g, 'out', record = True)
     net = Network(M, g)

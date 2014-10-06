@@ -3,7 +3,7 @@ from brian2hears import *
 import time
 
 def test_indexing():
-o    cf = erbspace(10*Hz, 1000*Hz, 32)
+    cf = erbspace(10*Hz, 1000*Hz, 32)
     signal = np.random.randn(1000)
     sound = TimedArray(signal, dt = defaultclock.dt)
 
@@ -18,7 +18,7 @@ o    cf = erbspace(10*Hz, 1000*Hz, 32)
     multiplexed = IndexedFilterbank(iir_filter, indices)
     Miir = StateMonitor(multiplexed, 'out', record = True)
 
-    iir_net = Network(iir_filter, Miir)
+    iir_net = Network(iir_filter, multiplexed, Miir)
     t0 = time.time()
     iir_net.run(len(signal)*defaultclock.dt)
     print 'IIR in ', time.time()-t0
