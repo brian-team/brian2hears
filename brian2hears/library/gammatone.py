@@ -56,11 +56,12 @@ class GammatoneFilterbank(Group):
     add_to_magic_network = True
     invalidates_magic_network = True
     def __init__(self, sound, cf, b=1.019, erb_order=1, ear_Q=9.26449,
-                 min_bw=24.7,
-                 codeobj_class = None, when = None, name = 'gammatonefilterbank*', 
-                 source_varname = 'out', source_index = None):
+                 min_bw=24.7, source_varname='out', source_index=None,
+                 dt=None, when='start', order=0, clock=None,
+                 name = 'gammatonefilterbank*'):
 
-        BrianObject.__init__(self, when = when, name = name)
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         cf = np.atleast_1d(cf)
         Nchannels = len(cf)
@@ -137,7 +138,7 @@ class GammatoneFilterbank(Group):
         self.variables.add_reference('out', f3, 'out') # here goes the fancy indexing for Repeat/Tile etc.
 
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set

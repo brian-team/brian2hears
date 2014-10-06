@@ -16,8 +16,10 @@ class IndexedFilterbank(Group):
     '''
     add_to_magic_network = True
     invalidates_magic_network = True
-    def __init__(self, source, shift_indices, when = None, name = 'restructurefilterbank*'):
-        BrianObject.__init__(self, when = when, name = name)
+    def __init__(self, source, shift_indices, dt=None, when='start', order=0,
+                 clock=None, name = 'restructurefilterbank*'):
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         Nout = len(shift_indices)
 
@@ -33,7 +35,7 @@ class IndexedFilterbank(Group):
 
         self.variables.add_reference('out', source, 'out', index = 'shift_indices')
 
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set
@@ -50,9 +52,11 @@ class Repeat(IndexedFilterbank):
     LLLRRR
     '''
 
-    def __init__(self, source, N, when = None, name = 'repeatfilterbank*'):
+    def __init__(self, source, N, dt=None, when='start', order=0, clock=None,
+                 name='repeatfilterbank*'):
         indices = np.repeat(np.arange(len(source), dtype = int), N)
-        IndexedFilterbank.__init__(self, source, indices, when = when, name = name)
+        IndexedFilterbank.__init__(self, source, indices, dt=dt, when=when,
+                                   order=order, clock=clock, name=name)
 
 class Tile(IndexedFilterbank):
     '''
@@ -62,9 +66,11 @@ class Tile(IndexedFilterbank):
     '''
     add_to_magic_network = True
     invalidates_magic_network = True
-    def __init__(self, source, N, when = None, name = 'tilefilterbank*'):
+    def __init__(self, source, N, dt=None, when='start', order=0, clock=None,
+                 name='tilefilterbank*'):
         indices = np.tile(np.arange(len(source), dtype = int), N)
-        IndexedFilterbank.__init__(self, source, indices, when = when, name = name)
+        IndexedFilterbank.__init__(self, source, indices, dt=dt, when=when,
+                                   order=order, clock=clock, name = name)
 
 class FunctionFilterbank(Group):
     '''
@@ -79,14 +85,16 @@ class FunctionFilterbank(Group):
     '''
     add_to_magic_network = True
     invalidates_magic_network = True
-    def __init__(self, source, function_statement, when = None, name = 'functionfilterbank*'):
-        BrianObject.__init__(self, when = when, name = name)
+    def __init__(self, source, function_statement, dt=None, when='start', order=0,
+                 clock=None, name = 'functionfilterbank*'):
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         Nchannels = len(source)
 
-        g = NeuronGroup(source.N, model = 'y:1', clock = self.clock, namespace = {})
+        g = NeuronGroup(source.N, model='y:1', clock=self.clock, namespace={})
         g.variables.add_reference('x', source, 'out')
-        custom_code = g.runner('y = '+function_statement)
+        custom_code = g.custom_operation('y = '+function_statement)
 
         self._contained_objects += [g, custom_code]
 
@@ -98,7 +106,7 @@ class FunctionFilterbank(Group):
 
         self.variables.add_reference('out', g, 'y')
 
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set
@@ -115,8 +123,10 @@ class FilterbankCascade(Group):
     add_to_magic_network = True
     invalidates_magic_network = True
     def __init__(self, source, b, a,
-                 codeobj_class = None, when = None, name = 'filterbankcascade*'):
-        BrianObject.__init__(self, when = when, name = name)
+                 dt=None, when='start', order=0, clock=None,
+                 name='filterbankcascade*'):
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         Nchannels = a.shape[0]
         Nchain = a.shape[2]
@@ -142,7 +152,7 @@ class FilterbankCascade(Group):
         self.variables.add_reference('out', filters[-1], 'out') # here goes the fancy indexing for Repeat/Tile etc.
 
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set

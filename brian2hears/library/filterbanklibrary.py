@@ -1,3 +1,4 @@
+from brian2 import second
 from brian2hears.core.linearfilterbank import *
 from brian2hears.core.filterbank import *
 from brian2hears.library.gammatone import GammatoneFilterbank
@@ -101,7 +102,7 @@ class ApproximateGammatone(FilterbankCascade):
             erb = ((cf/ear_Q)**erb_order + min_bw**erb_order)**(1/erb_order)
             bandwidth = b * erb
 
-        bandwidth = np.atleast_1d(bandwidth)
+        bandwidth = np.asarray(np.atleast_1d(bandwidth))
         self.cf = cf
         self.samplerate = 1./source.dt
         dt = 1/self.samplerate 
@@ -252,10 +253,10 @@ class LinearGammachirp(FIRFilterbank):
     '''
     def __init__(self,source, f, time_constant, c, phase=0): 
         
-        self.f=f=np.atleast_1d(f)
-        self.c=c=np.atleast_1d(c)
-        self.phase=phase=np.atleast_1d(phase)
-        self.time_constant=time_constant=np.atleast_1d(time_constant) 
+        self.f=f=np.atleast_1d(np.asarray(f))
+        self.c=c=np.atleast_1d(np.asarray(c))
+        self.phase=phase=np.atleast_1d(np.asarray(phase))
+        self.time_constant=time_constant=np.atleast_1d(np.asarray(time_constant))
         if len(time_constant)==1:
             time_constant=time_constant*np.ones(len(f))
         if len(c)==1:
@@ -268,7 +269,7 @@ class LinearGammachirp(FIRFilterbank):
         
         Tcst_max=max(time_constant)
 
-        t_start=-Tcst_max*3*second
+        t_start=-Tcst_max*3
         t=np.arange(t_start,-4*t_start,1./self.samplerate)
 
         

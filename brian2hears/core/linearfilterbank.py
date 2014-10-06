@@ -32,7 +32,8 @@ class NewShiftRegister(Group):
     The ShiftRegisterGoup has an "out" Variable.
     '''
 
-    def __init__(self, sound, Ntaps, codeobj_class = None, when = None, name = 'shiftregistergroup*', reverse_output = True):
+    def __init__(self, sound, Ntaps, reverse_output=True, dt=None, when='start',
+                 order=0, clock=None, name='shiftregistergroup*'):
         # Shift-register group
         # 
         # The sound is written (thanks to the synapses sr_S) to the last neuron of the neurongroup, 
@@ -40,7 +41,8 @@ class NewShiftRegister(Group):
         # (i.e. does sr_g[i] = sr_g[i-1] for all i)
         # This makes use of the new indexing scheme: so it relies on the add_reference thing.
 
-        BrianObject.__init__(self, when = when, name = name)
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         G  = NeuronGroup(Ntaps, '''x : 1
                                    out_itd : integer''')
@@ -72,7 +74,7 @@ class NewShiftRegister(Group):
             self.variables.add_array('final_shift_indices', Unit(1), Ntaps, dtype = int, constant = True)
             self.variables['final_shift_indices'].set_value(np.arange(Ntaps, dtype = int)[::-1])
             self.variables.add_reference('out', sr_g, 'x', index = 'final_shift_indices') # here should go the fancy indexing for Repeat/Tile etc.
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set
@@ -102,7 +104,8 @@ class ShiftRegister(Group):
     The ShiftRegisterGoup has an "out" Variable.
     '''
 
-    def __init__(self, sound, Ntaps, codeobj_class = None, when = None, name = 'shiftregistergroup*', reverse_output = True):
+    def __init__(self, sound, Ntaps, reverse_output=True, dt=None, when='start',
+                 order=0, clock=None, name='shiftregistergroup*'):
         # Shift-register group
         # 
         # The sound is written (thanks to the synapses sr_S) to the last neuron of the neurongroup, 
@@ -110,7 +113,8 @@ class ShiftRegister(Group):
         # (i.e. does sr_g[i] = sr_g[i-1] for all i)
         # This makes use of the new indexing scheme: so it relies on the add_reference thing.
 
-        BrianObject.__init__(self, when = when, name = name)
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         # something to shift all values
         sr_equations = '''
@@ -118,21 +122,19 @@ class ShiftRegister(Group):
         shift_indices : integer (constant)
         final_shift_indices : integer (constant)
         '''
-        sr_g = NeuronGroup(Ntaps, model = sr_equations, 
-                           codeobj_class = codeobj_class, clock = self.clock, namespace = {})
+        sr_g = NeuronGroup(Ntaps, model=sr_equations, clock=self.clock,
+                           namespace={})
         sr_g.shift_indices = np.roll(np.arange(Ntaps, dtype = int), -1)
         sr_g.variables.add_reference('shifted', sr_g, 'x', index = 'shift_indices')
-        sr_g_custom_operation = sr_g.custom_operation('x = shifted', 
-                                       when = (self.clock, 'start', 0))
+        sr_g_custom_operation = sr_g.custom_operation('x = shifted', order=0)
 
         # something to input the sound
-        sr_S = Synapses(sr_g, sr_g, 
-                        codeobj_class = codeobj_class, clock = self.clock, 
+        sr_S = Synapses(sr_g, sr_g, clock = self.clock,
                         namespace = {'sound':sound,
                                      'Ntaps':Ntaps})
         sr_S.connect(Ntaps - 1, Ntaps - 1)
-        sr_custom_operation = sr_S.custom_operation('x_post = sound(t)', 
-                                     when = (self.clock, 'start', 1))
+        sr_custom_operation = sr_S.custom_operation('x_post = sound(t)',
+                                                    order=1)
 
 
 
@@ -153,7 +155,7 @@ class ShiftRegister(Group):
             self.variables.add_array('final_shift_indices', Unit(1), Ntaps, dtype = int, constant = True)
             self.variables['final_shift_indices'].set_value(np.arange(Ntaps, dtype = int)[::-1])
             self.variables.add_reference('out', sr_g, 'x', index = 'final_shift_indices') # here should go the fancy indexing for Repeat/Tile etc.
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set
@@ -182,9 +184,10 @@ class FIRFilterbank(Group):
     '''
     add_to_magic_network = True
     invalidates_magic_network = True
-    def __init__(self, sound, fir_coeficients, 
-                 codeobj_class = None, when = None, name = 'firfilterbankgroup*'):
-        BrianObject.__init__(self, when = when, name = name)
+    def __init__(self, sound, fir_coeficients, dt=None, when='start', order=0,
+                 clock=None, name='firfilterbankgroup*'):
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         # FIR filtering specific stuff
         Nchannels, Ntaps = fir_coeficients.shape[0], fir_coeficients.shape[1]
@@ -198,9 +201,7 @@ class FIRFilterbank(Group):
         # then gets the time-shifted values, multiply them by the FIR filter coeficients, and 
         # return the sum of the values.
 
-        sr_g = ShiftRegister(sound, Ntaps, 
-                                  codeobj_class = None, 
-                                  when = None, 
+        sr_g = ShiftRegister(sound, Ntaps,
                                   name = 'shiftregistergroup*', 
                                   reverse_output = True)
         # Convolution with Synapses
@@ -209,11 +210,10 @@ class FIRFilterbank(Group):
         # There are Synapses from sr_g to out_g, each output channel has Ntaps synapses to sr_g: 
         # as a consequence, doing the weighed sum is just using a "(summed)" flag, and put the FIR coeficients 
         # in the right order.
-        out_g = NeuronGroup(Nchannels, 'filtered : 1', 
-                            codeobj_class = codeobj_class, clock = self.clock, namespace = {})
+        out_g = NeuronGroup(Nchannels, 'filtered : 1', clock=self.clock, namespace={})
         fir_S = Synapses(sr_g, out_g, '''coef : 1
-                                        filtered_post = out_pre*coef : 1 (summed)''', 
-                         codeobj_class = codeobj_class, clock = self.clock, namespace = {})
+                                        filtered_post = out_pre*coef : 1 (summed)''',
+                         clock=self.clock, namespace={})
         # connect the Synapses
         for k in range(Nchannels):
             fir_S.connect(np.arange(Ntaps), k)
@@ -232,7 +232,7 @@ class FIRFilterbank(Group):
         # this line gives the name of the output variable
         self.variables.add_reference('out', out_g, 'filtered') # here goes the fancy indexing for Repeat/Tile etc.
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set
@@ -307,11 +307,12 @@ class LinearFilterbank(Group):
     '''
     add_to_magic_network = True
     invalidates_magic_network = True
-    def __init__(self, source, b, a, 
-                 codeobj_class = None, when = None, name = 'linearfilterbankgroup*', 
-                 source_varname = 'out', source_index = None):
+    def __init__(self, source, b, a, source_varname='out', source_index=None,
+                 dt=None, when='start', order=0, clock=None,
+                 name='linearfilterbankgroup*'):
 
-        BrianObject.__init__(self, when = when, name = name)
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         Nchannels, Ntaps = b.shape[0], b.shape[1]
 
@@ -351,10 +352,9 @@ class LinearFilterbank(Group):
             z_updates += 'z%d_m = b_%d*x + z%d_m - a_%d*y \n' % (kupdate, kupdate+1, kupdate+1, kupdate+1) 
         z_updates += 'z%d_m = b_%d*x- a_%d*y \n' % (Ntaps-2, Ntaps-1, Ntaps - 1)
 
-        main_group = NeuronGroup(Nchannels, model = z_equations, 
-                          codeobj_class = codeobj_class, clock = self.clock, namespace = main_namespace)
-        main_group_updates = main_group.custom_operation(z_updates,
-                                                   when = (self.clock, 'start', 0))
+        main_group = NeuronGroup(Nchannels, model = z_equations,
+                                 clock=self.clock, namespace=main_namespace)
+        main_group_updates = main_group.custom_operation(z_updates)
         
         for k in range(Ntaps):
             exec('main_group.a_%d = a[:,%d]' % (k,k))
@@ -379,7 +379,7 @@ class LinearFilterbank(Group):
         self.variables.add_reference('out', main_group, 'y') 
 
         self.variables.add_constant('N', Unit(1), Nchannels) # a group has to have an N
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set
@@ -428,9 +428,10 @@ class OldIIRFilterbankGroup(Group):
     '''
     add_to_magic_network = True
     invalidates_magic_network = True
-    def __init__(self, sound, b, a, 
-                 codeobj_class = None, when = None, name = 'iirfilterbankgroup*'):
-        BrianObject.__init__(self, when = when, name = name)
+    def __init__(self, sound, b, a, dt=None, when='start', order=0, clock=None,
+                 name = 'iirfilterbankgroup*'):
+        BrianObject.__init__(self, dt=dt, when=when, order=order, clock=clock,
+                             name=name)
 
         Ntaps = b.shape[0]
 
@@ -439,11 +440,10 @@ class OldIIRFilterbankGroup(Group):
         z : 1
         y : 1
         '''
-        main_group = NeuronGroup(Ntaps, model = z_equations, 
-                          codeobj_class = codeobj_class, clock = self.clock, namespace = {'sound': sound})
+        main_group = NeuronGroup(Ntaps, model = z_equations, clock=self.clock,
+                          namespace={'sound': sound})
         # First, write the signal value to the x scalar
-        main_group_write_sound = main_group.custom_operation('x = sound(t)',
-                                     when = (self.clock, 'start', 0))
+        main_group_write_sound = main_group.custom_operation('x = sound(t)')
 
         # second, compute y[m]
 #        main_group_compute_y = main_group.custom_operation('y = b0 * x + z0m1', 
@@ -461,12 +461,11 @@ a : 1
 b : 1
 '''
         S_diffeq = Synapses(main_group, main_group, model = S_model,
-                            codeobj_class = codeobj_class, clock = self.clock, 
-                            namespace = {})
+                            clock = self.clock, namespace = {})
         #'(i + 1 == j) and (j != Ntaps - 1)') # explicitly should be better I suppose
         S_diffeq.connect(np.roll(np.arange(Ntaps), -1), np.arange(Ntaps))
         S_diffeq_code = S_diffeq.custom_operation('z_post = b * x_pre + z_pre*zflag - a * y_pre',
-                                        when = (self.clock, 'start', 2))
+                                                  order=2)
         S_diffeq.a = a
 #        S_diffeq.a[0] = 0
         S_diffeq.b = b
@@ -501,7 +500,7 @@ b : 1
         self.variables.add_reference('out', main_group, 'z') # here goes the fancy indexing for Repeat/Tile etc.
 #        self.variables.add_reference('out', main_group.variables['x']) # here goes the fancy indexing for Repeat/Tile etc.
         self.variables.add_constant('N', Unit(1), Ntaps) # a group has to have an N
-        self.variables.add_clock_variables(self.clock)
+        self.variables.create_clock_variables(self.clock)
 
         # creates natural naming scheme for attributes
         # has to be after all variables are set
