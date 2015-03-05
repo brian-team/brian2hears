@@ -330,7 +330,7 @@ class LinearFilterbank(Group):
         if source_is_fb:
             z_equations = '''x : 1 (linked) \n'''
         else:
-            z_equations = 'x : 1 (shared) \n'
+            z_equations = 'x : 1 \n'
 
         z_equations += 'y : 1 \n'
         for ktap in range(Ntaps):
@@ -341,7 +341,7 @@ class LinearFilterbank(Group):
         
         z_updates = ''
         if not source_is_fb:
-            z_updates += 'x = sound(t) \n'
+            z_updates += 'x = sound(t, i)\n'
             main_namespace =  {'sound': sound}
         else:
             main_namespace =  {}
