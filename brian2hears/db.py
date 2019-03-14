@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 from numpy import *
 
 __all__ = ['dB', 'dB_type', 'dB_error', 'gain']
