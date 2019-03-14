@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 from filterbank import Filterbank,FunctionFilterbank,ControlFilterbank, CombinedFilterbank
 from filterbanklibrary import *
 from linearfilterbank import *

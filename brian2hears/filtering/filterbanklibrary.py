@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 try:
     import weave
 except ImportError:

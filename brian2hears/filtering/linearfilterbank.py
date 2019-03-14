@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 try:
     import weave
 except ImportError:
@@ -243,13 +243,14 @@ class LinearFilterbank(Filterbank):
         self.filt_a = array(a, order='F')
         self.filt_state = zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
                 
-# Use the GPU version if available
-try:
-    if get_global_preference('brianhears_usegpu'):
-        import pycuda
-        from gpulinearfilterbank import LinearFilterbank
-        use_gpu = True
-    else:
-        use_gpu = False
-except ImportError:
-    use_gpu = False
+# # Use the GPU version if available
+# try:
+#     if get_global_preference('brianhears_usegpu'):
+#         import pycuda
+#         from gpulinearfilterbank import LinearFilterbank
+#         use_gpu = True
+#     else:
+#         use_gpu = False
+# except ImportError:
+#     use_gpu = False
+use_gpu = False

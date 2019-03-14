@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 
 __all__ = ['get_samplerate', 'set_default_samplerate']
 

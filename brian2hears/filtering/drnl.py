@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 from filterbank import Filterbank, FunctionFilterbank, CombinedFilterbank
 from filterbanklibrary import *
 
@@ -191,7 +191,7 @@ class DRNL(CombinedFilterbank):
     
 if __name__ == '__main__':        
     
-    from brian import *
+    from brian2 import *
     set_global_preferences(usenewbrianhears=True,
                            useweave=False)
     from brian.hears import *

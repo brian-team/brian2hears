@@ -5,7 +5,7 @@ as in HRTF.apply. To do this is slightly tricky because it needs to cache
 previous inputs. For the moment, we implement it as a special case of
 LinearFilterbank but later this will change to using the FFT method.
 '''
-from brian import *
+from brian2 import *
 from filterbank import *
 from linearfilterbank import *
 

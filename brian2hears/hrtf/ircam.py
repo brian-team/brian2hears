@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 from scipy.io import loadmat # NOTE: this requires scipy 0.7+
 from glob import glob
 from copy import copy

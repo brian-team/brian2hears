@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 from numpy import *
 import numpy
 import array as pyarray
@@ -720,8 +720,8 @@ class Sound(BaseSound, numpy.ndarray):
         each channel.
         '''
         samplerate = get_samplerate(samplerate)
-        duration = get_duration(duration,samplerate)
-        frequency = array(frequency)
+        duration = get_duration(duration, samplerate)
+        frequency = asarray(frequency)*Hz
         phase = array(phase)
         if frequency.size>nchannels and nchannels==1:
             nchannels = frequency.size

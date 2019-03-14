@@ -1,7 +1,7 @@
 '''
 Utility functions adapted from MAP 
 '''
-from brian import *
+from brian2 import *
 
 __all__ = ['erbspace']
 

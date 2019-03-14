@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 from hrtf import *
 from ..prefs import get_samplerate
 from ..filtering.fractionaldelay import FractionalDelay

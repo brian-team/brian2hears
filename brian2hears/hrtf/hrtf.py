@@ -1,4 +1,4 @@
-from brian import *
+from brian2 import *
 from ..sounds import Sound
 from ..filtering import FIRFilterbank
 from copy import copy
