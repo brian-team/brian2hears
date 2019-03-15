@@ -1058,7 +1058,7 @@ class Sound(BaseSound, numpy.ndarray):
         if samplewidth != 1 and samplewidth != 2:
             raise ValueError('Sample width must be 1 or 2 bytes.')
         
-        scale = {2:2 ** 15, 1:2 ** 7-1}[samplewidth]
+        scale = {2:2**15-1, 1: 2**7-1}[samplewidth]
         if ext=='wav':
             meanval = {2:0, 1:2**7}[samplewidth]
             dtype = {2:int16, 1:uint8}[samplewidth]
