@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Example of the use of the class :class:`~brian.hears.LogGammachirp` available in
+Example of the use of the class :class:`~brian2hears.LogGammachirp` available in
 the library. It implements a filterbank of IIR gammachirp filters as 
 Unoki et al. 2001, "Improvement of an IIR asymmetric compensation gammachirp
 filter". In this example, a white noise is filtered by a linear gammachirp

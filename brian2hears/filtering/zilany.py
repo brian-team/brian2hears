@@ -4,7 +4,7 @@ from filterbanklibrary import *
 from linearfilterbank import *
 import warnings
 from scipy.io import loadmat,savemat
-from brian.hears import *
+from brian2hears import *
 
 
 try:

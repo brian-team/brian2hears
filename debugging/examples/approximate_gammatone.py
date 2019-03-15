@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Example of the use of the class :class:`~brian.hears.ApproximateGammatone`
+Example of the use of the class :class:`~brian2hears.ApproximateGammatone`
 available in the library. It implements a filterbank of approximate gammatone
 filters as  described in Hohmann, V., 2002, "Frequency analysis and synthesis
 using a Gammatone filterbank", Acta Acustica United with Acustica. 

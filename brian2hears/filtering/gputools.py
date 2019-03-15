@@ -22,7 +22,7 @@ try:
         This function makes pycuda use GPU number n in the system.
         """
         initialise_cuda()
-        log_debug('brian.hears', "Setting PyCUDA context number %d" % n)
+        log_debug('brian2hears', "Setting PyCUDA context number %d" % n)
         try:
             pycuda.context.detach()
         except:
@@ -34,7 +34,7 @@ try:
         Closes the current context. MUST be called at the end of the script.
         """
         if pycuda.context is not None:
-            log_debug('brian.hears', "Closing current PyCUDA context")
+            log_debug('brian2hears', "Closing current PyCUDA context")
             try:
                 pycuda.context.pop()
                 pycuda.context = None

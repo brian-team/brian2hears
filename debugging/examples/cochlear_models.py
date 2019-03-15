@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
-Example of the use of the cochlear models (:class:`~brian.hears.DRNL`,
-:class:`~brian.hears.DCGC` and :class:`~brian.hears.TanCarney`) available in the library.
+Example of the use of the cochlear models (:class:`~brian2hears.DRNL`,
+:class:`~brian2hears.DCGC` and :class:`~brian2hears.TanCarney`) available in the library.
 '''
 from brian2 import *
 from brian2hears import *

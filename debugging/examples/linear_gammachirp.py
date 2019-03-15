@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Example of the use of the class :class:`~brian.hears.LinearGammachirp` available
+Example of the use of the class :class:`~brian2hears.LinearGammachirp` available
 in the library. It implements a filterbank of FIR gammatone filters with linear
 frequency sweeps as described in Wagner et al. 2009, "Auditory responses in the
 barn owl's nucleus laminaris to clicks: impulse response and signal analysis of

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Example of the use of the class :class:`~brian.hears.Butterworth` available in
+Example of the use of the class :class:`~brian2hears.Butterworth` available in
 the library. In this example, a white noise is filtered by a bank of butterworth
 bandpass filters and lowpass filters which are different for every channels. The
 centre or cutoff frequency of the filters are linearly taken between 100kHz and

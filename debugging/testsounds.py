@@ -1,6 +1,5 @@
 from brian2 import *
 from brian2hears.sounds import *
-import numpy
 
 s1 = tone([1]*kHz, 100*ms)
 # s = harmoniccomplex(1*kHz, 10*ms, phase=[0, 0, 0])
@@ -16,6 +15,8 @@ s1 = tone([1]*kHz, 100*ms)
 s2 = vowel('a', duration=100*ms)
 #s = sequence([s1, s2])
 s = s1+s2
-s.repeat(10).play(normalise=True)
+# s.repeat(10).play(normalise=True)
+#s.save('test.wav', normalise=True)
+#s = loadsound('test.wav')
 plot(s)
 show()

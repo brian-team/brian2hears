@@ -1,11 +1,11 @@
 '''
-The Bufferable class serves as a base for all the other Brian.hears classes
+The Bufferable class serves as a base for all the other brian2hears classes
 '''
 from numpy import zeros, empty, hstack, vstack, arange, diff
 
 class Bufferable(object):
     '''
-    Base class for Brian.hears classes
+    Base class for brian2hears classes
     
     Defines a buffering interface of two methods:
     

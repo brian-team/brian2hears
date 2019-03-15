@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Example of the use of the class :class:`~brian.hears.IIRFilterbank` available in
+Example of the use of the class :class:`~brian2hears.IIRFilterbank` available in
 the library.  In this example, a white noise is filtered by a bank of chebyshev
 bandpass filters and lowpass filters which are different for every channels.
 The centre frequencies of  the filters are linearly taken between 100kHz and

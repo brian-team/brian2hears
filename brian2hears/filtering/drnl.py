@@ -194,7 +194,7 @@ if __name__ == '__main__':
     from brian2 import *
     set_global_preferences(usenewbrianhears=True,
                            useweave=False)
-    from brian.hears import *
+    from brian2hears import *
 
     dBlevel=60*dB  # dB level in rms dB SPL
     sound=Sound.load('/home/bertrand/Data/Toolboxes/AIM2006-1.40/Sounds/aimmat.wav')

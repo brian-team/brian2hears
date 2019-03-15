@@ -187,7 +187,7 @@ class LinearFilterbank(Filterbank):
         self.filt_state = zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
         self.use_weave = get_global_preference('useweave')
         if self.use_weave:
-            log_info('brian.hears.filtering.linearfilterbank', 'Using weave')
+            log_info('brian2hears.filtering.linearfilterbank', 'Using weave')
             self.cpp_compiler = get_global_preference('weavecompiler')
             self.extra_compile_args = ['-O3']
             if self.cpp_compiler=='gcc':

@@ -3,7 +3,7 @@
 This example implements a band pass filter whose center frequency is modulated
 by an Ornstein-Uhlenbeck. The white noise term used for this process is output
 by a FunctionFilterbank. The bandpass filter coefficients update is an example
-of how to use a :class:`~brian.hears.ControlFilterbank`. The bandpass filter is
+of how to use a :class:`~brian2hears.ControlFilterbank`. The bandpass filter is
 a basic biquadratic filter for which the Q factor and the center frequency must
 be given. The input is a white noise.
 '''

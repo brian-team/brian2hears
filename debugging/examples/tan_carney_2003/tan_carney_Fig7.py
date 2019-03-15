@@ -15,7 +15,7 @@ from scipy.interpolate import interp1d
 from brian2 import *
 #set_global_preferences(useweave=True)
 from brian2hears import *
-from brian.hears.filtering.tan_carney import TanCarneySignal, MiddleEar
+from brian2hears.filtering.tan_carney import TanCarneySignal, MiddleEar
 
 samplerate = 50*kHz
 set_default_samplerate(samplerate)

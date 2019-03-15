@@ -4,7 +4,7 @@ Implementation example of the dual resonance nonlinear (DRNL) filter with
 parameters fitted for human as described in Lopez-Paveda, E. and Meddis, R., A
 human nonlinear cochlear filterbank, JASA 2001.
 
-A class called :class:`~brian.hears.DRNL` implementing this model is available
+A class called :class:`~brian2hears.DRNL` implementing this model is available
 in the library.
 
 The entire pathway consists of the sum of a linear and a nonlinear pathway.

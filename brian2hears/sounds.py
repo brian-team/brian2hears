@@ -4,11 +4,7 @@ import numpy
 import array as pyarray
 import time
 import struct
-try:
-    import pygame
-    have_pygame = True
-except ImportError:
-    have_pygame = False
+pygame_loaded = False
 try:
     from scikits.samplerate import resample
     have_scikits_samplerate = True
@@ -438,6 +434,13 @@ class Sound(BaseSound, numpy.ndarray):
         sleep=True then the function will wait until the sound has finished
         playing before returning.
         '''
+        global pygame, pygame_loaded
+        if not pygame_loaded:
+            try:
+                import pygame
+            except ImportError:
+                raise ImportError("Playing sounds requires the pygame module to be installed")
+            pygame_loaded = True
         if self.nchannels>2:
             raise ValueError("Can only play sounds with 1 or 2 channels.")
         self._init_mixer()

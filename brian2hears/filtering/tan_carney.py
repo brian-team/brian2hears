@@ -10,12 +10,12 @@ from brian.reset import CustomRefractoriness
 from brian.neurongroup import NeuronGroup
 from brian.network import network_operation
 
-from brian.hears.filtering.filterbank import (FunctionFilterbank,
+from brian2hears.filtering.filterbank import (FunctionFilterbank,
                                               ControlFilterbank,
                                               CombinedFilterbank,
                                               RestructureFilterbank)
-from brian.hears.filtering.linearfilterbank import LinearFilterbank
-from brian.hears.filtering.filterbankgroup import FilterbankGroup
+from brian2hears.filtering.linearfilterbank import LinearFilterbank
+from brian2hears.filtering.filterbankgroup import FilterbankGroup
 
 
 __all__=['TanCarney', 'MiddleEar', 'ZhangSynapse']

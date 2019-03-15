@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Example of the use of the class :class:`~brian.hears.Gammatone` available in the
+Example of the use of the class :class:`~brian2hears.Gammatone` available in the
 library. It implements a fitlerbank of IIR gammatone filters as 
 described  in Slaney, M., 1993, "An Efficient Implementation of the
 Patterson-Holdsworth Auditory Filter Bank". Apple Computer Technical Report #35. 

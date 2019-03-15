@@ -20,7 +20,7 @@ from brian.monitor import StateMonitor, SpikeMonitor
 from brian.globalprefs import set_global_preferences
 
 #set_global_preferences(useweave=True)
-from brian.hears import (Sound, get_samplerate, set_default_samplerate, tone,
+from brian2hears import (Sound, get_samplerate, set_default_samplerate, tone,
                          click, silence, dB, TanCarney, MiddleEar, ZhangSynapse)
 from brian.clock import reinit_default_clock
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Example of online computation using :meth:`~brian.hears.Filterbank.process`.
+Example of online computation using :meth:`~brian2hears.Filterbank.process`.
 Plots the RMS value of each channel output by a gammatone filterbank.
 '''
 from brian2 import *

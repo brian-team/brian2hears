@@ -2,10 +2,10 @@
 '''
 This example implements a band pass filter whose center frequency is modulated by
 a sinusoid function. This modulator is implemented as a
-:class:`~brian.hears.FunctionFilterbank`. One  state variable (here time) must
+:class:`~brian2hears.FunctionFilterbank`. One  state variable (here time) must
 be kept; it is therefore implemented with a class.
 The bandpass filter coefficients update is an example of how to use a
-:class:`~brian.hears.ControlFilterbank`. The bandpass filter is a basic
+:class:`~brian2hears.ControlFilterbank`. The bandpass filter is a basic
 biquadratic filter for which the Q factor and the center
 frequency must be given. The input is a white noise.
 '''

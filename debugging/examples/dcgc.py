@@ -4,7 +4,7 @@ Implementation example of the compressive gammachirp auditory filter as
 described in Irino, T. and Patterson R., "A compressive gammachirp auditory
 filter for both physiological and psychophysical data", JASA 2001.
 
-A class called :class:`~brian.hears.DCGC` implementing this model is available
+A class called :class:`~brian2hears.DCGC` implementing this model is available
 in the library.
 
 Technical implementation details and notation can be found in Irino, T. and
