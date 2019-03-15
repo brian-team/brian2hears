@@ -1,0 +1,18 @@
+Modules to go through:
+- filtering package
+    - filterbank
+    - linearfilterbank
+    - filterbankgroup
+    - filterbanklibrary
+    - firfilterbank
+    - fractionaldelay
+    - dcgc
+    - drnl
+    - tan_carney
+    - zilany
+    (- gpulinearfilterbank)
+    (- gputools)
+- hrtf package
+    - hrtf
+    - ircam
+    - itd
