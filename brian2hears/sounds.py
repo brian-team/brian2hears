@@ -241,17 +241,6 @@ class Sound(BaseSound, numpy.ndarray):
             return Sound(x, self.samplerate)
     __radd__ = __add__
 
-    # getslice and setslice need to be implemented for compatibility reasons,
-    # but __getitem__ covers all the functionality so we just use that
-    def __getslice__(self, start, stop):
-        return self.__getitem__(slice(start, stop))
-
-    def __setslice__(self, start, stop, seq):
-        return self.__setitem__(slice(start, stop), seq)
-
-    get_slice = __getslice__
-    set_slice = __setslice__
-
     def __getitem__(self, key):
         channel = slice(None)
         if isinstance(key, tuple):
@@ -944,8 +933,7 @@ class Sound(BaseSound, numpy.ndarray):
         Returns a series of n clicks (see :func:`click`) separated by interval.
         '''
         oneclick = Sound.click(duration, peak=peak, samplerate=samplerate)
-        #return oneclick.get_slice(0*ms, interval).repeat(n)
-        return oneclick[:interval].repeat(n)
+        return oneclick[slice(None, interval)].repeat(n)
 
     @staticmethod
     @check_units(duration=second, samplerate=Hz)
