@@ -482,7 +482,7 @@ class Sound(BaseSound, numpy.ndarray):
             x = self.flatten()-other.flatten()
         else:
             x = self.flatten()
-        pxx, freqs, bins, im = specgram(x, Fs=self.samplerate, **kwds)
+        pxx, freqs, bins, im = specgram(x, Fs=float(self.samplerate), **kwds)
         if low is not None or high is not None:
             restricted = True
             if low is None:
@@ -508,7 +508,7 @@ class Sound(BaseSound, numpy.ndarray):
                    origin='upper', aspect='auto')
         xlabel('Time (s)')
         ylabel('Frequency (Hz)')
-        return (pxx, freqs, bins, im)
+        return (pxx, freqs*Hz, bins*second, im)
 
     @check_units(low=Hz, high=Hz)
     def spectrum(self, low=None, high=None, log_power=True, display=False):
@@ -555,24 +555,23 @@ class Sound(BaseSound, numpy.ndarray):
             Z[Z < 1e-20] = 1e-20 # no zeros because we take logs
             Z = 10 * log10(Z)
         if display:
+            Zp = Z[freqs>0]
+            phasep = phase[freqs>0]
+            freqsp = freqs[freqs>0]
             subplot(211)
-            semilogx(freqs, Z)
-            ticks_freqs = 32000 * 2 ** -array(range(18), dtype=float64)
-            xticks(ticks_freqs, map(str, ticks_freqs))
+            semilogx(freqsp, Zp)
             grid()
-            xlim((freqs[0], freqs[-1]))
+            xlim((freqsp[0], freqsp[-1]))
             xlabel('Frequency (Hz)')
             ylabel('Power (dB/Hz)') if log_power else ylabel('Power')
             subplot(212)
-            semilogx(freqs, phase)
-            ticks_freqs = 32000 * 2 ** -array(range(18), dtype=float64)
-            xticks(ticks_freqs, map(str, ticks_freqs))
+            semilogx(freqsp, phasep)
             grid()
-            xlim((freqs[0], freqs[-1]))
+            xlim((freqsp[0], freqsp[-1]))
             xlabel('Frequency (Hz)')
             ylabel('Phase (rad)')
-            show()
-        return (Z, freqs, phase)
+            tight_layout()
+        return (Z, freqs*Hz, phase)
 
     def get_level(self):
         '''
@@ -692,7 +691,9 @@ class Sound(BaseSound, numpy.ndarray):
 
     def fft(self,n=None):
         '''
-        Performs an n-point FFT on the sound object, that is an array of the same size containing the DFT of each channel. n defaults to the number of samples of the sound, but can be changed manually setting the ``n`` keyword argument
+        Performs an n-point FFT on the sound object, that is an array of the same size containing the DFT of each
+        channel. n defaults to the number of samples of the sound, but can be changed manually setting the ``n`` keyword
+        argument
         '''
         if n is None:
             n=self.shape[0]
