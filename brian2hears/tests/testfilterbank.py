@@ -51,8 +51,8 @@ def test_cochleagram():
     lowpass = LowPass(cochlea, 10 * Hz)
     output = lowpass.process()
 
-    imshow(output.T, origin='lower left', aspect='auto', vmin=0)
-    show()
+    # imshow(output.T, origin='lower left', aspect='auto', vmin=0)
+    # show()
 
 
 if __name__=='__main__':
