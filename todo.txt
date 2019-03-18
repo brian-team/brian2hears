@@ -1,7 +1,5 @@
 Modules to go through:
 - filtering package
-    - filterbank
-    - linearfilterbank
     - filterbankgroup
     - filterbanklibrary
     - firfilterbank

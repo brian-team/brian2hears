@@ -75,10 +75,10 @@ class Gammatone(LinearFilterbank):
 
     def __init__(self, source, cf, b=1.019, erb_order=1, ear_Q=9.26449,
                  min_bw=24.7, cascade=None):
-        cf = atleast_1d(cf)
+        cf = atleast_1d(asarray(cf))
         self.cf = cf
         self.samplerate =  source.samplerate
-        T = 1/self.samplerate
+        T = float(1/self.samplerate)
         self.b,self.erb_order,self.EarQ,self.min_bw=b,erb_order,ear_Q,min_bw
         erb = ((cf/ear_Q)**erb_order + min_bw**erb_order)**(1/erb_order)
         B = b*2*pi*erb

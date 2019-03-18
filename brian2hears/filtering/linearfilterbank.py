@@ -1,4 +1,6 @@
 from brian2 import *
+from brian2.codegen.cpp_prefs import get_compiler_and_args, update_for_cross_compilation
+from brian2.utils.logger import std_silent, get_logger
 try:
     import weave
 except ImportError:
@@ -12,6 +14,8 @@ from ..bufferable import Bufferable
 from itertools import izip
 
 __all__ = ['LinearFilterbank']
+
+logger = get_logger(__name__)
 
 def _scipy_apply_linear_filterbank(b, a, x, zi):
     '''
@@ -82,6 +86,13 @@ def _weave_apply_linear_filterbank(b, a, x, zi,
     n, m, p = b.shape
     n1, m1, p1 = a.shape
     numsamples = x.shape[0]
+    n = int(n)
+    m = int(m)
+    p = int(p)
+    n1 = int(n1)
+    m1 = int(m1)
+    p1 = int(p1)
+    numsamples = int(numsamples)
     if n1!=n or m1!=m or p1!=p or x.shape!=(numsamples, n) or zi.shape!=(n, m, p):
         raise ValueError('Data has wrong shape.')
     if numsamples>1 and not x.flags['C_CONTIGUOUS']:
@@ -185,14 +196,10 @@ class LinearFilterbank(Filterbank):
         self.filt_b = array(b, order='F')
         self.filt_a = array(a, order='F')
         self.filt_state = zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
-        self.use_weave = get_global_preference('useweave')
+        self.use_weave = weave is not None
         if self.use_weave:
-            log_info('brian2hears.filtering.linearfilterbank', 'Using weave')
-            self.cpp_compiler = get_global_preference('weavecompiler')
-            self.extra_compile_args = ['-O3']
-            if self.cpp_compiler=='gcc':
-                self.extra_compile_args += get_global_preference('gcc_options')
-
+            logger.debug("Using weave for LinearFilterbank")
+            self.cpp_compiler, self.extra_compile_args = get_compiler_and_args()
 
     def reset(self):
         self.buffer_init()
