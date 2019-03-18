@@ -29,7 +29,7 @@ set_default_samplerate(50*kHz)
 sample_length = 1 / get_samplerate(None)
 cf = 1000 * Hz
 
-print 'Testing click response'
+print('Testing click response')
 duration = 25*ms    
 levels = [40, 60, 80, 100, 120]
 # a click of two samples
@@ -67,7 +67,7 @@ for idx, level in enumerate(levels):
     plt.plot(spike_mon.spiketimes[idx] / ms,
          np.ones(len(spike_mon.spiketimes[idx])) * np.nanmax(R_mon[idx]), 'rx')
 
-print 'Testing tone response'
+print('Testing tone response')
 reinit_default_clock()
 duration = 60*ms    
 levels = [0, 20, 40, 60, 80]

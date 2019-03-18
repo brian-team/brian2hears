@@ -27,7 +27,7 @@ def erbspace(low, high, N, earQ=9.26449, minBW=24.7, order=1):
 # Testing
 if __name__ == '__main__':
     cf = erbspace(20 * Hz, 20 * kHz, 3000)
-    print amin(cf), amax(cf)
-    print diff(cf)[-5:]
+    print(amin(cf), amax(cf))
+    print(diff(cf)[-5:])
     plot(cf)
     show()
