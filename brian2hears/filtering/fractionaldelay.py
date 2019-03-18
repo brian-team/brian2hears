@@ -1,6 +1,6 @@
 from brian2 import *
-from filterbank import *
-from firfilterbank import *
+from .filterbank import *
+from .firfilterbank import *
 
 __all__ = ['FractionalDelay']
 

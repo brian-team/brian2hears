@@ -1,6 +1,6 @@
 from brian2 import *
-from filterbank import Filterbank, FunctionFilterbank, CombinedFilterbank
-from filterbanklibrary import *
+from .filterbank import Filterbank, FunctionFilterbank, CombinedFilterbank
+from .filterbanklibrary import *
 
 __all__ = ['DRNL']
 

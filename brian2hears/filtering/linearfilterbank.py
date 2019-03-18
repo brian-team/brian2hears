@@ -9,9 +9,13 @@ except ImportError:
     except ImportError:
         weave = None
 from scipy import signal, random
-from filterbank import Filterbank, RestructureFilterbank
+from .filterbank import Filterbank, RestructureFilterbank
 from ..bufferable import Bufferable
-from itertools import izip
+try:
+    from itertools import izip
+except ImportError:
+    izip = zip
+from six.moves import range as xrange
 
 __all__ = ['LinearFilterbank']
 

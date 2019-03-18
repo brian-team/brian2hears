@@ -10,9 +10,9 @@ try:
     have_scikits_samplerate = True
 except (ImportError, ValueError):
     have_scikits_samplerate = False
-from bufferable import Bufferable
-from prefs import get_samplerate
-from db import dB, dB_type, dB_error, gain
+from .bufferable import Bufferable
+from .prefs import get_samplerate
+from .db import dB, dB_type, dB_error, gain
 from scipy.signal import fftconvolve, lfilter
 from scipy.misc import factorial
 

@@ -1,7 +1,7 @@
 from brian2 import *
-from filterbank import Filterbank,FunctionFilterbank,ControlFilterbank,CombinedFilterbank,RestructureFilterbank
-from filterbanklibrary import *
-from linearfilterbank import *
+from .filterbank import Filterbank,FunctionFilterbank,ControlFilterbank,CombinedFilterbank,RestructureFilterbank
+from .filterbanklibrary import *
+from .linearfilterbank import *
 
 __all__ = ['DCGC']
 

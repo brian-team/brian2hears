@@ -1,4 +1,5 @@
 from brian2 import *
+
 try:
     import weave
 except ImportError:
@@ -7,9 +8,8 @@ except ImportError:
     except ImportError:
         weave = None
 from scipy import signal, random
-from ..bufferable import Bufferable
-from operator import isSequenceType
-from __builtin__ import all
+from brian2hears.bufferable import Bufferable
+from builtins import all
 
 __all__ = ['Filterbank',
            'RestructureFilterbank',

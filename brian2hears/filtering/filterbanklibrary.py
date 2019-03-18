@@ -8,10 +8,10 @@ except ImportError:
         weave = None
 from scipy import signal, random
 from math import factorial
-from operator import isSequenceType
-from filterbank import Filterbank,RestructureFilterbank
-from linearfilterbank import *
-from firfilterbank import *
+from .filterbank import Filterbank,RestructureFilterbank
+from .linearfilterbank import *
+from .firfilterbank import *
+from six.moves import range as xrange
 
 
 __all__ = ['Cascade',
@@ -130,7 +130,7 @@ class Gammatone(LinearFilterbank):
                          array([A0*ones(len(cf)), A12, zeros(len(cf))]).T,
                          array([A0*ones(len(cf)), A13, zeros(len(cf))]).T,
                          array([A0*ones(len(cf)), A14, zeros(len(cf))]).T))
-    
+
         LinearFilterbank.__init__(self, source, self.filt_b, self.filt_a)
         if cascade is not None:
             self.decascade(cascade)

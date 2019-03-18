@@ -56,6 +56,6 @@ def test_cochleagram():
 
 
 if __name__=='__main__':
-    # test_basic_filterbanks()
-    # test_filterbankgroup()
+    test_basic_filterbanks()
+    test_filterbankgroup()
     test_cochleagram()

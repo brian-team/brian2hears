@@ -3,12 +3,7 @@ from numpy import pi
 import scipy.signal as signal
 import warnings
 
-from brian.clock import Clock
-from brian.stdunits import Hz, ms
-from brian.threshold import PoissonThreshold
-from brian.reset import CustomRefractoriness
-from brian.neurongroup import NeuronGroup
-from brian.network import network_operation
+from brian2 import *
 
 from brian2hears.filtering.filterbank import (FunctionFilterbank,
                                               ControlFilterbank,
