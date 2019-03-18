@@ -1,6 +1,5 @@
 Modules to go through:
 - filtering package
-    - filterbankgroup
     - filterbanklibrary
     - firfilterbank
     - fractionaldelay
@@ -14,3 +13,8 @@ Modules to go through:
     - hrtf
     - ircam
     - itd
+
+Other things to do:
+
+- filterbankgroup
+    - sort of works, but presumably not with multiple runs and store/restore yet

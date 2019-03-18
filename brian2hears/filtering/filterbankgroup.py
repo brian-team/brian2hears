@@ -1,4 +1,4 @@
-from brian import StateUpdater, NeuronGroup, Equations, Clock, network_operation
+from brian2 import NeuronGroup, Clock, network_operation
 
 __all__ = ['FilterbankGroup']
 
@@ -36,9 +36,6 @@ class FilterbankGroup(NeuronGroup):
         self.filterbank = filterbank
         filterbank.buffer_init()
 
-        # update level keyword
-        kwds['level'] = kwds.get('level', 0)+1
-    
         # Sanitize the clock - does it have the right dt value?
         if 'clock' in kwds:
             if int(1/kwds['clock'].dt)!=int(filterbank.samplerate):
@@ -52,6 +49,7 @@ class FilterbankGroup(NeuronGroup):
         self.buffersize = buffersize
         self.buffer_pointer = buffersize
         self.buffer_start = -buffersize
+        self.buffer = None
         
         NeuronGroup.__init__(self, filterbank.nchannels, *args, **kwds)
         
