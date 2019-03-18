@@ -169,11 +169,11 @@ class ApproximateGammatone(LinearFilterbank):
      '''
    
     def __init__(self, source, cf,  bandwidth,order=4):
-        cf = atleast_1d(cf)
-        bandwidth = atleast_1d(bandwidth)
+        cf = asarray(atleast_1d(cf))
+        bandwidth = asarray(atleast_1d(bandwidth))
         self.cf = cf
         self.samplerate =  source.samplerate
-        dt = 1/self.samplerate 
+        dt = float(1/self.samplerate)
         phi = 2 * pi * bandwidth * dt
         theta = 2 * pi * cf * dt
         cos_theta = cos(theta)
@@ -484,8 +484,8 @@ class IIRFilterbank(LinearFilterbank):
     
     def __init__(self, source, nchannels, passband, stopband, gpass, gstop, btype, ftype):
 
-        Wpassband = atleast_1d(passband).copy()
-        Wstopband = atleast_1d(stopband).copy()
+        Wpassband = asarray(atleast_1d(passband).copy())
+        Wstopband = asarray(atleast_1d(stopband).copy())
         gpass = atleast_1d(gpass)
         gstop = atleast_1d(gstop)
         
@@ -634,6 +634,8 @@ class LowPass(LinearFilterbank):
     '''
     def __init__(self,source,fc):
         fc = asarray(atleast_1d(fc))
+        if len(fc)==1:
+            fc = fc*ones(source.nchannels)
         nchannels=len(fc)
         self.samplerate= source.samplerate
         dt=float(1./self.samplerate)

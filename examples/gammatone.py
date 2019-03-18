@@ -25,7 +25,7 @@ gt_mon = gammatone.process()
 figure()
 imshow(gt_mon.T, aspect='auto', origin='lower left',
        extent=(0, sound.duration/ms,
-               center_frequencies[0], center_frequencies[-1]))
+               center_frequencies[0]/Hz, center_frequencies[-1]/Hz))
 pyplot.yscale('log')
 title('Cochleogram')
 ylabel('Frequency (Hz)')

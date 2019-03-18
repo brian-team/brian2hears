@@ -1,6 +1,6 @@
 Modules to go through:
+
 - filtering package
-    - filterbanklibrary
     - firfilterbank
     - fractionaldelay
     - dcgc
@@ -18,3 +18,12 @@ Other things to do:
 
 - filterbankgroup
     - sort of works, but presumably not with multiple runs and store/restore yet
+
+Examples to fix:
+
+- cochlear_models
+- dcgc
+- drnl
+- ircam_hrtf
+- sound_localisation_model
+- tan_carney_2003/*

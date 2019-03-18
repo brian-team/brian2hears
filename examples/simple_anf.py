@@ -19,12 +19,12 @@ ihc = FunctionFilterbank(cochlea, lambda x: 3*clip(x, 0, Inf)**(1.0/3.0))
 
 # Leaky integrate-and-fire model with noise and refractoriness
 eqs = '''
-dv/dt = (I-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1
+dv/dt = (I-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1 (unless refractory)
 I : 1
 '''
-anf = FilterbankGroup(ihc, 'I', eqs, reset=0, threshold=1, refractory=5*ms)
+anf = FilterbankGroup(ihc, 'I', eqs, reset='v=0', threshold='v>1', refractory=5*ms)
 
 M = SpikeMonitor(anf)
 run(sound.duration)
-raster_plot(M)
+plot(M.t/ms, M.i, ',k')
 show()

@@ -18,7 +18,7 @@ nbr_center_frequencies = 50  # number of frequency channels in the filterbank
 # center frequencies with a spacing following an ERB scale
 center_frequencies = erbspace(100*Hz, 1000*Hz, nbr_center_frequencies)
 # bandwidth of the filters (different in each channel) 
-bw = 10**(0.037+0.785*log10(center_frequencies))
+bw = 10**(0.037+0.785*log10(center_frequencies/Hz))
 
 gammatone = ApproximateGammatone(sound, center_frequencies, bw, order=3) 
 

@@ -48,9 +48,9 @@ class CoeffController(object):
         #the control variables are taken as the last of the buffer
         noise_term = input[-1,:]
         #update the center frequency by updateing the OU process
-        self.fc = self.fc-self.fc/tau_i*self.deltaT+noise_term
+        self.fc = asarray(self.fc-self.fc/tau_i*self.deltaT)+noise_term
 
-        w0 = 2*pi*self.fc/samplerate
+        w0 = 2*pi*self.fc/float(samplerate)
         #update the coefficient of the biquadratic filterbank
         alpha = sin(w0)*sinh(log(2)/2*self.BW*w0/sin(w0))
         self.target.filt_b[:, 0, 0] = sin(w0)/2

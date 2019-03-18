@@ -15,7 +15,7 @@ sound = sound.ramp()
 sound.play()
 
 # The first 20ms of the sound
-startsound = sound[:20*ms]
+startsound = sound[slice(0*ms, 20*ms)]
 
 subplot(121)
 plot(startsound.times, startsound)

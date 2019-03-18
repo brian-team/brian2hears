@@ -30,7 +30,7 @@ def generate_vowel(vowel):
     I = zeros(len(f), dtype=bool)
     for cf in vowel:
         I = I|((abs(f)<cf+width)&(abs(f)>cf-width))
-    I = -I
+    I = ~I
     y[I] = 0
     x = ifft(y)
     return Sound(x.real)

@@ -38,6 +38,24 @@ def test_filterbankgroup():
     # show()
 
 
+def test_cochleagram():
+    sound1 = tone(1 * kHz, .1 * second)
+    sound2 = whitenoise(.1 * second)
+
+    sound = sound1 + sound2
+    sound = sound.ramp()
+
+    cf = erbspace(20 * Hz, 20 * kHz, 3000)
+    gammatone = Gammatone(sound, cf)
+    cochlea = FunctionFilterbank(gammatone, lambda x: clip(x, 0, Inf) ** (1.0 / 3.0))
+    lowpass = LowPass(cochlea, 10 * Hz)
+    output = lowpass.process()
+
+    imshow(output.T, origin='lower left', aspect='auto', vmin=0)
+    show()
+
+
 if __name__=='__main__':
-    test_basic_filterbanks()
-    test_filterbankgroup()
+    # test_basic_filterbanks()
+    # test_filterbankgroup()
+    test_cochleagram()
