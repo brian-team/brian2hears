@@ -7,10 +7,13 @@ except ImportError:
     except ImportError:
         weave = None
 from scipy import signal, random
+from math import factorial
 from operator import isSequenceType
 from filterbank import Filterbank,RestructureFilterbank
 from linearfilterbank import *
 from firfilterbank import *
+
+
 __all__ = ['Cascade',
            'Gammatone',
            'ApproximateGammatone',
@@ -22,7 +25,6 @@ __all__ = ['Cascade',
            'AsymmetricCompensation',
            'LowPass',
            'asymmetric_compensation_coeffs',
-           'BiQuadratic'
            ]
 
 
@@ -235,13 +237,13 @@ class LogGammachirp(LinearFilterbank):
     '''
       
     def __init__(self, source, f,b=1.019,c=1,ncascades=4):
-        f = atleast_1d(f)
+        f = atleast_1d(asarray(f))
         self.f = f
         self.samplerate= source.samplerate
         
         self.c=c
         self.b=b
-        gammatone=Gammatone(source, f,b)
+        gammatone = Gammatone(source, f, b)
 
         self.gammatone_filt_b=gammatone.filt_b
         self.gammatone_filt_a=gammatone.filt_a
@@ -317,12 +319,12 @@ class LinearGammachirp(FIRFilterbank):
         Array of shape ``(nchannels, length_impulse_response)`` with each row
         being an impulse response for the corresponding channel.
     '''
-    def __init__(self,source, f, time_constant, c, phase=0): 
+    def __init__(self, source, f, time_constant, c=1, phase=0):
         
-        self.f=f=atleast_1d(f)
+        self.f=f=asarray(atleast_1d(f))
         self.c=c=atleast_1d(c)
         self.phase=phase=atleast_1d(phase)
-        self.time_constant=time_constant=atleast_1d(time_constant) 
+        self.time_constant=time_constant=asarray(atleast_1d(time_constant))
         if len(time_constant)==1:
             time_constant=time_constant*ones(len(f))
         if len(c)==1:
@@ -330,16 +332,12 @@ class LinearGammachirp(FIRFilterbank):
         if len(phase)==1:
             phase=phase*ones(len(f))
         self.samplerate= source.samplerate
-        
-        
-        
+
         Tcst_max=max(time_constant)
 
-        t_start=-Tcst_max*3*second
-        t=arange(t_start,-4*t_start,1./self.samplerate)
+        t_start=float(-Tcst_max*3*second)
+        t=arange(t_start,-4*t_start,float(1./self.samplerate))
 
-        
-            
         self.impulse_response=zeros((len(f),len(t)))
                                     
         for ich in xrange(len(f)):
@@ -403,13 +401,13 @@ class LinearGaborchirp(FIRFilterbank):
         Array of shape ``(nchannels, length_impulse_response)`` with each row
         being an impulse response for the corresponding channel.
     '''
-    def __init__(self,source, f, time_constant, c, phase=0): 
-        self.f=f=atleast_1d(f)
+    def __init__(self,source, f, time_constant, c=1, phase=0):
+        self.f=f=asarray(atleast_1d(f))
         self.c=c=atleast_1d(c)
         self.phase=phase=atleast_1d(phase)
-        self.time_constant=time_constant=atleast_1d(time_constant) 
+        self.time_constant=time_constant=asarray(atleast_1d(time_constant))
         if len(time_constant)==1:
-            time_constant=time_constant*ones(len(f))
+            time_constant=asarray(time_constant*ones(len(f)))
         if len(c)==1:
             c=c*ones(len(f))
         if len(phase)==1:
@@ -418,8 +416,8 @@ class LinearGaborchirp(FIRFilterbank):
         
         Tcst_max=max(time_constant)
 
-        t_start=-Tcst*6*second
-        t=arange(t_start,-t_start,1./self.samplerate)
+        t_start=float(-Tcst_max*6*second)
+        t=arange(t_start,-t_start,float(1./self.samplerate))
 
         self.impulse_response=zeros((len(f),len(t)))
                                     
@@ -486,10 +484,8 @@ class IIRFilterbank(LinearFilterbank):
     
     def __init__(self, source, nchannels, passband, stopband, gpass, gstop, btype, ftype):
 
-        Wpassband = passband.copy()
-        Wstopband = stopband.copy()
-        Wpassband = atleast_1d(Wpassband)
-        Wstopband = atleast_1d(Wstopband)
+        Wpassband = atleast_1d(passband).copy()
+        Wstopband = atleast_1d(stopband).copy()
         gpass = atleast_1d(gpass)
         gstop = atleast_1d(gstop)
         
@@ -497,8 +493,8 @@ class IIRFilterbank(LinearFilterbank):
         if Wpassband.shape != Wstopband.shape:
             raise Exception('passband and stopband must contain the same number of ent')
         try:
-            Wpassband=Wpassband/self.samplerate*2+0.0    # wn=1 corresponding to half the sample rate 
-            Wstopband=Wstopband/self.samplerate*2+0.0     
+            Wpassband=Wpassband/float(self.samplerate)*2+0.0    # wn=1 corresponding to half the sample rate
+            Wstopband=Wstopband/float(self.samplerate)*2+0.0
         except DimensionMismatchError:
             raise DimensionMismatchError('IIRFilterbank passband, stopband parameters must be in Hz')
         
@@ -587,16 +583,10 @@ class Butterworth(LinearFilterbank):
     '''
 
     def __init__(self,source, nchannels, order, fc, btype='low'):
-        Wn=fc.copy()
-        Wn=atleast_1d(Wn) #Scalar inputs are converted to 1-dimensional arrays
+        Wn = asarray(atleast_1d(fc)).copy() #Scalar inputs are converted to 1-dimensional arrays
         self.samplerate = source.samplerate
-        try:
-            Wn= Wn/self.samplerate *2+0.0    # wn=1 corresponding to half the sample rate   
-        except DimensionMismatchError:
-            raise DimensionMismatchError('Wn must be in Hz')
-        
+        Wn= Wn/float(self.samplerate)*2    # wn=1 corresponding to half the sample rate
 
-        
         if btype=='low' or btype=='high':
             self.filt_b=zeros((nchannels,order+1))
             self.filt_a=zeros((nchannels,order+1))
@@ -625,57 +615,6 @@ class Butterworth(LinearFilterbank):
         LinearFilterbank.__init__(self,source, self.filt_b, self.filt_a) 
 
 
-class BiQuadratic(LinearFilterbank):
-    '''
-    Bank of biquadratic bandpass filters
-    
-    The transfer function of the filters are like the ones of  all second-order linear filters
-    :math:`H(s)=\frac{Kw_{0}^{2}}{s_{2}+w_{0}/Qs+w_{0}^{2}}`
-    where :math:`w_{0}`  is the centre frequency and :math:`Q` the quality factor of the filter
-
-    
-    The implementation  is a 2nd-order IIR  filter with a tranfer function being the ratio of two quadratic functions.
-    
-
-    Initialisation parameters:
-    
-    ``source``
-        Source sound or filterbank.
-        
-    ``f``
-        List or array of the centre frequencies. (:math:`w_{0}^{2}/2\pi`) 
-        
-        
-    ``Q``
-        Quality factor of the filters (dimensionless). It can be a scalar (the same for every channel) or a list/array.``Q`` defines the bandwidth such that
-        
-        
-    ``BW``
-        Alternativl
-        
-    '''
-      
-    def __init__(self, source, cf,Q):
-        cf=cf[0]
-        Q=Q[0]
-#        Q=1
-#        cf = atleast_1d(cf)
-        self.samplerate= source.samplerate
-        w0 = 2*pi*cf/self.samplerate/second
-        BW = 2./log(2)*arcsinh((1./2/Q))
-        alpha = sin(w0)*sinh(log(2)/2 * BW * w0/sin(w0) )
-        
-        
-        
-        b_temp =   array([alpha,0,-alpha])/(1 + alpha)
-        a_temp = array([1 + alpha,-2*cos(w0),1 - alpha])/(1 + alpha)
-        
-        print  b_temp,a_temp
-        self.filt_b = tile(b_temp.reshape([3,1]),[1,1,1])               
-        self.filt_a = tile(a_temp.reshape([3,1]),[1,1,1]) 
-        
-        LinearFilterbank.__init__(self, source, self.filt_b,self.filt_a)
-
 class LowPass(LinearFilterbank):
     '''
     Bank of 1st-order lowpass filters
@@ -694,11 +633,10 @@ class LowPass(LinearFilterbank):
         frequencies.
     '''
     def __init__(self,source,fc):
-        if not isSequenceType(fc):
-            fc = fc*ones(source.nchannels)
+        fc = asarray(atleast_1d(fc))
         nchannels=len(fc)
         self.samplerate= source.samplerate
-        dt=1./self.samplerate
+        dt=float(1./self.samplerate)
 
         self.filt_b=zeros((nchannels, 2, 1))
         self.filt_a=zeros((nchannels, 2, 1))
@@ -774,7 +712,7 @@ class AsymmetricCompensation(LinearFilterbank):
      
     def __init__(self, source, f,b=1.019, c=1,ncascades=4):
         
-        f = atleast_1d(f)
+        f = asarray(atleast_1d(f))
         self.f = f
         self.samplerate =  source.samplerate     
         ERBw=24.7*(4.37e-3*f+1.)
@@ -789,18 +727,18 @@ class AsymmetricCompensation(LinearFilterbank):
 
         for k in arange(ncascades):
 
-            r=exp(-p1*(p0/p4)**(k)*2*pi*b*ERBw/self.samplerate) #k instead of k-1 because range 0 N-1
+            r=exp(-p1*(p0/p4)**(k)*2*pi*b*ERBw/float(self.samplerate)) #k instead of k-1 because range 0 N-1
             Df=(p0*p4)**(k)*p2*c*b*ERBw
 
-            phi=2*pi*maximum((f+Df), 0)/self.samplerate
-            psy=2*pi*maximum((f-Df), 0)/self.samplerate
+            phi=2*pi*maximum((f+Df), 0)/float(self.samplerate)
+            psy=2*pi*maximum((f-Df), 0)/float(self.samplerate)
 
             ap=vstack((ones(r.shape),-2*r*cos(phi), r**2)).T
             bz=vstack((ones(r.shape),-2*r*cos(psy), r**2)).T
 
             fn=f#+ compensation_filter_order* p3 *c *b *ERBw/4;
 
-            vwr=exp(1j*2*pi*fn/self.samplerate)
+            vwr=exp(1j*2*pi*fn/float(self.samplerate))
             vwrs=vstack((ones(vwr.shape), vwr, vwr**2)).T
 
             ##normilization stuff
@@ -819,10 +757,10 @@ def asymmetric_compensation_coeffs(samplerate,fr,filt_b,filt_a,b,c,p0,p1,p2,p3,p
     This function is used to generated the coefficient of the asymmetric
     compensation filter used for the gammachirp implementation.
     '''
+    samplerate = float(samplerate)
     ERBw=24.7*(4.37e-3*fr+1.)
     nbr_cascade=4
     for k in arange(nbr_cascade):
-
         r=exp(-p1*(p0/p4)**(k)*2*pi*b*ERBw/samplerate) #k instead of k-1 because range 0 N-1
 
         Dfr=(p0*p4)**(k)*p2*c*b*ERBw
@@ -843,6 +781,3 @@ def asymmetric_compensation_coeffs(samplerate,fr,filt_b,filt_a,b,c,p0,p1,p2,p3,p
         filt_a[:, :, k]=ap
 
     return filt_b,filt_a
-
-def factorial(n):
-    return prod(arange(1, n+1))
