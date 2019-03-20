@@ -67,8 +67,20 @@ def test_firfilterbank():
     # plot(sound.times/ms, output2, '--')
     # show()
 
+
+def test_fractionaldelayfilterbank():
+    sound_orig = Sound(lambda t: sin(2*pi*30*Hz*t), duration=100*ms)
+    delay = 0.5/sound_orig.samplerate
+    fb = FractionalDelay(sound_orig, [delay])
+    sound_delay = fb.process()
+    sound_offset = Sound(lambda t: sin(2*pi*30*Hz*(t-(fb.delay_offset+delay)))*(t>=fb.delay_offset+delay), duration=100*ms)
+    # plot(sound_orig.times/ms, sound_offset)
+    # plot(sound_orig.times/ms, sound_delay)
+    # show()
+
 if __name__=='__main__':
     # test_basic_filterbanks()
     # test_filterbankgroup()
     # test_cochleagram()
-    test_firfilterbank()
+    # test_firfilterbank()
+    test_fractionaldelayfilterbank()

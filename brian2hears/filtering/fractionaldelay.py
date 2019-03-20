@@ -55,7 +55,7 @@ class FractionalDelay(FIRFilterbank):
     This value is available as the attribute ``delay_offset``.
     '''
     def __init__(self, source, delays, filter_length=None, **args):
-        delays = array(delays)
+        delays = asarray(atleast_1d(delays))
         delay_max = amax(abs(delays))
         delay_max_int = int(ceil(source.samplerate*delay_max))
         if filter_length is None:
@@ -76,7 +76,8 @@ class FractionalDelay(FIRFilterbank):
 # Adapted from
 # http://www.labbookpages.co.uk/audio/beamforming/fractionalDelay.html    
 def fractional_delay_ir(delay, samplerate, filter_length=151):
-    delay = delay*samplerate
+    delay = float(delay*samplerate)
+    print delay
     centre_tap = filter_length // 2
     t = arange(filter_length)
     x = t-delay
