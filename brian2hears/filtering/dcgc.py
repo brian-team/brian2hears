@@ -23,8 +23,8 @@ def set_parameters(cf,param):
     parameters['lct_ERB'] = 1.5  #value of the shift in ERB frequencies
     parameters['frat_control'] = 1.08
     parameters['order_gc']=4
-    parameters['ERBrate']= 21.4*log10(4.37*cf/1000+1)
-    parameters['ERBwidth']= 24.7*(4.37*cf/1000 + 1)
+    parameters['ERBrate']= 21.4*log10(4.37*(cf/kHz)+1)
+    parameters['ERBwidth']= 24.7*(4.37*(cf/kHz)+1)
     
     if param: 
         if not isinstance(param, dict): 
@@ -145,7 +145,7 @@ class DCGC(CombinedFilterbank):
         
         parameters=set_parameters(cf,param)
         ERBspace = mean(diff(parameters['ERBrate']))
-        cf=atleast_1d(cf)
+        cf = asarray(atleast_1d(cf))
         #bank of passive gammachirp filters. As the control path uses the same passive filterbank than the signal path (buth shifted in frequency)
         #this filterbanl is used by both pathway.
         pGc=LogGammachirp(source,cf,b=parameters['b1'], c=parameters['c1'])

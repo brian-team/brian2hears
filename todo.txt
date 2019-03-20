@@ -1,7 +1,6 @@
 Modules to go through:
 
 - filtering package
-    - dcgc
     - drnl
     - tan_carney
     - zilany
@@ -20,7 +19,6 @@ Other things to do:
 Examples to fix:
 
 - cochlear_models
-- dcgc
 - drnl
 - ircam_hrtf
 - sound_localisation_model

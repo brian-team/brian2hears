@@ -30,8 +30,8 @@ c2 = 2.2   #glide slope of the second filterbank
 b2 = 2.17  #factor determining the time constant of the second filterbank
 
 order_ERB = 4
-ERBrate = 21.4*log10(4.37*cf/1000+1)
-ERBwidth = 24.7*(4.37*cf/1000 + 1)
+ERBrate = 21.4*log10(4.37*(cf/kHz)+1)
+ERBwidth = 24.7*(4.37*(cf/kHz) + 1)
 ERBspace = mean(diff(ERBrate))
 
 # the filter coefficients are updated every update_interval (here in samples)
@@ -44,7 +44,7 @@ update_interval = 1
 #this filterbank is used by both pathway.
 pGc = LogGammachirp(sound, cf, b=b1, c=c1)
 
-fp1 = cf + c1*ERBwidth*b1/order_ERB #centre frequency of the signal path
+fp1 = asarray(cf) + c1*ERBwidth*b1/order_ERB #centre frequency of the signal path
 
 #### Control Path ####
 
