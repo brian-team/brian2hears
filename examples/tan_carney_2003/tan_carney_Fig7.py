@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
 from brian2 import *
-#set_global_preferences(useweave=True)
 from brian2hears import *
 from brian2hears.filtering.tan_carney import TanCarneySignal, MiddleEar
 

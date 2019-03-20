@@ -14,16 +14,9 @@ The Journal of the Acoustical Society of America 114 (2003): 2007.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from brian.stdunits import kHz, Hz, ms
-from brian.network import Network
-from brian.monitor import StateMonitor, SpikeMonitor
-from brian.globalprefs import set_global_preferences
-
-#set_global_preferences(useweave=True)
+from brian2 import *
 from brian2hears import (Sound, get_samplerate, set_default_samplerate, tone,
                          click, silence, dB, TanCarney, MiddleEar, ZhangSynapse)
-from brian.clock import reinit_default_clock
-
 
 set_default_samplerate(50*kHz)
 sample_length = 1 / get_samplerate(None)

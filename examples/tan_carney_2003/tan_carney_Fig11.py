@@ -43,7 +43,7 @@ s_mon = StateMonitor(syn, 's', record=True, clock=syn.clock)
 net = Network(syn, s_mon)
 net.run(duration)
 
-reshaped = s_mon.values.reshape((len(freqs), len(levels), -1))
+reshaped = s_mon.s[:].reshape((len(freqs), len(levels), -1))
 
 # calculate the phase with respect to the stimulus
 pi = np.pi
@@ -54,7 +54,7 @@ phases = np.zeros((reshaped_subset.shape[0], len(levels)))
 for f_idx, freq in enumerate(freq_subset):
     period = 1.0 / freq
     for l_idx in xrange(len(levels)):
-        phase_angles = np.arange(reshaped_subset.shape[2])/samplerate % period / period * 2*pi
+        phase_angles = np.arange(reshaped_subset.shape[2])/float(samplerate) % period / period * 2*pi
         temp_phases = (np.exp(1j * phase_angles) *
                        reshaped_subset[f_idx, l_idx, :])
         phases[f_idx, l_idx] = np.angle(np.sum(temp_phases))

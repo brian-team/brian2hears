@@ -99,8 +99,20 @@ def test_tan_carney():
     sound = whitenoise(100*ms, samplerate=50*kHz)
     fb = TanCarney(sound, [100, 200]*Hz)
     output = fb.process()
-    plot(sound.times/ms, output)
+    # plot(sound.times/ms, output)
+    # show()
+
+
+def test_zhang_synapse():
+    sound = whitenoise(100*ms, samplerate=50*kHz)
+    cf = erbspace(20*Hz, 20*kHz, 100)
+    ihc = TanCarney(MiddleEar(sound), cf)
+    syn = ZhangSynapse(ihc, cf)
+    M = SpikeMonitor(syn)
+    run(sound.duration)
+    plot(M.t/ms, M.i, '.k')
     show()
+
 
 if __name__=='__main__':
     # test_basic_filterbanks()
@@ -110,4 +122,7 @@ if __name__=='__main__':
     # test_fractionaldelayfilterbank()
     # test_dcgc()
     # test_drnl()
-    test_tan_carney()
+    # test_tan_carney()
+    #BrianLogger.log_level_diagnostic()
+    test_zhang_synapse()
+

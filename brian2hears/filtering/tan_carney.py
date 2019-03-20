@@ -69,42 +69,41 @@ class ZhangSynapseSpikes(NeuronGroup):
         c_0, c_1 = params['c_0'], params['c_1']
         s_0, s_1 = params['s_0'], params['s_1']
         R_A = params['R_A']
+        ns = dict(s_0=s_0, s_1=s_1, c_0=c_0, c_1=c_1)
         eqs =  '''
         # time-varying discharge rate, input into this model
         s : Hz
         
         # discharge-history effect (Equation 20 in differential equation form)        
         H = c_0*e_0 + c_1*e_1 : 1
-        de_0/dt = -e_0/s_0    : 1
-        de_1/dt = -e_1/s_1    : 1
+        de_0/dt = -e_0/s_0    : 1 (unless refractory)
+        de_1/dt = -e_1/s_1    : 1 (unless refractory)
 
         # final time-varying discharge rate for the Poisson process, equation 19
         R = s * (1 - H) : Hz
         '''
         
-        def reset_func(P, spikes):
-            P.e_0[spikes] = 1.0
-            P.e_1[spikes] = 1.0
-
         # make sure that the s value is first updated in
         # ZhangSynapseRate, then this NeuronGroup is
-        # updated
-        clock=Clock(dt=source.clock.dt, t=source.clock.t,
-                    order=source.clock.order + 1)
-        
-        @network_operation(clock=clock, when='start')
+        # updated by setting order+1
+        @network_operation(dt=source.dt[:], when='start', order=source.order+1)
         def distribute_input():
-            self.s[:] = source.s.repeat(n_per_channel)
+            self.s[:] = source.s[:].repeat(n_per_channel)
         
         NeuronGroup.__init__(self, len(source) * n_per_channel,
                              model=eqs,
-                             threshold=PoissonThreshold('R'),
-                             reset=CustomRefractoriness(resetfun=reset_func,
-                                                        period=R_A),
-                             clock=clock
+                             threshold='rand()<R*dt',
+                             reset='''
+                             e_0 = 1
+                             e_1 = 1
+                             ''',
+                             refractory=R_A,
+                             dt=source.dt[:], order=source.order+1,
+                             namespace=ns,
+                             method='euler',
                              )
         
-        self.contained_objects += [distribute_input]
+        self.contained_objects.append(distribute_input)
 
 
 class ZhangSynapse(ZhangSynapseSpikes):
@@ -168,7 +167,7 @@ class ZhangSynapse(ZhangSynapseSpikes):
         rate_model = ZhangSynapseRate(source, CF, params)        
         ZhangSynapseSpikes.__init__(self, rate_model, n_per_channel, params)
         
-        self.contained_objects += [rate_model]
+        self.contained_objects.append(rate_model)
 
 
 class ZhangSynapseRate(FilterbankGroup):
@@ -234,26 +233,37 @@ class ZhangSynapseRate(FilterbankGroup):
     
         # Equation 18 with A16 and A17
         p_1 = P_rest / np.log(2)
-    
+
+        # Equation A17 (using an expression based on the spontaneous rate instead of 18.54, based on the C code)
+        V_sat2 = 2 + 3*log10(asarray(CF)/1000.0)
+        V_sat = 20.0*(spont + 1*Hz)/(spont + 5*Hz)*P_Imax*((V_sat2 > 1.5)*(V_sat2 - 1.5) + 1.5)
+
+        # Following Equation A16 (p_2 is the same as P_ST)
+        p_2_exponent = abs(log(2)*V_sat/P_rest)
+        temp1 = zeros_like(p_2_exponent)
+        temp1[p_2_exponent>=100] = p_2_exponent[p_2_exponent>=100]
+        temp1[p_2_exponent<100] = log(exp(p_2_exponent[p_2_exponent<100])-1)
+        p_2 = clip(temp1, -inf, abs(p_2_exponent))
+
+        ns = dict(
+            spont=spont, P_Imax=P_Imax, p_1=p_1, P_rest=P_rest, P_L=P_L, V_I=V_I, P_G=P_G, C_G=C_G,
+            )
+
         eqs = '''
         # input into the Synapse
         V_ihc : 1
 
         # CF in Hz
         CF_param : 1
-
-        # Equation A17 (using an expression based on the spontaneous rate instead of 18.54, based on the C code)
-        V_sat = 20.0*(spont + 1*Hz)/(spont + 5*Hz)*P_Imax*((V_sat2 > 1.5)*(V_sat2 - 1.5) + 1.5) : 1
-        V_sat2 = 2 + 3*np.log10(CF_param / 1000.0) : 1
-
-        # Equation 17
-        P_I_exponent = p_2 * V_ihc : 1
-        # avoid infinity values
-        P_I = p_1 * np.clip(np.log(1 + np.exp(P_I_exponent)), -np.inf, np.abs(P_I_exponent) + 1): 1
+        
+        # Equation 17 with some corrections to fix overflow problems
+        base_P_I_exponent = p_2 * V_ihc : 1
+        clip_base_P_I_exponent = clip(base_P_I_exponent, -1e100, 100) : 1
+        P_I_exponent = base_P_I_exponent*(base_P_I_exponent>=100)+log(1+exp(clip_base_P_I_exponent))*(base_P_I_exponent<100) : 1
+        P_I = p_1 * P_I_exponent : 1
     
         # Following Equation A16 (p_2 is the same as P_ST)
-        p_2_exponent = np.log(2) * V_sat / P_rest : 1
-        p_2 = np.clip(np.log(np.exp(p_2_exponent) - 1), -np.inf, np.abs(p_2_exponent)) : 1
+        p_2 : 1
 
         # Equation A18-A19
         # Concentration in the stores (as differential instead of difference equation)
@@ -264,8 +274,9 @@ class ZhangSynapseRate(FilterbankGroup):
         s = C_I * P_I : Hz
         '''
     
-        FilterbankGroup.__init__(self, source, 'V_ihc', model=eqs)
-        self.CF_param = CF
+        FilterbankGroup.__init__(self, source, 'V_ihc', eqs, namespace=ns, method='euler')
+        self.CF_param = asarray(CF)
+        self.p_2 = p_2
         self.C_I = C_Irest
         self.C_L = C_Lrest
         

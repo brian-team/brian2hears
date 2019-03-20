@@ -1,7 +1,6 @@
 Modules to go through:
 
 - filtering package
-    - zilany
     (- gpulinearfilterbank)
     (- gputools)
 - hrtf package
@@ -18,4 +17,4 @@ Examples to fix:
 
 - ircam_hrtf
 - sound_localisation_model
-- tan_carney_2003/*
+- tan_carney_2003/tan_carney_simple_test (needs re-runs on filterbankgroup done)
