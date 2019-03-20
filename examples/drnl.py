@@ -30,6 +30,7 @@ sound.level = level
 nbr_cf = 50  #number of centre frequencies
 #center frequencies with a spacing following an ERB scale
 center_frequencies = erbspace(100*Hz,1000*Hz, nbr_cf)
+center_frequencies = asarray(center_frequencies) # avoid units issues
 
 #conversion to stape velocity (which are the units needed by the following centres)
 sound = sound*0.00014

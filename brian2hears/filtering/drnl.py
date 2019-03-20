@@ -143,7 +143,7 @@ class DRNL(CombinedFilterbank):
         CombinedFilterbank.__init__(self, source)
         source = self.get_modified_source()
         
-        cf = atleast_1d(cf)
+        cf = asarray(atleast_1d(cf))
         nbr_cf=len(cf)
         parameters=set_parameters(cf,type,param)
         

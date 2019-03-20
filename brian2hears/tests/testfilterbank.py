@@ -83,8 +83,16 @@ def test_dcgc():
     sound = whitenoise(100*ms)
     fb = DCGC(sound, [100, 200]*Hz)
     output = fb.process()
-    plot(sound.times/ms, output)
-    show()
+    # plot(sound.times/ms, output)
+    # show()
+
+
+def test_drnl():
+    sound = whitenoise(100*ms)
+    fb = DRNL(sound, [100, 200]*Hz)
+    output = fb.process()
+    # plot(sound.times/ms, output)
+    # show()
 
 if __name__=='__main__':
     # test_basic_filterbanks()
@@ -92,4 +100,5 @@ if __name__=='__main__':
     # test_cochleagram()
     # test_firfilterbank()
     # test_fractionaldelayfilterbank()
-    test_dcgc()
+    # test_dcgc()
+    test_drnl()

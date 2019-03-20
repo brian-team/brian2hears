@@ -1,7 +1,6 @@
 Modules to go through:
 
 - filtering package
-    - drnl
     - tan_carney
     - zilany
     (- gpulinearfilterbank)
@@ -19,7 +18,6 @@ Other things to do:
 Examples to fix:
 
 - cochlear_models
-- drnl
 - ircam_hrtf
 - sound_localisation_model
 - tan_carney_2003/*
