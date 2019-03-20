@@ -11,24 +11,28 @@ set_default_samplerate(50*kHz)
 sound = whitenoise(simulation_duration)
 sound = sound.atlevel(50*dB) # level in rms dB SPL
 cf = erbspace(100*Hz, 1000*Hz, 50) # centre frequencies
-interval = 16  #update interval of the time varying filters
-## DNRL
-#param_drnl = {}
-#param_drnl['lp_nl_cutoff_m'] = 1.1
-#drnl_filter=DRNL(sound, cf, type='human', param=param_drnl)
-#out = drnl_filter.process()
 
-## DCGC
-#param_dcgc = {}
-#param_dcgc['c1'] = -2.96
+param_drnl = {}
+param_drnl['lp_nl_cutoff_m'] = 1.1
 
-#dcgc_filter = DCGC(sound, cf, interval, param=param_dcgc)
-#out = dcgc_filter.process()
+param_dcgc = {}
+param_dcgc['c1'] = -2.96
 
-## Tan and Carney 2003
-tan_filter = TanCarney(sound, cf, interval)
-out = tan_filter.process()
+figure(figsize=(10, 4))
+for i, (model, param) in enumerate([(DRNL, param_drnl),
+                                    (DCGC, param_dcgc),
+                                    (TanCarney, None)]):
+    fb = model(sound, cf, param=param)
+    out = fb.process()
+    subplot(1, 3, i+1)
+    title(model.__name__)
+    imshow(flipud(out.T), aspect='auto', extent=(0, simulation_duration/ms, 0, len(cf)-1))
+    xlabel('Time (ms)')
+    if i==0:
+        ylabel('CF (kHz)')
+        yticks([0, len(cf)-1], [cf[0]/kHz, cf[-1]/kHz])
+    else:
+        yticks([])
 
-figure()
-imshow(flipud(out.T), aspect='auto')
+tight_layout()
 show()

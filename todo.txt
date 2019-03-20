@@ -1,7 +1,6 @@
 Modules to go through:
 
 - filtering package
-    - tan_carney
     - zilany
     (- gpulinearfilterbank)
     (- gputools)
@@ -17,7 +16,6 @@ Other things to do:
 
 Examples to fix:
 
-- cochlear_models
 - ircam_hrtf
 - sound_localisation_model
 - tan_carney_2003/*

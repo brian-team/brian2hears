@@ -94,6 +94,14 @@ def test_drnl():
     # plot(sound.times/ms, output)
     # show()
 
+
+def test_tan_carney():
+    sound = whitenoise(100*ms, samplerate=50*kHz)
+    fb = TanCarney(sound, [100, 200]*Hz)
+    output = fb.process()
+    plot(sound.times/ms, output)
+    show()
+
 if __name__=='__main__':
     # test_basic_filterbanks()
     # test_filterbankgroup()
@@ -101,4 +109,5 @@ if __name__=='__main__':
     # test_firfilterbank()
     # test_fractionaldelayfilterbank()
     # test_dcgc()
-    test_drnl()
+    # test_drnl()
+    test_tan_carney()

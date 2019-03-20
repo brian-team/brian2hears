@@ -301,7 +301,7 @@ class Control_Coefficients:
         self.cf = cf
         self.PI2 = 2.*3.14159265358979
         self.nch=len(cf)
-        self.fs_bilinear = 2.0*samplerate#*ones(self.nch)
+        self.fs_bilinear = float(2.0*samplerate)#*ones(self.nch)
 #        self.fs_bilinear =tile(self.fs_bilinear.reshape(self.nch,-1),3)
         self.x_cf=11.9*np.log10(0.8+cf/456);
         self.f_shift=(pow(10,((self.x_cf+1.2)/11.9))-0.8)*456-cf
@@ -374,7 +374,7 @@ class Signal_Coefficients:
         self.cf = cf
         self.PI2 = 2*3.14159265358979
         self.nch=len(cf)
-        self.fs_bilinear = 2.0*samplerate#*ones(self.nch)
+        self.fs_bilinear = float(2.0*samplerate)#*ones(self.nch)
         
         self.order_of_pole = 20             
         self.half_order_pole = self.order_of_pole/2
@@ -622,7 +622,7 @@ class TanCarney(CombinedFilterbank):
     def __init__(self, source, cf, update_interval=1, param=None):
         CombinedFilterbank.__init__(self, source)
         source = self.get_modified_source()       
-        cf = np.atleast_1d(cf)
+        cf = np.asarray(np.atleast_1d(cf))
 
         parameters=set_parameters(cf,param)        
         
