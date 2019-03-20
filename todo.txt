@@ -4,8 +4,6 @@ Modules to go through:
     (- gpulinearfilterbank)
     (- gputools)
 - hrtf package
-    - hrtf
-    - ircam
     - itd
 
 Other things to do:
@@ -15,6 +13,4 @@ Other things to do:
 
 Examples to fix:
 
-- ircam_hrtf
-- sound_localisation_model
 - tan_carney_2003/tan_carney_simple_test (needs re-runs on filterbankgroup done)

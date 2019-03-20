@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 '''
 Example showing the use of HRTFs in Brian hears. Note that you will need to
-download the :class:`IRCAM_LISTEN` database.
+download the :class:`IRCAM_LISTEN` database and set the IRCAM_LISTEN environment variable to point to the location
+where you saved it.
 '''
 from brian2 import *
 from brian2hears import *
 # Load database
-hrtfdb = IRCAM_LISTEN(r'F:\HRTF\IRCAM')
-hrtfset = hrtfdb.load_subject(1002)
+hrtfdb = IRCAM_LISTEN()
+hrtfset = hrtfdb.load_subject(hrtfdb.subjects[0])
 # Select only the horizontal plane
 hrtfset = hrtfset.subset(lambda elev: elev==0)
 # Set up a filterbank

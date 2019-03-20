@@ -17,9 +17,10 @@ class IRCAM_LISTEN(HRTFDatabase):
     
     The database object can be initialised with the following arguments:
     
-    ``basedir``
+    ``basedir=None``
         The directory where the database has been downloaded and extracted,
         e.g. ``r'D:\HRTF\IRCAM'``. Multiple directories in a list can be provided as well (e.g IRCAM and IRCAM New).
+        Note that if you set this to None, it will use the environment variable IRCAM_LISTEN if that has been set.
     ``compensated=False``
         Whether to use the raw or compensated impulse responses.
     ``samplerate=None``
@@ -37,7 +38,12 @@ class IRCAM_LISTEN(HRTFDatabase):
     Each subject archive should be extracted to a folder (e.g. IRCAM) with the
     names of the subject, e.g. IRCAM/IRC_1002, etc.
     '''
-    def __init__(self, basedir, compensated=False, samplerate=None):
+    def __init__(self, basedir=None, compensated=False, samplerate=None):
+        if basedir is None:
+            basedir = os.getenv('IRCAM_LISTEN')
+        if basedir is None:
+            raise ValueError("You need to provide a directory for the IRCAM LISTEN database, or set the environment "
+                             "variable IRCAM_LISTEN to point to it.")
         if not isinstance(basedir, (list, tuple)):
             basedir = [basedir]
         self.basedir = basedir

@@ -11,6 +11,10 @@ summed firing rates give the sizes of the blue circles in the plot. The most
 strongly responding assembly is indicated by the green x, which is the estimate
 of the location by the model.
 
+Note that you will need to
+download the :class:`IRCAM_LISTEN` database and set the IRCAM_LISTEN environment variable to point to the location
+where you saved it.
+
 Reference:
 
 `Goodman DFM, Brette R (2010). Spike-timing-based computation in sound
@@ -21,8 +25,8 @@ from brian2hears import *
 
 # Download the IRCAM database, and replace this filename with the location
 # you downloaded it to
-hrtfdb = IRCAM_LISTEN(r'F:\HRTF\IRCAM')
-subject = 1002
+hrtfdb = IRCAM_LISTEN()
+subject = hrtfdb.subjects[0]
 hrtfset = hrtfdb.load_subject(subject)
 # This gives the number of spatial locations in the set of HRTFs
 num_indices = hrtfset.num_indices
@@ -53,25 +57,24 @@ gfb = Gammatone(Repeat(hrtfset_fb, cfN),
 cochlea = FunctionFilterbank(gfb, lambda x:15*clip(x, 0, Inf)**(1.0/3.0))
 # Leaky integrate and fire neuron model
 eqs = '''
-dV/dt = (I-V)/(1*ms)+0.1*xi/(0.5*ms)**.5 : 1
+dV/dt = (I-V)/(1*ms)+0.1*xi/(0.5*ms)**.5 : 1 (unless refractory)
 I : 1
 '''
-G = FilterbankGroup(cochlea, 'I', eqs, reset=0, threshold=1, refractory=5*ms)
+G = FilterbankGroup(cochlea, 'I', eqs, reset='V=0', threshold='V>1', refractory=5*ms, method='Euler')
 # The coincidence detector (cd) neurons
-cd = NeuronGroup(num_indices*cfN, eqs, reset=0, threshold=1, clock=G.clock)
+cd = NeuronGroup(num_indices*cfN, eqs, reset='V=0', threshold='V>1', refractory=1*ms, method='Euler', dt=G.dt[:])
 # Each CD neuron receives precisely two inputs, one from the left ear and
 # one from the right, for each location and each cochlear frequency
-C = Connection(G, cd, 'V')
-for i in xrange(num_indices*cfN):
-    C[i, i] = 0.5                 # from right ear
-    C[i+num_indices*cfN, i] = 0.5 # from left ear
+C = Synapses(G, cd, on_pre='V += 0.5', dt=G.dt[:])
+C.connect(j='i', skip_if_invalid=True)
+C.connect(j='i-num_indices*cfN', skip_if_invalid=True)
 # We want to just count the number of CD spikes
-counter = SpikeCounter(cd)
+counter = SpikeMonitor(cd, record=False)
 # Run the simulation, giving a report on how long it will take as we run
 run(sound.duration, report='stderr')
 # We take the array of counts, and reshape them into a 2D array which we sum
 # across frequencies to get the spike count of each location-specific assembly
-count = counter.count
+count = counter.count[:].copy()
 count.shape = (num_indices, cfN)
 count = sum(count, axis=1)
 count = array(count, dtype=float)/amax(count)
