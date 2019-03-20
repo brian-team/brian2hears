@@ -910,17 +910,17 @@ class Sound(BaseSound, numpy.ndarray):
         return Sound(x, samplerate)
 
     @staticmethod
-    @check_units(duration=second, samplerate=Hz)
-    def click(duration, peak=None, samplerate=None, nchannels=1):
+    @check_units(samplerate=Hz)
+    def click(duration=1, peak=None, samplerate=None, nchannels=1):
         '''
-        Returns a click of the given duration.
+        Returns a click of the given duration (in time or samples)
         
         If ``peak`` is not specified, the amplitude will be 1, otherwise
         ``peak`` refers to the peak dB SPL of the click, according to the
         formula ``28e-6*10**(peak/20.)``.
         '''
         samplerate = get_samplerate(samplerate)
-        duration = get_duration(duration,samplerate)
+        duration = get_duration(duration, samplerate)
         if peak is not None:
             if not isinstance(peak, dB_type):
                 raise dB_error('Peak must be given in dB')

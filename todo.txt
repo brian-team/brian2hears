@@ -1,7 +1,6 @@
 Modules to go through:
 
 - filtering package
-    - firfilterbank
     - fractionaldelay
     - dcgc
     - drnl

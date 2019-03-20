@@ -55,7 +55,20 @@ def test_cochleagram():
     # show()
 
 
+def test_firfilterbank():
+    sound = whitenoise(100*ms)
+    ir = Gammatone(click()[slice(0*ms, 100*ms)], [100, 200]*Hz).process()
+    for linear in [True, False]:
+        firfb = FIRFilterbank(sound, ir.T, use_linearfilterbank=linear)
+        output1 = firfb.process()
+        output2 = Gammatone(sound, [100, 200]*Hz).process()
+        assert amax(abs(output1-output2))<1e-10
+    # plot(sound.times/ms, output1)
+    # plot(sound.times/ms, output2, '--')
+    # show()
+
 if __name__=='__main__':
-    test_basic_filterbanks()
-    test_filterbankgroup()
-    test_cochleagram()
+    # test_basic_filterbanks()
+    # test_filterbankgroup()
+    # test_cochleagram()
+    test_firfilterbank()
