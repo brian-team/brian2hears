@@ -9,6 +9,8 @@ Other things to do:
 - filterbankgroup
     - sort of works, but presumably not with multiple runs and store/restore yet
 - distribution (pypi, conda, etc.)
+- updated documentation (readthedocs)
+    - mention the slice() thing on Python 2
 
 Examples to fix:
 
