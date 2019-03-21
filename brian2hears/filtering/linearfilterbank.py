@@ -121,16 +121,29 @@ def _weave_apply_linear_filterbank(b, a, x, zi,
     {
         for(int k=0; k<p; k++)
         {
+            double * rp_y = &(Y(s, 0));
+            const double * rp_b1 = &(B(0, 0, k));
+            double * rp_x = &(X(s, 0));
+            double * rp_zi1 = &(Zi(0, 0, k));
             for(int j=0; j<n; j++)
-                         Y(s,j) =   B(j,0,k)*X(s,j) + Zi(j,0,k);
+                         rp_y[j] =   rp_b1[j]*rp_x[j] + rp_zi1[j];
             for(int i=0; i<m-2; i++)
+            {
+                const double * rp_b2 = &(B(0, i+1, k));
+                const double * rp_a2 = &(A(0, i+1, k));
+                double * rp_zi20 = &(Zi(0, i, k));
+                double * rp_zi21 = &(Zi(0, i+1, k));
                 for(int j=0;j<n;j++)
-                    Zi(j,i,k) = B(j,i+1,k)*X(s,j) + Zi(j,i+1,k) - A(j,i+1,k)*Y(s,j);
+                    rp_zi20[j] = rp_b2[j]*rp_x[j] + rp_zi21[j] - rp_a2[j]*rp_y[j];
+            }
+            const double * rp_b3 = &(B(0, m-1, k));
+            const double * rp_a3 = &(A(0, m-1, k));
+            double * rp_zi3 = &(Zi(0, m-2, k));
             for(int j=0; j<n; j++)
-                  Zi(j,m-2,k) = B(j,m-1,k)*X(s,j)               - A(j,m-1,k)*Y(s,j);
+                  rp_zi3[j] = rp_b3[j]*rp_x[j] - rp_a3[j]*rp_y[j];
             if(k<p-1)
                 for(int j=0; j<n; j++)
-                    X(s,j) = Y(s,j);
+                    rp_x[j] = rp_y[j];            
         }
     }
     '''
@@ -147,45 +160,10 @@ class CythonLinearFilterbankApply(object):
 #cython: language_level=3
 #cython: boundscheck=False
 #cython: wraparound=False
-#cython: cdivision=False
 #cython: infer_types=True
-from __future__ import division
 
 import numpy as _numpy
 cimport numpy as _numpy
-from libc.math cimport sin, cos, tan, sinh, cosh, tanh, exp, log, log10, sqrt, asin, acos, atan, fmod, floor, ceil, isinf
-cdef extern from "math.h":
-    double M_PI
-# Import the two versions of std::abs
-from libc.stdlib cimport abs  # For integers
-from libc.math cimport abs  # For floating point values
-from libc.limits cimport INT_MIN, INT_MAX
-from libcpp cimport bool
-
-_numpy.import_array()
-cdef extern from "numpy/ndarraytypes.h":
-    void PyArray_CLEARFLAGS(_numpy.PyArrayObject *arr, int flags)
-from libc.stdlib cimport free
-
-cdef extern from "numpy/npy_math.h":
-    bint npy_isinf(double x)
-
-cdef extern from "stdint_compat.h":
-    # Longness only used for type promotion
-    # Actual compile time size used for conversion
-    ctypedef signed int int32_t
-    ctypedef signed long int64_t
-    ctypedef unsigned long uint64_t
-    # It seems we cannot used a fused type here
-    cdef int int_(bool)
-    cdef int int_(char)
-    cdef int int_(short)
-    cdef int int_(int)
-    cdef int int_(long)
-    cdef int int_(float)
-    cdef int int_(double)
-    cdef int int_(long double)
-
 
 cpdef parallel_lfilter(_numpy.ndarray[_numpy.float64_t, ndim=3] b,
                        _numpy.ndarray[_numpy.float64_t, ndim=3] a,
@@ -193,31 +171,73 @@ cpdef parallel_lfilter(_numpy.ndarray[_numpy.float64_t, ndim=3] b,
                        _numpy.ndarray[_numpy.float64_t, ndim=3] zi,
                        _numpy.ndarray[_numpy.float64_t, ndim=2] y):
     cdef int n, m, p, n1, m1, p1, numsamples, s, k, i, j
+    cdef double* py
+    cdef double* px
+    cdef double* pa
+    cdef double* pb
+    cdef double* pzi
+    cdef double* pzi2
     n = b.shape[0]
     m = b.shape[1]
     p = b.shape[2]
-    n1 = a.shape[0]
-    m1 = a.shape[1]
-    p1 = a.shape[2]
     numsamples = x.shape[0]
     for s in range(numsamples):
+        py = &(y[s, 0]) 
+        px = &(x[s, 0])
         for k in range(p):
+            pb = &(b[0, 0, k])
+            pzi = &(zi[0, 0, k])
             for j in range(n):
                 y[s, j] =   b[j, 0, k]*x[s, j] + zi[j, 0, k]
+                # py[j] =   pb[j]*px[j] + pzi[j]
             for i in range(m-2):
+                pa = &(a[0, i+1, k])
+                pb = &(b[0, i+1, k])
+                pzi = &(zi[0, i, k])                
+                pzi2 = &(zi[0, i+1, k])
                 for j in range(n):
-                    zi[j, i, k] = b[j, i+1, k]*x[s, j] + zi[j, i+1, k] - a[j, i+1, k]*y[s,j]
+                    # zi[j, i, k] = b[j, i+1, k]*x[s, j] + zi[j, i+1, k] - a[j, i+1, k]*y[s,j]
+                    pzi[j] = pb[j]*px[j] + pzi2[j] - pa[j]*py[j]
+            pa = &(a[0, m-1, k])
+            pb = &(b[0, m-1, k])
+            pzi = &(zi[0, m-2, k])                
             for j in range(n):
-                  zi[j, m-2, k] = b[j, m-1, k]*x[s,j] - a[j, m-1, k]*y[s,j]
+                # zi[j, m-2, k] = b[j, m-1, k]*x[s,j] - a[j, m-1, k]*y[s,j]
+                pzi[j] = pb[j]*px[j] - pa[j]*py[j]
             if k<p-1:
                 for j in range(n):
-                    x[s, j] = y[s, j]
+                    # x[s, j] = y[s, j]
+                    px[j] = py[j]
         '''
         self.compiled_code = cython_extension_manager.create_extension(code,
                                                                        compiler=self.compiler,
                                                                        extra_compile_args=self.extra_compile_args)
     def __call__(self, b, a, x, zi):
+        if zi.shape[2]>1:
+            # we need to do this so as not to alter the values in x in the C code below
+            # but if zi.shape[2] is 1 there is only one filter in the chain and the
+            # copy operation at the end of the C code will never happen.
+            x = array(x, copy=True, order='C')
+        else:
+            # make sure that the array is in C-order
+            x = asarray(x, order='C')
         y = empty_like(x)
+        n, m, p = b.shape
+        n1, m1, p1 = a.shape
+        numsamples = x.shape[0]
+        n = int(n)
+        m = int(m)
+        p = int(p)
+        n1 = int(n1)
+        m1 = int(m1)
+        p1 = int(p1)
+        numsamples = int(numsamples)
+        if n1 != n or m1 != m or p1 != p or x.shape != (numsamples, n) or zi.shape != (n, m, p):
+            raise ValueError('Data has wrong shape.')
+        if numsamples>1 and not x.flags['C_CONTIGUOUS']:
+            raise ValueError('Input data must be C_CONTIGUOUS')
+        if not b.flags['F_CONTIGUOUS'] or not a.flags['F_CONTIGUOUS'] or not zi.flags['F_CONTIGUOUS']:
+            raise ValueError('Filter parameters must be F_CONTIGUOUS')
         self.compiled_code.parallel_lfilter(b, a, x, zi, y)
         return y
 
@@ -296,7 +316,6 @@ class LinearFilterbank(Filterbank):
             self.cpp_compiler, self.extra_compile_args = get_compiler_and_args()
         else:
             self.use_cython = Cython is not None
-            # self.use_cython = False
             if self.use_cython:
                 self.cython_func = CythonLinearFilterbankApply()
 
