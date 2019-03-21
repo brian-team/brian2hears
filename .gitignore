@@ -1,2 +1,5 @@
 /.project
 /.pydevproject
+/dist/
+/build/
+/brian2hears.egg-info/

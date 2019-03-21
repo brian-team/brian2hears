@@ -6,9 +6,9 @@ Modules to go through:
 
 Other things to do:
 
-- installer
 - filterbankgroup
     - sort of works, but presumably not with multiple runs and store/restore yet
+- distribution (pypi, conda, etc.)
 
 Examples to fix:
 
