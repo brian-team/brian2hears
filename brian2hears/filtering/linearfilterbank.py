@@ -1,6 +1,8 @@
 from brian2 import *
 from brian2.codegen.cpp_prefs import get_compiler_and_args, update_for_cross_compilation
 from brian2.utils.logger import std_silent, get_logger
+from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
+from brian2.codegen.runtime.cython_rt.cython_rt import CythonCodeObject
 try:
     import weave
 except ImportError:
@@ -8,6 +10,12 @@ except ImportError:
         from scipy import weave
     except ImportError:
         weave = None
+try:
+    import Cython
+    if not CythonCodeObject.is_available():
+        Cython = None
+except ImportError:
+    Cython = None
 from scipy import signal, random
 from .filterbank import Filterbank, RestructureFilterbank
 from ..bufferable import Bufferable
@@ -129,7 +137,89 @@ def _weave_apply_linear_filterbank(b, a, x, zi,
     weave.inline(code, ['b', 'a', 'x', 'zi', 'y', 'n', 'm', 'p', 'numsamples'],
                  compiler=cpp_compiler,
                  extra_compile_args=extra_compile_args)
-    return y 
+    return y
+
+
+class CythonLinearFilterbankApply(object):
+    def __init__(self):
+        self.compiler, self.extra_compile_args = get_compiler_and_args()
+        code = '''
+#cython: language_level=3
+#cython: boundscheck=False
+#cython: wraparound=False
+#cython: cdivision=False
+#cython: infer_types=True
+from __future__ import division
+
+import numpy as _numpy
+cimport numpy as _numpy
+from libc.math cimport sin, cos, tan, sinh, cosh, tanh, exp, log, log10, sqrt, asin, acos, atan, fmod, floor, ceil, isinf
+cdef extern from "math.h":
+    double M_PI
+# Import the two versions of std::abs
+from libc.stdlib cimport abs  # For integers
+from libc.math cimport abs  # For floating point values
+from libc.limits cimport INT_MIN, INT_MAX
+from libcpp cimport bool
+
+_numpy.import_array()
+cdef extern from "numpy/ndarraytypes.h":
+    void PyArray_CLEARFLAGS(_numpy.PyArrayObject *arr, int flags)
+from libc.stdlib cimport free
+
+cdef extern from "numpy/npy_math.h":
+    bint npy_isinf(double x)
+
+cdef extern from "stdint_compat.h":
+    # Longness only used for type promotion
+    # Actual compile time size used for conversion
+    ctypedef signed int int32_t
+    ctypedef signed long int64_t
+    ctypedef unsigned long uint64_t
+    # It seems we cannot used a fused type here
+    cdef int int_(bool)
+    cdef int int_(char)
+    cdef int int_(short)
+    cdef int int_(int)
+    cdef int int_(long)
+    cdef int int_(float)
+    cdef int int_(double)
+    cdef int int_(long double)
+
+
+cpdef parallel_lfilter(_numpy.ndarray[_numpy.float64_t, ndim=3] b,
+                       _numpy.ndarray[_numpy.float64_t, ndim=3] a,
+                       _numpy.ndarray[_numpy.float64_t, ndim=2] x,
+                       _numpy.ndarray[_numpy.float64_t, ndim=3] zi,
+                       _numpy.ndarray[_numpy.float64_t, ndim=2] y):
+    cdef int n, m, p, n1, m1, p1, numsamples, s, k, i, j
+    n = b.shape[0]
+    m = b.shape[1]
+    p = b.shape[2]
+    n1 = a.shape[0]
+    m1 = a.shape[1]
+    p1 = a.shape[2]
+    numsamples = x.shape[0]
+    for s in range(numsamples):
+        for k in range(p):
+            for j in range(n):
+                y[s, j] =   b[j, 0, k]*x[s, j] + zi[j, 0, k]
+            for i in range(m-2):
+                for j in range(n):
+                    zi[j, i, k] = b[j, i+1, k]*x[s, j] + zi[j, i+1, k] - a[j, i+1, k]*y[s,j]
+            for j in range(n):
+                  zi[j, m-2, k] = b[j, m-1, k]*x[s,j] - a[j, m-1, k]*y[s,j]
+            if k<p-1:
+                for j in range(n):
+                    x[s, j] = y[s, j]
+        '''
+        self.compiled_code = cython_extension_manager.create_extension(code,
+                                                                       compiler=self.compiler,
+                                                                       extra_compile_args=self.extra_compile_args)
+    def __call__(self, b, a, x, zi):
+        y = empty_like(x)
+        self.compiled_code.parallel_lfilter(b, a, x, zi, y)
+        return y
 
 
 class LinearFilterbank(Filterbank):
@@ -204,6 +294,11 @@ class LinearFilterbank(Filterbank):
         if self.use_weave:
             logger.debug("Using weave for LinearFilterbank")
             self.cpp_compiler, self.extra_compile_args = get_compiler_and_args()
+        else:
+            self.use_cython = Cython is not None
+            # self.use_cython = False
+            if self.use_cython:
+                self.cython_func = CythonLinearFilterbankApply()
 
     def reset(self):
         self.buffer_init()
@@ -218,6 +313,8 @@ class LinearFilterbank(Filterbank):
             return _weave_apply_linear_filterbank(self.filt_b, self.filt_a, input,
                                                   self.filt_state, self.cpp_compiler,
                                                   self.extra_compile_args)
+        elif self.use_cython:
+            return self.cython_func(self.filt_b, self.filt_a, input, self.filt_state)
         else:
             return _scipy_apply_linear_filterbank(self.filt_b, self.filt_a, input,
                                                   self.filt_state)

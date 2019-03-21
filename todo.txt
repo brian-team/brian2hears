@@ -7,10 +7,9 @@ Modules to go through:
 Other things to do:
 
 - installer
-- python 3 support
-- cython linear filterbank
 - filterbankgroup
     - sort of works, but presumably not with multiple runs and store/restore yet
+- logging doesn't work (no handlers could be found for ...)
 
 Examples to fix:
 
