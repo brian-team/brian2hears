@@ -15,6 +15,7 @@ from .prefs import get_samplerate
 from .db import dB, dB_type, dB_error, gain
 from scipy.signal import fftconvolve, lfilter
 from scipy.misc import factorial
+from six.moves import range as xrange
 
 __all__ = ['BaseSound', 'Sound',
            'pinknoise','brownnoise','powerlawnoise',
@@ -1083,7 +1084,11 @@ class Sound(BaseSound, numpy.ndarray):
             z[i::self.nchannels] = x[::1,i]
         data = array(z, dtype=dtype)
         data = pyarray.array(typecode, data)
-        w.writeframes(data.tostring())
+        try:
+            out = data.tobytes()
+        except AttributeError:
+            out = data.tostring()
+        w.writeframes(out)
         w.close()
     
     @staticmethod

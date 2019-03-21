@@ -59,7 +59,7 @@ def set_parameters(cf,type,param):
         if not isinstance(param, dict): 
             raise Error('given parameters must be a dict')
         for key in param.keys():
-            if not parameters.has_key(key):
+            if not key in parameters:
                 raise Exception(key + ' is invalid key entry for given parameters')
             parameters[key] = param[key]
     return parameters

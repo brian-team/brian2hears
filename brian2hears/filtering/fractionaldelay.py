@@ -77,7 +77,6 @@ class FractionalDelay(FIRFilterbank):
 # http://www.labbookpages.co.uk/audio/beamforming/fractionalDelay.html    
 def fractional_delay_ir(delay, samplerate, filter_length=151):
     delay = float(delay*samplerate)
-    print delay
     centre_tap = filter_length // 2
     t = arange(filter_length)
     x = t-delay

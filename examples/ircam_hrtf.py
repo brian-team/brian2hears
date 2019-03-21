@@ -16,8 +16,8 @@ sound = whitenoise(10*ms)
 fb = hrtfset.filterbank(sound)
 # Extract the filtered response and plot
 img = fb.process().T
-img_left = img[:img.shape[0]/2, :]
-img_right = img[img.shape[0]/2:, :]
+img_left = img[:img.shape[0]//2, :]
+img_right = img[img.shape[0]//2:, :]
 subplot(121)
 imshow(img_left, origin='lower left', aspect='auto',
        extent=(0, sound.duration/ms, 0, 360))

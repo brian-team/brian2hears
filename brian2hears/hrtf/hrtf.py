@@ -2,6 +2,8 @@ from brian2 import *
 from brian2hears.sounds import Sound
 from brian2hears.filtering import FIRFilterbank
 from copy import copy
+from six.moves import range as xrange
+from six import get_function_code
 
 __all__ = ['HRTF', 'HRTFSet', 'HRTFDatabase',
            'make_coordinates']
@@ -109,7 +111,7 @@ def make_coordinates(**kwds):
         print coords['azimuth']
     '''
     dtype = [(name, float) for name in kwds.keys()]
-    n = len(kwds.values()[0])
+    n = len(next(iter(kwds.values())))
     x = zeros(n, dtype=dtype)
     for name, values in kwds.items():
         x[name] = values
@@ -197,15 +199,17 @@ class HRTFSet(object):
         ``condition=lambda azim:azim<pi/2``.
         '''
         if callable(condition):
-            ns = dict((name, self.coordinates[name]) for name in condition.func_code.co_varnames)
+            fcode = get_function_code(condition)
+            fvars = fcode.co_varnames
+            ns = dict((name, self.coordinates[name]) for name in fvars)
             try:
                 I = condition(**ns)
                 I = I.nonzero()[0]
             except:
                 I = False
             if isinstance(I, bool): # vector-based calculation doesn't work
-                n = len(ns[condition.func_code.co_varnames[0]])
-                I = array([condition(**dict((name, ns[name][j]) for name in condition.func_code.co_varnames)) for j in range(n)])
+                n = len(ns[fvars[0]])
+                I = array([condition(**dict((name, ns[name][j]) for name in fvars)) for j in range(n)])
                 I = I.nonzero()[0]
         else:
             if condition.dtype==bool:

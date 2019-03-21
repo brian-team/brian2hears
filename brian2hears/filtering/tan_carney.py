@@ -152,7 +152,7 @@ class ZhangSynapse(ZhangSynapseSpikes):
         if params is None:
             return default_params
     
-        for param, value in params.iteritems():
+        for param, value in params.items():
             if not param in default_params:
                 raise KeyError(('"%s" is not a valid parameter, '
                                 'has to be one of: %s') % (param,
@@ -298,7 +298,7 @@ def set_parameters(cf,param):
         if not isinstance(param, dict): 
             raise TypeError('given parameters must be a dict')
         for key in param.keys():
-            if key != 'nlgain' and not parameters.has_key(key):
+            if key != 'nlgain' and not key in parameters:
                 raise KeyError(key + ' is invalid key entry for given parameters')
             parameters[key] = param[key]
 

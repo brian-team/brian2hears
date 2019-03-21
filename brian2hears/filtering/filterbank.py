@@ -10,6 +10,8 @@ except ImportError:
 from scipy import signal, random
 from brian2hears.bufferable import Bufferable
 from builtins import all
+from six import get_function_code
+from six.moves import range as xrange
 
 __all__ = ['Filterbank',
            'RestructureFilterbank',
@@ -217,7 +219,7 @@ class Filterbank(Bufferable):
         if func is None:
             return vstack(tuple(self.buffer_fetch(start, end) for start, end in zendpoints))
         else:
-            if func.func_code.co_argcount==1:
+            if get_function_code(func).co_argcount==1:
                 for start, end in zendpoints:
                     func(self.buffer_fetch(start, end))
             else:
