@@ -27,7 +27,7 @@ from six.moves import range as xrange
 
 __all__ = ['LinearFilterbank']
 
-logger = get_logger(__name__)
+logger = get_logger('brian2.'+__name__) # bit of a hack, but fine
 
 def _scipy_apply_linear_filterbank(b, a, x, zi):
     '''

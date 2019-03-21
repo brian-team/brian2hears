@@ -9,7 +9,6 @@ Other things to do:
 - installer
 - filterbankgroup
     - sort of works, but presumably not with multiple runs and store/restore yet
-- logging doesn't work (no handlers could be found for ...)
 
 Examples to fix:
 
