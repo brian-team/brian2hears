@@ -3,11 +3,12 @@ Modules to go through:
 - filtering package
     (- gpulinearfilterbank)
     (- gputools)
-- hrtf package
-    - itd
 
 Other things to do:
 
+- installer
+- python 3 support
+- cython linear filterbank
 - filterbankgroup
     - sort of works, but presumably not with multiple runs and store/restore yet
 

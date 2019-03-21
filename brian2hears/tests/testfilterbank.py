@@ -31,7 +31,7 @@ def test_filterbankgroup():
     dv/dt = (I-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1 (unless refractory)
     I : 1
     '''
-    anf = FilterbankGroup(ihc, 'I', eqs, reset='v=0', threshold='v>1', refractory=5*ms)
+    anf = FilterbankGroup(ihc, 'I', eqs, reset='v=0', threshold='v>1', refractory=5*ms, method='euler')
     M = SpikeMonitor(anf)
     run(sound.duration)
     # plot(M.t/ms, M.i, ',k')
@@ -110,8 +110,8 @@ def test_zhang_synapse():
     syn = ZhangSynapse(ihc, cf)
     M = SpikeMonitor(syn)
     run(sound.duration)
-    plot(M.t/ms, M.i, '.k')
-    show()
+    # plot(M.t/ms, M.i, '.k')
+    # show()
 
 
 if __name__=='__main__':
