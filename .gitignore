@@ -1,5 +1,10 @@
 /.project
 /.pydevproject
+/.idea/
 /dist/
 /build/
 /brian2hears.egg-info/
+# Compiled Python files
+*.py[cod]
+__pycache__/
+
