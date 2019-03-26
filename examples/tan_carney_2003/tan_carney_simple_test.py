@@ -31,37 +31,38 @@ tones = Sound([Sound.sequence([click(sample_length*2, peak=level*dB),
            for level in levels])
 ihc = TanCarney(MiddleEar(tones), [cf] * len(levels), update_interval=1)
 syn = ZhangSynapse(ihc, cf)
-s_mon = StateMonitor(syn, 's', record=True, clock=syn.clock)
-R_mon = StateMonitor(syn, 'R', record=True, clock=syn.clock)
+mon = StateMonitor(syn, ['s', 'R'], record=True, clock=syn.clock)
 spike_mon = SpikeMonitor(syn)
-net = Network(syn, s_mon, R_mon, spike_mon)
+net = Network(syn, mon, spike_mon)
 net.run(duration * 1.5)
+
+spiketimes = spike_mon.spike_trains()
+
 for idx, level in enumerate(levels):
     plt.figure(1)
     plt.subplot(len(levels), 1, idx + 1)
-    plt.plot(s_mon.times / ms, s_mon[idx])
+    plt.plot(mon.t/ms, mon.s[idx])
     plt.xlim(0, 25)
     plt.xlabel('Time (msec)')
     plt.ylabel('Sp/sec')
-    plt.text(15, np.nanmax(s_mon[idx])/2., 'Peak SPL=%s SPL' % str(level*dB));
+    plt.text(15, np.nanmax(mon.s[idx])/2., 'Peak SPL=%s SPL' % str(level*dB));
     ymin, ymax = plt.ylim()
     if idx == 0:
         plt.title('Click responses')
 
     plt.figure(2)
     plt.subplot(len(levels), 1, idx + 1)
-    plt.plot(R_mon.times / ms, R_mon[idx])
+    plt.plot(mon.t/ms, mon.R[idx])
     plt.xlabel('Time (msec)')
     plt.xlabel('Time (msec)')
-    plt.text(15, np.nanmax(s_mon[idx])/2., 'Peak SPL=%s SPL' % str(level*dB));
+    plt.text(15, np.nanmax(mon.s[idx])/2., 'Peak SPL=%s SPL' % str(level*dB));
     plt.ylim(ymin, ymax)
     if idx == 0:
         plt.title('Click responses (with spikes and refractoriness)')
-    plt.plot(spike_mon.spiketimes[idx] / ms,
-         np.ones(len(spike_mon.spiketimes[idx])) * np.nanmax(R_mon[idx]), 'rx')
+    plt.plot(spiketimes[idx]/ms,
+         np.ones(len(spiketimes[idx])) * np.nanmax(mon.R[idx]), 'rx')
 
 print('Testing tone response')
-reinit_default_clock()
 duration = 60*ms    
 levels = [0, 20, 40, 60, 80]
 tones = Sound([Sound.sequence([tone(cf, duration).atlevel(level*dB).ramp(when='both',
@@ -71,33 +72,35 @@ tones = Sound([Sound.sequence([tone(cf, duration).atlevel(level*dB).ramp(when='b
                for level in levels])
 ihc = TanCarney(MiddleEar(tones), [cf] * len(levels), update_interval=1)
 syn = ZhangSynapse(ihc, cf)
-s_mon = StateMonitor(syn, 's', record=True, clock=syn.clock)
-R_mon = StateMonitor(syn, 'R', record=True, clock=syn.clock)
+mon = StateMonitor(syn, ['s', 'R'], record=True, clock=syn.clock)
 spike_mon = SpikeMonitor(syn)
-net = Network(syn, s_mon, R_mon, spike_mon)
+net = Network(syn, mon, spike_mon)
 net.run(duration * 1.5)
+
+spiketimes = spike_mon.spike_trains()
+
 for idx, level in enumerate(levels):
     plt.figure(3)
     plt.subplot(len(levels), 1, idx + 1)
-    plt.plot(s_mon.times / ms, s_mon[idx])
+    plt.plot(mon.t/ms, mon.s[idx])
     plt.xlim(0, 120)
     plt.xlabel('Time (msec)')
     plt.ylabel('Sp/sec')
-    plt.text(1.25 * duration/ms, np.nanmax(s_mon[idx])/2., '%s SPL' % str(level*dB));
+    plt.text(1.25 * duration/ms, np.nanmax(mon.s[idx])/2., '%s SPL' % str(level*dB));
     ymin, ymax = plt.ylim()
     if idx == 0:
         plt.title('CF=%.0f Hz - Response to Tone at CF' % cf)
 
     plt.figure(4)
     plt.subplot(len(levels), 1, idx + 1)
-    plt.plot(R_mon.times / ms, R_mon[idx])
+    plt.plot(mon.t/ms, mon.R[idx])
     plt.xlabel('Time (msec)')
     plt.xlabel('Time (msec)')
-    plt.text(1.25 * duration/ms, np.nanmax(R_mon[idx])/2., '%s SPL' % str(level*dB));
+    plt.text(1.25 * duration/ms, np.nanmax(mon.R[idx])/2., '%s SPL' % str(level*dB));
     plt.ylim(ymin, ymax)
     if idx == 0:
         plt.title('CF=%.0f Hz - Response to Tone at CF (with spikes and refractoriness)' % cf)
-    plt.plot(spike_mon.spiketimes[idx] / ms,
-         np.ones(len(spike_mon.spiketimes[idx])) * np.nanmax(R_mon[idx]), 'rx')
+    plt.plot(spiketimes[idx] / ms,
+         np.ones(len(spiketimes[idx])) * np.nanmax(mon.R[idx]), 'rx')
 
 plt.show()
