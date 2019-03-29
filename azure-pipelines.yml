@@ -20,7 +20,17 @@ jobs:
   steps:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
-  - template: dev/continuous-integration/azure-steps.yml
+  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future
+    displayName: 'Install dependencies'
+  - script: |
+      source activate test_env
+      python -m pip install --no-deps --ignore-installed --user .
+    displayName: 'Install Brian2Hears'
+  - script: |
+      source activate test_env
+      cd ..  # move out of the source directory to avoid direct import
+      pytest --pyargs brian2hears
+    displayName: 'Run tests'
 
 - job: 'OSX'
   pool:
@@ -37,7 +47,17 @@ jobs:
   steps:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
-  - template: dev/continuous-integration/azure-steps.yml
+  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future
+    displayName: 'Install dependencies'
+  - script: |
+      source activate test_env
+      python -m pip install --no-deps --ignore-installed --user .
+    displayName: 'Install Brian2Hears'
+  - script: |
+      source activate test_env
+      cd ..  # move out of the source directory to avoid direct import
+      pytest --pyargs brian2hears
+    displayName: 'Run tests'
 
 - job: 'Windows'
   pool:
@@ -54,5 +74,15 @@ jobs:
   steps:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: Add conda to PATH
-  - template: dev/continuous-integration/azure-steps.yml
+  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future
+    displayName: 'Install dependencies'
+  - script: |
+      call activate test_env
+      python -m pip install --no-deps --ignore-installed --user .
+    displayName: 'Install Brian2Hears'
+  - script: |
+      call activate test_env
+      cd ..  # move out of the source directory to avoid direct import
+      pytest --pyargs brian2hears
+    displayName: 'Run tests'
 
