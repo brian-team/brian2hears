@@ -97,7 +97,7 @@ class Filterbank(Bufferable):
     output so that it has shape ``(bufsize, outputnchannels)`` so that it can
     be used as the input to subsequent filterbanks.
     '''
-       
+
     def __init__(self, source):
         if isinstance(source, Bufferable):
             self.source = source
