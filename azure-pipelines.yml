@@ -18,8 +18,9 @@ jobs:
         python.version: '3.7'
         script_name: dev/runtests.py
 
-
   steps:
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+    displayName: Add conda to PATH
   - template: dev/continuous-integration/azure-steps.yml
 
 - job: 'OSX'
@@ -35,8 +36,9 @@ jobs:
         python.version: '3.7'
         script_name: dev/runtests.py
 
-
   steps:
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+    displayName: Add conda to PATH
   - template: dev/continuous-integration/azure-steps.yml
 
 - job: 'Windows'
@@ -52,6 +54,8 @@ jobs:
         python.version: '3.7'
         script_name: dev/runtests.py
 
-
   steps:
+  - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+    displayName: Add conda to PATH
   - template: dev/continuous-integration/azure-steps.yml
+
