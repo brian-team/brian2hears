@@ -9,7 +9,7 @@ except ImportError:
         weave = None
 from scipy import signal, random
 from brian2hears.bufferable import Bufferable
-from builtins import all
+from builtins import all, sum
 from six import get_function_code
 from six.moves import range as xrange
 

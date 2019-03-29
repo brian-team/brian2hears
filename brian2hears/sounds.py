@@ -14,7 +14,7 @@ from .bufferable import Bufferable
 from .prefs import get_samplerate
 from .db import dB, dB_type, dB_error, gain
 from scipy.signal import fftconvolve, lfilter
-from scipy.misc import factorial
+from scipy.special import factorial
 from six.moves import range as xrange
 
 __all__ = ['BaseSound', 'Sound',
