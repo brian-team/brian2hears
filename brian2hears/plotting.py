@@ -1,5 +1,6 @@
 from brian2 import *
-from erb import *
+
+from .erb import *
 
 __all__ = ['log_frequency_xaxis_labels', 'log_frequency_yaxis_labels']
 
