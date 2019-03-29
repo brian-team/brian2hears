@@ -4,7 +4,7 @@ from glob import glob
 from copy import copy
 from scipy.io.wavfile import *
 import os, re
-from hrtf import *
+from .hrtf import *
 
 __all__ = ['IRCAM_LISTEN']
 
