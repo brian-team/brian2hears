@@ -187,25 +187,3 @@ class DRNL(CombinedFilterbank):
         drnl_filter=lowpass_linear+lowpass_nonlinear
 
         self.set_output(drnl_filter)
-
-    
-if __name__ == '__main__':        
-    
-    from brian2 import *
-    set_global_preferences(usenewbrianhears=True,
-                           useweave=False)
-    from brian2hears import *
-
-    dBlevel=60*dB  # dB level in rms dB SPL
-    sound=Sound.load('/home/bertrand/Data/Toolboxes/AIM2006-1.40/Sounds/aimmat.wav')
-    samplerate=sound.samplerate
-    sound=sound.atlevel(dBlevel)
-    
-    
-    simulation_duration=len(sound)/samplerate
-    
-    nbr_center_frequencies=50
-    center_frequencies=log_space(100*Hz, 1000*Hz, nbr_center_frequencies)
-    dnrl_filter=DRNL(sound,center_frequencies)
-    dnrl_filter.buffer_init()
-    dnrl=dnrl_filter.buffer_fetch(0, len(sound))
