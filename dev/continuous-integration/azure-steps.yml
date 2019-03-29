@@ -1,18 +1,14 @@
 steps:
-  - task: CondaEnvironment@1
-    inputs:
-      environmentName: 'test_environment'
-      updateConda: false
-      packageSpecs: 'python=$(python.version) brian2 pip pytest six future'
-      installOptions: '-c conda-forge'
-      createOptions: '-c conda-forge'
-      cleanEnvironment: true
-      createCustomEnvironment: true
+  - script: conda create -c conda-forge -n test_env python=$(python.version) brian2 pip pytest six future
+    displayName: 'Install dependencies'
 
-  - script: python -m pip install --no-deps --ignore-installed --user .
+  - script: |
+    conda activate test_env
+    python -m pip install --no-deps --ignore-installed --user .
     displayName: 'Install Brian2Hears'
 
-  - bash: |
+  - script: |
+      conda activate test_env
       cd ..  # move out of the source directory to avoid direct import
       pytest --pyargs brian2hears
     displayName: 'Run tests'
