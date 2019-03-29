@@ -1,6 +1,6 @@
 steps:
 
-  - script: conda create -c conda-forge -n test_env python=$(python.version) brian2 pip pytest six future
+  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future
     displayName: 'Install dependencies'
 
   - script: |

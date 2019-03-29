@@ -6,7 +6,6 @@
 jobs:
 
 - job: 'Linux'
-  timeoutInMinutes: 0
   pool:
     vmImage: 'Ubuntu 16.04'
   strategy:
@@ -24,7 +23,6 @@ jobs:
   - template: dev/continuous-integration/azure-steps.yml
 
 - job: 'OSX'
-  timeoutInMinutes: 0
   pool:
     vmImage: 'macOS-10.13'
   strategy:
@@ -42,7 +40,6 @@ jobs:
   - template: dev/continuous-integration/azure-steps.yml
 
 - job: 'Windows'
-  timeoutInMinutes: 0
   pool:
     vmImage: 'vs2017-win2016'
   strategy:
