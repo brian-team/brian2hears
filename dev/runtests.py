@@ -1,7 +1,10 @@
-import brian2hears
-import nose
 import os
+import sys
 
-basedir, _ = os.path.split(brian2hears.__file__)
+import pytest
+
+import brian2hears
+
+basedir = os.path.dirname(brian2hears.__file__)
 os.chdir(basedir)
-nose.run()
+sys.exit(pytest.main(['-v']))

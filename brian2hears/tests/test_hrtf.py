@@ -1,4 +1,5 @@
 from brian2 import *
+del test  ## prevent Brian's test suite from getting picked up
 from brian2hears import *
 import os
 
