@@ -3,8 +3,8 @@ steps:
     displayName: 'Install dependencies'
 
   - script: |
-    conda activate test_env
-    python -m pip install --no-deps --ignore-installed --user .
+      conda activate test_env
+      python -m pip install --no-deps --ignore-installed --user .
     displayName: 'Install Brian2Hears'
 
   - script: |
