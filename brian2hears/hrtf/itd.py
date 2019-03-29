@@ -1,8 +1,10 @@
 from brian2 import *
-from hrtf import *
+
 from brian2hears.prefs import get_samplerate
 from brian2hears.filtering.fractionaldelay import FractionalDelay
 from brian2hears.sounds import silence
+
+from .hrtf import *
 
 __all__ = ['HeadlessDatabase']
 
