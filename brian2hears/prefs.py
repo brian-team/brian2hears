@@ -1,4 +1,4 @@
-from brian2 import *
+from brian2 import kHz
 
 __all__ = ['get_samplerate', 'set_default_samplerate']
 

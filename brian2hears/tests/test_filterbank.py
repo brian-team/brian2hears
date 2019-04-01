@@ -1,5 +1,7 @@
-from brian2 import *
-del test  ## prevent Brian's test suite from getting picked up
+import numpy as np
+
+from brian2 import second, ms, Hz, kHz, SpikeMonitor, run, store, restore
+
 from brian2hears import *
 
 def test_basic_filterbanks():
@@ -7,7 +9,7 @@ def test_basic_filterbanks():
                       tone(100*Hz, 100*ms)])
     res = FunctionFilterbank(sound, lambda x: abs(x)).process()
     res = Gammatone(sound, erbspace(50*Hz, 200*Hz, 4)).process()
-    res = ApproximateGammatone(sound, erbspace(50 * Hz, 200 * Hz, 4), ones(4)*100*Hz).process()
+    res = ApproximateGammatone(sound, erbspace(50 * Hz, 200 * Hz, 4), np.ones(4)*100*Hz).process()
     res = LogGammachirp(sound, erbspace(50 * Hz, 200 * Hz, 4)).process()
     res = LinearGammachirp(sound, erbspace(50 * Hz, 200 * Hz, 4), 10*ms).process()
     res = LinearGaborchirp(sound, erbspace(50 * Hz, 200 * Hz, 4), 10*ms).process()
@@ -26,7 +28,7 @@ def test_filterbankgroup():
     cf = erbspace(20 * Hz, 20 * kHz, 3000)
     cochlea = Gammatone(sound, cf)
     # Half-wave rectification and compression [x]^(1/3)
-    ihc = FunctionFilterbank(cochlea, lambda x: 3 * clip(x, 0, Inf) ** (1.0 / 3.0))
+    ihc = FunctionFilterbank(cochlea, lambda x: 3 * np.clip(x, 0, np.inf) ** (1.0 / 3.0))
     # Leaky integrate-and-fire model with noise and refractoriness
     eqs = '''
     dv/dt = (I-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1 (unless refractory)
@@ -48,7 +50,7 @@ def test_cochleagram():
 
     cf = erbspace(20 * Hz, 20 * kHz, 3000)
     gammatone = Gammatone(sound, cf)
-    cochlea = FunctionFilterbank(gammatone, lambda x: clip(x, 0, Inf) ** (1.0 / 3.0))
+    cochlea = FunctionFilterbank(gammatone, lambda x: np.clip(x, 0, np.inf) ** (1.0 / 3.0))
     lowpass = LowPass(cochlea, 10 * Hz)
     output = lowpass.process()
 
@@ -63,18 +65,18 @@ def test_firfilterbank():
         firfb = FIRFilterbank(sound, ir.T, use_linearfilterbank=linear)
         output1 = firfb.process()
         output2 = Gammatone(sound, [100, 200]*Hz).process()
-        assert amax(abs(output1-output2))<1e-10
+        assert np.amax(abs(output1-output2))<1e-10
     # plot(sound.times/ms, output1)
     # plot(sound.times/ms, output2, '--')
     # show()
 
 
 def test_fractionaldelayfilterbank():
-    sound_orig = Sound(lambda t: sin(2*pi*30*Hz*t), duration=100*ms)
+    sound_orig = Sound(lambda t: np.sin(2*np.pi*30*Hz*t), duration=100*ms)
     delay = 0.5/sound_orig.samplerate
     fb = FractionalDelay(sound_orig, [delay])
     sound_delay = fb.process()
-    sound_offset = Sound(lambda t: sin(2*pi*30*Hz*(t-(fb.delay_offset+delay)))*(t>=fb.delay_offset+delay), duration=100*ms)
+    sound_offset = Sound(lambda t: np.sin(2*np.pi*30*Hz*(t-(fb.delay_offset+delay)))*(t>=fb.delay_offset+delay), duration=100*ms)
     # plot(sound_orig.times/ms, sound_offset)
     # plot(sound_orig.times/ms, sound_delay)
     # show()
@@ -123,7 +125,7 @@ def test_filterbankgroup_restart():
     cf = erbspace(20 * Hz, 20 * kHz, 3000)
     cochlea = Gammatone(sound, cf)
     # Half-wave rectification and compression [x]^(1/3)
-    ihc = FunctionFilterbank(cochlea, lambda x: 3 * clip(x, 0, Inf) ** (1.0 / 3.0))
+    ihc = FunctionFilterbank(cochlea, lambda x: 3 * np.clip(x, 0, np.inf) ** (1.0 / 3.0))
     # Leaky integrate-and-fire model with noise and refractoriness
     eqs = '''
     dv/dt = (I-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1 (unless refractory)

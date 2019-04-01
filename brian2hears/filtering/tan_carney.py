@@ -3,7 +3,8 @@ from numpy import pi
 import scipy.signal as signal
 import warnings
 
-from brian2 import *
+from brian2 import (NeuronGroup, network_operation,
+                    Hz, ms)
 
 from brian2hears.filtering.filterbank import (FunctionFilterbank,
                                               ControlFilterbank,
@@ -235,15 +236,15 @@ class ZhangSynapseRate(FilterbankGroup):
         p_1 = P_rest / np.log(2)
 
         # Equation A17 (using an expression based on the spontaneous rate instead of 18.54, based on the C code)
-        V_sat2 = 2 + 3*log10(asarray(CF)/1000.0)
+        V_sat2 = 2 + 3*np.log10(np.asarray(CF)/1000.0)
         V_sat = 20.0*(spont + 1*Hz)/(spont + 5*Hz)*P_Imax*((V_sat2 > 1.5)*(V_sat2 - 1.5) + 1.5)
 
         # Following Equation A16 (p_2 is the same as P_ST)
-        p_2_exponent = abs(log(2)*V_sat/P_rest)
-        temp1 = zeros_like(p_2_exponent)
+        p_2_exponent = abs(np.log(2)*V_sat/P_rest)
+        temp1 = np.zeros_like(p_2_exponent)
         temp1[p_2_exponent>=100] = p_2_exponent[p_2_exponent>=100]
-        temp1[p_2_exponent<100] = log(exp(p_2_exponent[p_2_exponent<100])-1)
-        p_2 = clip(temp1, -inf, abs(p_2_exponent))
+        temp1[p_2_exponent<100] = np.log(np.exp(p_2_exponent[p_2_exponent<100])-1)
+        p_2 = np.clip(temp1, -np.inf, abs(p_2_exponent))
 
         ns = dict(
             spont=spont, P_Imax=P_Imax, p_1=p_1, P_rest=P_rest, P_L=P_L, V_I=V_I, P_G=P_G, C_G=C_G,
@@ -275,7 +276,7 @@ class ZhangSynapseRate(FilterbankGroup):
         '''
     
         FilterbankGroup.__init__(self, source, 'V_ihc', eqs, namespace=ns, method='euler')
-        self.CF_param = asarray(CF)
+        self.CF_param = np.asarray(CF)
         self.p_2 = p_2
         self.C_I = C_Irest
         self.C_L = C_Lrest

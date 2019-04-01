@@ -1,4 +1,5 @@
-from brian2 import *
+import numpy as np
+
 from .filterbank import *
 from .firfilterbank import *
 
@@ -55,9 +56,9 @@ class FractionalDelay(FIRFilterbank):
     This value is available as the attribute ``delay_offset``.
     '''
     def __init__(self, source, delays, filter_length=None, **args):
-        delays = asarray(atleast_1d(delays))
-        delay_max = amax(abs(delays))
-        delay_max_int = int(ceil(source.samplerate*delay_max))
+        delays = np.asarray(np.atleast_1d(delays))
+        delay_max = np.amax(abs(delays))
+        delay_max_int = int(np.ceil(source.samplerate*delay_max))
         if filter_length is None:
             filter_length = 2*int(delay_max_int*1.25)+1
             if filter_length<2048:
@@ -69,7 +70,7 @@ class FractionalDelay(FIRFilterbank):
         self.delays = delays
         irs = [fractional_delay_ir(delay, source.samplerate,
                     filter_length=filter_length) for delay in delays]
-        irs = array(irs)
+        irs = np.array(irs)
         self.impulse_response = irs
         FIRFilterbank.__init__(self, source, irs, **args)
 
@@ -78,11 +79,11 @@ class FractionalDelay(FIRFilterbank):
 def fractional_delay_ir(delay, samplerate, filter_length=151):
     delay = float(delay*samplerate)
     centre_tap = filter_length // 2
-    t = arange(filter_length)
+    t = np.arange(filter_length)
     x = t-delay
     if abs(round(delay)-float(delay))<1e-10:
-        return array(x==centre_tap, dtype=float)
-    sinc = sin(pi*(x-centre_tap))/(pi*(x-centre_tap))
-    window = 0.54-0.46*cos(2.0*pi*(x+0.5)/filter_length) # Hamming window
+        return np.array(x==centre_tap, dtype=float)
+    sinc = np.sin(np.pi*(x-centre_tap))/(np.pi*(x-centre_tap))
+    window = 0.54-0.46*np.cos(2.0*np.pi*(x+0.5)/filter_length) # Hamming window
     tap_weight = window*sinc
     return tap_weight

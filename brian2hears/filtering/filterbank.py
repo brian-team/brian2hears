@@ -1,5 +1,3 @@
-from brian2 import *
-
 try:
     import weave
 except ImportError:
@@ -8,10 +6,12 @@ except ImportError:
     except ImportError:
         weave = None
 from scipy import signal, random
-from brian2hears.bufferable import Bufferable
 from builtins import all, sum
 from six import get_function_code
 from six.moves import range as xrange
+import numpy as np
+
+from brian2hears.bufferable import Bufferable
 
 __all__ = ['Filterbank',
            'RestructureFilterbank',
@@ -213,11 +213,11 @@ class Filterbank(Bufferable):
         if not isinstance(buffersize, int):
             buffersize = int(buffersize*self.samplerate)
         self.buffer_init()
-        endpoints = hstack((arange(0, duration, buffersize), duration))
+        endpoints = np.hstack((np.arange(0, duration, buffersize), duration))
         zendpoints = zip(endpoints[:-1], endpoints[1:])
         #sizes = diff(endpoints)
         if func is None:
-            return vstack(tuple(self.buffer_fetch(start, end) for start, end in zendpoints))
+            return np.vstack(tuple(self.buffer_fetch(start, end) for start, end in zendpoints))
         else:
             if get_function_code(func).co_argcount==1:
                 for start, end in zendpoints:
@@ -382,24 +382,24 @@ class RestructureFilterbank(Filterbank):
         if isinstance(source, Bufferable):
             source = (source,)
         if indexmapping is None:
-            nchannels = array([s.nchannels for s in source])
-            idx = hstack(([0], cumsum(nchannels)))
-            I = [arange(start, stop) for start, stop in zip(idx[:-1], idx[1:])]
-            I = tuple(repeat(i, numrepeat) for i in I)
+            nchannels = np.array([s.nchannels for s in source])
+            idx = np.hstack(([0], np.cumsum(nchannels)))
+            I = [np.arange(start, stop) for start, stop in zip(idx[:-1], idx[1:])]
+            I = tuple(np.repeat(i, numrepeat) for i in I)
             if type=='serial':
-                indexmapping = hstack(I)
+                indexmapping = np.hstack(I)
             elif type=='interleave':
-                if len(unique(nchannels))!=1:
+                if len(np.unique(nchannels))!=1:
                     raise ValueError('For interleaving, all inputs must have an equal number of channels.')
                 I0 = len(I[0])
-                indexmapping = zeros(I0*len(I), dtype=int)
+                indexmapping = np.zeros(I0*len(I), dtype=int)
                 for j, i in enumerate(I):
                     indexmapping[j::len(I)] = i
             else:
                 raise ValueError('Type must be "serial" or "interleave"')
-            indexmapping = tile(indexmapping, numtile)
-        if not isinstance(indexmapping, ndarray):
-            indexmapping = array(indexmapping, dtype=int)
+            indexmapping = np.tile(indexmapping, numtile)
+        if not isinstance(indexmapping, np.ndarray):
+            indexmapping = np.array(indexmapping, dtype=int)
         # optimisation to reduce multiple RestructureFilterbanks into a single
         # one, by collating the sources and reconstructing the indexmapping
         # from the individual indexmappings
@@ -412,13 +412,13 @@ class RestructureFilterbank(Filterbank):
                 newsource += s.source
                 inputsourcesize = sum(inpsource.nchannels for inpsource in s.source)
                 newsourcesizes += (inputsourcesize,)
-            newsourcesizes = array(newsourcesizes)
-            newsourceoffsets = hstack((0, cumsum(newsourcesizes)))
-            new_indexmapping = zeros_like(indexmapping)
-            sourcesizes = array(tuple(s.nchannels for s in source))
-            sourceoffsets = hstack((0, cumsum(sourcesizes)))
+            newsourcesizes = np.array(newsourcesizes)
+            newsourceoffsets = np.hstack((0, np.cumsum(newsourcesizes)))
+            new_indexmapping = np.zeros_like(indexmapping)
+            sourcesizes = np.array(tuple(s.nchannels for s in source))
+            sourceoffsets = np.hstack((0, np.cumsum(sourcesizes)))
             # gives the index of the source of each element of indexmapping
-            sourceindices = digitize(indexmapping, cumsum(sourcesizes))
+            sourceindices = np.digitize(indexmapping, np.cumsum(sourcesizes))
             for i in xrange(len(indexmapping)):
                 source_index = sourceindices[i]
                 s = source[source_index]
@@ -442,7 +442,7 @@ class RestructureFilterbank(Filterbank):
         self.next_sample += samples
         end = start+samples
         inputs = tuple(s.buffer_fetch(start, end) for s in self.source)
-        input = hstack(inputs)
+        input = np.hstack(inputs)
         input = input[:, self.indexmapping]
         return input
 
@@ -563,7 +563,7 @@ class SumFilterbank(FunctionFilterbank):
     '''
     def __init__(self, source, weights=None):
         if weights is None:
-            weights = ones(len(source))
+            weights = np.ones(len(source))
         self.weights = weights
         func = lambda *inputs: sum(input*w for input, w in zip(inputs, weights))
         FunctionFilterbank.__init__(self, source, func)

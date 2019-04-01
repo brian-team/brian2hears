@@ -1,5 +1,5 @@
-from brian2 import *
-del test  ## prevent Brian's test suite from getting picked up
+from brian2 import ms
+
 from brian2hears import *
 import os
 
@@ -57,6 +57,7 @@ def test_headless_database():
     # ylabel('Azimuth')
     # title('Right ear')
     # show()
+
 
 if __name__=='__main__':
     test_ircam_listen()

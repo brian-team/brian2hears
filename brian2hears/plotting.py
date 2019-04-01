@@ -1,4 +1,7 @@
-from brian2 import *
+import numpy as np
+import matplotlib.pyplot as plt
+
+from brian2 import Hz, kHz
 
 from .erb import *
 
@@ -23,7 +26,7 @@ def log_frequency_xaxis_labels(ax=None, freqs=None):
     before setting the ticks.
     '''
     if ax is None:
-        ax = gca()
+        ax = plt.gca()
     return log_frequency_axis_labels(ax.xaxis, freqs=freqs)
 
 def log_frequency_yaxis_labels(ax=None, freqs=None):
@@ -45,14 +48,14 @@ def log_frequency_yaxis_labels(ax=None, freqs=None):
     before setting the ticks.
     '''
     if ax is None:
-        ax = gca()
+        ax = plt.gca()
     return log_frequency_axis_labels(ax.yaxis, freqs=freqs)
 
 def log_frequency_axis_labels(ax, freqs=None):
     if freqs is not None:
-        ax.set_major_locator(FixedLocator(freqs))
-        ax.set_major_formatter(ScalarFormatter())
-        ax.set_minor_locator(NullLocator())
+        ax.set_major_locator(plt.FixedLocator(freqs))
+        ax.set_major_formatter(plt.ScalarFormatter())
+        ax.set_minor_locator(plt.NullLocator())
         return
     xmin, xmax = ax.get_view_interval()
     # we use the first of these ranges that the data fits within
@@ -65,15 +68,16 @@ def log_frequency_axis_labels(ax, freqs=None):
                       ]
     found = False
     for R in allowed_ranges:
-        if xmin>=amin(R)*0.9999 and xmax<=amax(R)*1.0001:
+        if xmin>=np.amin(R)*0.9999 and xmax<=np.amax(R)*1.0001:
             found = True
             break
     if not found:
-        ax.set_major_locator(LogLocator(base=2))
+        ax.set_major_locator(plt.LogLocator(base=2))
     else:
-        ax.set_major_locator(FixedLocator(R))
-    ax.set_major_formatter(ScalarFormatter())
-    ax.set_minor_locator(NullLocator())
+        ax.set_major_locator(plt.FixedLocator(R))
+    ax.set_major_formatter(plt.ScalarFormatter())
+    ax.set_minor_locator(plt.NullLocator())
+
 
 if __name__=='__main__':
     for i, cfs in enumerate([erbspace(150*Hz, 5*kHz, 100),
@@ -81,9 +85,9 @@ if __name__=='__main__':
                              erbspace(100*Hz, 10*kHz, 100),
                              erbspace(100*Hz, 400*Hz, 100),
                              ]):
-        subplot(2, 2, i+1)
+        plt.subplot(2, 2, i+1)
         #cfs = erbspace(150*Hz, 5*kHz, 100)
-        semilogx(cfs, 1-((arange(len(cfs))-len(cfs)/2.0)/(len(cfs)/2.0))**2)
-        axis('tight')
+        plt.semilogx(cfs, 1-((np.arange(len(cfs))-len(cfs)/2.0)/(len(cfs)/2.0))**2)
+        plt.axis('tight')
         log_frequency_xaxis_labels()
-    show()
+    plt.show()

@@ -1,4 +1,7 @@
-from brian2 import *
+import numpy as np
+
+from brian2 import ms, kHz
+
 from .filterbank import Filterbank,FunctionFilterbank,ControlFilterbank,CombinedFilterbank,RestructureFilterbank
 from .filterbanklibrary import *
 from .linearfilterbank import *
@@ -23,12 +26,12 @@ def set_parameters(cf,param):
     parameters['lct_ERB'] = 1.5  #value of the shift in ERB frequencies
     parameters['frat_control'] = 1.08
     parameters['order_gc']=4
-    parameters['ERBrate']= 21.4*log10(4.37*(cf/kHz)+1)
+    parameters['ERBrate']= 21.4*np.log10(4.37*(cf/kHz)+1)
     parameters['ERBwidth']= 24.7*(4.37*(cf/kHz)+1)
     
     if param: 
         if not isinstance(param, dict): 
-            raise Error('given parameters must be a dict')
+            raise TypeError('given parameters must be a dict')
         for key in param.keys():
             if not key in parameters:
                 raise Exception(key + ' is invalid key entry for given parameters')
@@ -39,12 +42,12 @@ def set_parameters(cf,param):
 #defition of the controler class
 class AsymCompUpdate: 
     def __init__(self,target,samplerate,fp1,param):
-        fp1=atleast_1d(fp1)
+        fp1=np.atleast_1d(fp1)
         self.iteration=0
         self.target=target
         self.samplerate=samplerate
         self.fp1=fp1             
-        self.exp_deca_val = exp(-1/(param['decay_tcst'] *samplerate)*log(2))
+        self.exp_deca_val = np.exp(-1/(param['decay_tcst'] *samplerate)*np.log(2))
         self.level_min = 10**(- param['RMStoSPL']/20)
         self.level_ref  = 10**(( param['level_ref'] - param['RMStoSPL'])/20)        
         self.b=param['b2']
@@ -66,12 +69,12 @@ class AsymCompUpdate:
     def __call__(self,*input):
          value1=input[0][-1,:]
          value2=input[1][-1,:]
-         level1 = maximum(maximum(value1,0),self.level1_prev*self.exp_deca_val)
-         level2 = maximum(maximum(value2,0),self.level2_prev*self.exp_deca_val)
+         level1 = np.maximum(np.maximum(value1,0),self.level1_prev*self.exp_deca_val)
+         level2 = np.maximum(np.maximum(value2,0),self.level2_prev*self.exp_deca_val)
          self.level1_prev=level1
          self.level2_prev=level2
          level_total=self.lev_weight*self.level_ref*(level1/self.level_ref)**self.level_pwr1+(1-self.lev_weight)*self.level_ref*(level2/self.level_ref)**self.level_pwr2
-         level_dB=20*log10(maximum(level_total,self.level_min))+self.RMStoSPL                                       
+         level_dB=20*np.log10(np.maximum(level_total,self.level_min))+self.RMStoSPL
          frat = self.frat0 + self.frat1*level_dB
          fr2 = self.fp1*frat
          self.iteration+=1
@@ -144,8 +147,8 @@ class DCGC(CombinedFilterbank):
         source = self.get_modified_source()
         
         parameters=set_parameters(cf,param)
-        ERBspace = mean(diff(parameters['ERBrate']))
-        cf = asarray(atleast_1d(cf))
+        ERBspace = np.mean(np.diff(parameters['ERBrate']))
+        cf = np.asarray(np.atleast_1d(cf))
         #bank of passive gammachirp filters. As the control path uses the same passive filterbank than the signal path (buth shifted in frequency)
         #this filterbanl is used by both pathway.
         pGc=LogGammachirp(source,cf,b=parameters['b1'], c=parameters['c1'])
@@ -155,7 +158,7 @@ class DCGC(CombinedFilterbank):
         nbr_cf=len(cf)
         #### Control Path ####
         n_ch_shift  = round(parameters['lct_ERB']/ERBspace); #value of the shift in channels
-        indch1_control = minimum(maximum(1, arange(1,nbr_cf+1)+n_ch_shift),nbr_cf).astype(int)-1
+        indch1_control = np.minimum(np.maximum(1, np.arange(1,nbr_cf+1)+n_ch_shift),nbr_cf).astype(int)-1
         fp1_control = fp1[indch1_control]        
         pGc_control=RestructureFilterbank(pGc,indexmapping=indch1_control)
         fr2_control = parameters['frat_control']*fp1_control       

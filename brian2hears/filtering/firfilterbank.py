@@ -5,7 +5,9 @@ as in HRTF.apply. To do this is slightly tricky because it needs to cache
 previous inputs. For the moment, we implement it as a special case of
 LinearFilterbank but later this will change to using the FFT method.
 '''
-from brian2 import *
+import numpy as np
+from numpy.fft import fft, ifft
+
 from .filterbank import *
 from .linearfilterbank import *
 
@@ -20,15 +22,15 @@ class LinearFIRFilterbank(LinearFilterbank):
         # will save a lot of computation as the FFT only needs to be computed
         # once then.
         if len(impulse_response.shape)==1:
-            impulse_response = repeat(reshape(impulse_response, (1, len(impulse_response))), source.nchannels, axis=0)
+            impulse_response = np.repeat(np.reshape(impulse_response, (1, len(impulse_response))), source.nchannels, axis=0)
         # Automatically duplicate mono input to fit the desired output shape
         if impulse_response.shape[0]!=source.nchannels:
             if source.nchannels!=1:
                 raise ValueError('Can only automatically duplicate source channels for mono sources, use RestructureFilterbank.')
             source = RestructureFilterbank(source, impulse_response.shape[0])
         # Implement it as a LinearFilterbank
-        b = reshape(impulse_response, impulse_response.shape+(1,))
-        a = zeros_like(b)
+        b = np.reshape(impulse_response, impulse_response.shape+(1,))
+        a = np.zeros_like(b)
         a[:, 0, :] = 1
         LinearFilterbank.__init__(self, source, b, a)
         if minimum_buffer_size is not None:
@@ -43,7 +45,7 @@ class FFTFIRFilterbank(Filterbank):
         # will save a lot of computation as the FFT only needs to be computed
         # once then.
         if len(impulse_response.shape)==1:
-            impulse_response = repeat(reshape(impulse_response, (1, len(impulse_response))), source.nchannels, axis=0)
+            impulse_response = np.repeat(np.reshape(impulse_response, (1, len(impulse_response))), source.nchannels, axis=0)
         # Automatically duplicate mono input to fit the desired output shape
         if impulse_response.shape[0]!=source.nchannels:
             if source.nchannels!=1:
@@ -51,7 +53,7 @@ class FFTFIRFilterbank(Filterbank):
             source = RestructureFilterbank(source, impulse_response.shape[0])
         Filterbank.__init__(self, source)
 
-        self.input_cache = zeros((impulse_response.shape[1], self.nchannels))
+        self.input_cache = np.zeros((impulse_response.shape[1], self.nchannels))
         self.impulse_response = impulse_response
         self.fftcache_nmax = -1
         if minimum_buffer_size is None:
@@ -94,21 +96,21 @@ class FFTFIRFilterbank(Filterbank):
 #        return output
     
     def buffer_apply(self, input):
-        output = zeros_like(input)
+        output = np.zeros_like(input)
         nmax = max(self.input_cache.shape[0]+input.shape[0], self.impulse_response.shape[1])
-        nmax = 2**int(ceil(log2(nmax)))
+        nmax = 2**int(np.ceil(np.log2(nmax)))
         if self.fftcache_nmax!=nmax:
             self.fftcache = []
         for i, (previnput, curinput, ir) in enumerate(zip(self.input_cache.T,
                                                           input.T,
                                                           self.impulse_response)):
-            fullinput = hstack((previnput, curinput))
+            fullinput = np.hstack((previnput, curinput))
             # pad
-            fullinput = hstack((fullinput, zeros(nmax-len(fullinput))))
+            fullinput = np.hstack((fullinput, np.zeros(nmax-len(fullinput))))
             # apply fft
             if self.fftcache_nmax!=nmax:
                 # recompute IR fft, first pad, then take fft, then store
-                ir = hstack((ir, zeros(nmax-len(ir))))
+                ir = np.hstack((ir, np.zeros(nmax-len(ir))))
                 ir_fft = fft(ir, n=nmax)
                 self.fftcache.append(ir_fft)
             else:

@@ -1,4 +1,5 @@
-from brian2 import *
+import numpy as np
+
 try:
     import weave
 except ImportError:
@@ -13,6 +14,7 @@ from .linearfilterbank import *
 from .firfilterbank import *
 from six.moves import range as xrange
 
+from brian2 import second, DimensionMismatchError
 
 __all__ = ['Cascade',
            'Gammatone',
@@ -77,59 +79,59 @@ class Gammatone(LinearFilterbank):
 
     def __init__(self, source, cf, b=1.019, erb_order=1, ear_Q=9.26449,
                  min_bw=24.7, cascade=None):
-        cf = atleast_1d(asarray(cf))
+        cf = np.atleast_1d(np.asarray(cf))
         self.cf = cf
         self.samplerate =  source.samplerate
         T = float(1/self.samplerate)
         self.b,self.erb_order,self.EarQ,self.min_bw=b,erb_order,ear_Q,min_bw
         erb = ((cf/ear_Q)**erb_order + min_bw**erb_order)**(1/erb_order)
-        B = b*2*pi*erb
-#        B = 2*pi*b
+        B = b*2*np.pi*erb
+#        B = 2*np.pi*b
 
         A0 = T
         A2 = 0
         B0 = 1
-        B1 = -2*cos(2*cf*pi*T)/exp(B*T)
-        B2 = exp(-2*B*T)
+        B1 = -2*np.cos(2*cf*np.pi*T)/np.exp(B*T)
+        B2 = np.exp(-2*B*T)
         
-        A11 = -(2*T*cos(2*cf*pi*T)/exp(B*T) + 2*sqrt(3+2**1.5)*T*sin(2*cf*pi*T) / \
+        A11 = -(2*T*np.cos(2*cf*np.pi*T)/np.exp(B*T) + 2*np.sqrt(3+2**1.5)*T*np.sin(2*cf*np.pi*T) / \
 
-                exp(B*T))/2
-        A12=-(2*T*cos(2*cf*pi*T)/exp(B*T)-2*sqrt(3+2**1.5)*T*sin(2*cf*pi*T)/\
-                exp(B*T))/2
-        A13=-(2*T*cos(2*cf*pi*T)/exp(B*T)+2*sqrt(3-2**1.5)*T*sin(2*cf*pi*T)/\
-                exp(B*T))/2
-        A14=-(2*T*cos(2*cf*pi*T)/exp(B*T)-2*sqrt(3-2**1.5)*T*sin(2*cf*pi*T)/\
-                exp(B*T))/2
+                np.exp(B*T))/2
+        A12=-(2*T*np.cos(2*cf*np.pi*T)/np.exp(B*T)-2*np.sqrt(3+2**1.5)*T*np.sin(2*cf*np.pi*T)/\
+                np.exp(B*T))/2
+        A13=-(2*T*np.cos(2*cf*np.pi*T)/np.exp(B*T)+2*np.sqrt(3-2**1.5)*T*np.sin(2*cf*np.pi*T)/\
+                np.exp(B*T))/2
+        A14=-(2*T*np.cos(2*cf*np.pi*T)/np.exp(B*T)-2*np.sqrt(3-2**1.5)*T*np.sin(2*cf*np.pi*T)/\
+                np.exp(B*T))/2
 
         i=1j
-        gain=abs((-2*exp(4*i*cf*pi*T)*T+\
-                         2*exp(-(B*T)+2*i*cf*pi*T)*T*\
-                                 (cos(2*cf*pi*T)-sqrt(3-2**(3./2))*\
-                                  sin(2*cf*pi*T)))*\
-                   (-2*exp(4*i*cf*pi*T)*T+\
-                     2*exp(-(B*T)+2*i*cf*pi*T)*T*\
-                      (cos(2*cf*pi*T)+sqrt(3-2**(3./2))*\
-                       sin(2*cf*pi*T)))*\
-                   (-2*exp(4*i*cf*pi*T)*T+\
-                     2*exp(-(B*T)+2*i*cf*pi*T)*T*\
-                      (cos(2*cf*pi*T)-\
-                       sqrt(3+2**(3./2))*sin(2*cf*pi*T)))*\
-                   (-2*exp(4*i*cf*pi*T)*T+2*exp(-(B*T)+2*i*cf*pi*T)*T*\
-                   (cos(2*cf*pi*T)+sqrt(3+2**(3./2))*sin(2*cf*pi*T)))/\
-                  (-2/exp(2*B*T)-2*exp(4*i*cf*pi*T)+\
-                   2*(1+exp(4*i*cf*pi*T))/exp(B*T))**4)
+        gain=abs((-2*np.exp(4*i*cf*np.pi*T)*T+\
+                         2*np.exp(-(B*T)+2*i*cf*np.pi*T)*T*\
+                                 (np.cos(2*cf*np.pi*T)-np.sqrt(3-2**(3./2))*\
+                                  np.sin(2*cf*np.pi*T)))*\
+                   (-2*np.exp(4*i*cf*np.pi*T)*T+\
+                     2*np.exp(-(B*T)+2*i*cf*np.pi*T)*T*\
+                      (np.cos(2*cf*np.pi*T)+np.sqrt(3-2**(3./2))*\
+                       np.sin(2*cf*np.pi*T)))*\
+                   (-2*np.exp(4*i*cf*np.pi*T)*T+\
+                     2*np.exp(-(B*T)+2*i*cf*np.pi*T)*T*\
+                      (np.cos(2*cf*np.pi*T)-\
+                       np.sqrt(3+2**(3./2))*np.sin(2*cf*np.pi*T)))*\
+                   (-2*np.exp(4*i*cf*np.pi*T)*T+2*np.exp(-(B*T)+2*i*cf*np.pi*T)*T*\
+                   (np.cos(2*cf*np.pi*T)+np.sqrt(3+2**(3./2))*np.sin(2*cf*np.pi*T)))/\
+                  (-2/np.exp(2*B*T)-2*np.exp(4*i*cf*np.pi*T)+\
+                   2*(1+np.exp(4*i*cf*np.pi*T))/np.exp(B*T))**4)
 
-        allfilts=ones(len(cf))
+        allfilts=np.ones(len(cf))
 
         self.A0, self.A11, self.A12, self.A13, self.A14, self.A2, self.B0, self.B1, self.B2, self.gain=\
             A0*allfilts, A11, A12, A13, A14, A2*allfilts, B0*allfilts, B1, B2, gain
 
-        self.filt_a=dstack((array([ones(len(cf)), B1, B2]).T,)*4)
-        self.filt_b=dstack((array([A0/gain, A11/gain, A2/gain]).T,
-                         array([A0*ones(len(cf)), A12, zeros(len(cf))]).T,
-                         array([A0*ones(len(cf)), A13, zeros(len(cf))]).T,
-                         array([A0*ones(len(cf)), A14, zeros(len(cf))]).T))
+        self.filt_a=np.dstack((np.array([np.ones(len(cf)), B1, B2]).T,)*4)
+        self.filt_b=np.dstack((np.array([A0/gain, A11/gain, A2/gain]).T,
+                         np.array([A0*np.ones(len(cf)), A12, np.zeros(len(cf))]).T,
+                         np.array([A0*np.ones(len(cf)), A13, np.zeros(len(cf))]).T,
+                         np.array([A0*np.ones(len(cf)), A14, np.zeros(len(cf))]).T))
 
         LinearFilterbank.__init__(self, source, self.filt_b, self.filt_a)
         if cascade is not None:
@@ -169,28 +171,28 @@ class ApproximateGammatone(LinearFilterbank):
      '''
    
     def __init__(self, source, cf,  bandwidth,order=4):
-        cf = asarray(atleast_1d(cf))
-        bandwidth = asarray(atleast_1d(bandwidth))
+        cf = np.asarray(np.atleast_1d(cf))
+        bandwidth = np.asarray(np.atleast_1d(bandwidth))
         self.cf = cf
         self.samplerate =  source.samplerate
         dt = float(1/self.samplerate)
-        phi = 2 * pi * bandwidth * dt
-        theta = 2 * pi * cf * dt
-        cos_theta = cos(theta)
-        sin_theta = sin(theta)
-        alpha = -exp(-phi) * cos_theta
-        b0 = ones(len(cf))
+        phi = 2 * np.pi * bandwidth * dt
+        theta = 2 * np.pi * cf * dt
+        cos_theta = np.cos(theta)
+        sin_theta = np.sin(theta)
+        alpha = -np.exp(-phi) * cos_theta
+        b0 = np.ones(len(cf))
         b1 = 2 * alpha
-        b2 = exp(-2 * phi)
+        b2 = np.exp(-2 * phi)
         z1 = (1 + alpha * cos_theta) - (alpha * sin_theta) * 1j
         z2 = (1 + b1 * cos_theta) - (b1 * sin_theta) * 1j
-        z3 = (b2 * cos(2 * theta)) - (b2 * sin(2 * theta)) * 1j
+        z3 = (b2 * np.cos(2 * theta)) - (b2 * np.sin(2 * theta)) * 1j
         tf = (z2 + z3) / z1
         a0 = abs(tf)
         a1 = alpha * a0   
         # we apply the same filters order times so we just duplicate them in the 3rd axis for the parallel_lfilter_step command
-        self.filt_a = dstack((array([b0, b1, b2]).T,)*order)
-        self.filt_b = dstack((array([a0, a1, zeros(len(cf))]).T,)*order)
+        self.filt_a = np.dstack((np.array([b0, b1, b2]).T,)*order)
+        self.filt_b = np.dstack((np.array([a0, a1, np.zeros(len(cf))]).T,)*order)
         self.order = order
         
         LinearFilterbank.__init__(self,source, self.filt_b, self.filt_a)
@@ -237,7 +239,7 @@ class LogGammachirp(LinearFilterbank):
     '''
       
     def __init__(self, source, f,b=1.019,c=1,ncascades=4):
-        f = atleast_1d(asarray(f))
+        f = np.atleast_1d(np.asarray(f))
         self.f = f
         self.samplerate= source.samplerate
         
@@ -256,14 +258,20 @@ class LogGammachirp(LinearFilterbank):
         p3=0.2523*(1-0.0244*b)*(1+0.0574*abs(c))
         p4=1.0724
 
-        self.asymmetric_filt_b=zeros((len(f),3, ncascades))
-        self.asymmetric_filt_a=zeros((len(f),3, ncascades))
+        self.asymmetric_filt_b=np.zeros((len(f),3, ncascades))
+        self.asymmetric_filt_a=np.zeros((len(f),3, ncascades))
 
-        self.asymmetric_filt_b,self.asymmetric_filt_a=asymmetric_compensation_coeffs(self.samplerate,f,self.asymmetric_filt_b,self.asymmetric_filt_a,b,c,p0,p1,p2,p3,p4)
+        self.asymmetric_filt_b, self.asymmetric_filt_a = asymmetric_compensation_coeffs(self.samplerate,
+                                                                                        f,
+                                                                                        self.asymmetric_filt_b,
+                                                                                        self.asymmetric_filt_a,
+                                                                                        b, c, p0, p1, p2, p3, p4)
 
         #concatenate the gammatone filter coefficients so that everything is in cascade in each frequency channel
-        self.filt_b=concatenate([self.gammatone_filt_b, self.asymmetric_filt_b],axis=2)
-        self.filt_a=concatenate([self.gammatone_filt_a, self.asymmetric_filt_a],axis=2)
+        self.filt_b = np.concatenate([self.gammatone_filt_b,
+                                      self.asymmetric_filt_b], axis=2)
+        self.filt_a = np.concatenate([self.gammatone_filt_a,
+                                      self.asymmetric_filt_a], axis=2)
         
         LinearFilterbank.__init__(self, source, self.filt_b,self.filt_a)
 
@@ -321,30 +329,30 @@ class LinearGammachirp(FIRFilterbank):
     '''
     def __init__(self, source, f, time_constant, c=1, phase=0):
         
-        self.f=f=asarray(atleast_1d(f))
-        self.c=c=atleast_1d(c)
-        self.phase=phase=atleast_1d(phase)
-        self.time_constant=time_constant=asarray(atleast_1d(time_constant))
+        self.f=f=np.asarray(np.atleast_1d(f))
+        self.c=c=np.atleast_1d(c)
+        self.phase=phase=np.atleast_1d(phase)
+        self.time_constant=time_constant=np.asarray(np.atleast_1d(time_constant))
         if len(time_constant)==1:
-            time_constant=time_constant*ones(len(f))
+            time_constant=time_constant*np.ones(len(f))
         if len(c)==1:
-            c=c*ones(len(f))
+            c=c*np.ones(len(f))
         if len(phase)==1:
-            phase=phase*ones(len(f))
+            phase=phase*np.ones(len(f))
         self.samplerate= source.samplerate
 
         Tcst_max=max(time_constant)
 
         t_start=float(-Tcst_max*3*second)
-        t=arange(t_start,-4*t_start,float(1./self.samplerate))
+        t=np.arange(t_start,-4*t_start,float(1./self.samplerate))
 
-        self.impulse_response=zeros((len(f),len(t)))
+        self.impulse_response=np.zeros((len(f),len(t)))
                                     
         for ich in xrange(len(f)):
-            env=(t-t_start)**3*exp(-(t-t_start)/time_constant[ich])        
-            self.impulse_response[ich,:]=env*cos(2*pi*(f[ich]*t+c[ich]/2*t**2)+phase[ich])
-#            self.impulse_response[ich,:]=self.impulse_response[ich,:]/sqrt(sum(self.impulse_response[ich,:]**2))
-            self.impulse_response[ich,:]=self.impulse_response[ich,:]/sum(abs(self.impulse_response[ich,:]))        
+            env=(t-t_start)**3*np.exp(-(t-t_start)/time_constant[ich])        
+            self.impulse_response[ich,:]=env*np.cos(2*np.pi*(f[ich]*t+c[ich]/2*t**2)+phase[ich])
+#            self.impulse_response[ich,:]=self.impulse_response[ich,:]/np.sqrt(sum(self.impulse_response[ich,:]**2))
+            self.impulse_response[ich,:]=self.impulse_response[ich,:]/np.sum(abs(self.impulse_response[ich,:]))        
 
 
         FIRFilterbank.__init__(self,source, self.impulse_response)
@@ -402,29 +410,29 @@ class LinearGaborchirp(FIRFilterbank):
         being an impulse response for the corresponding channel.
     '''
     def __init__(self,source, f, time_constant, c=1, phase=0):
-        self.f=f=asarray(atleast_1d(f))
-        self.c=c=atleast_1d(c)
-        self.phase=phase=atleast_1d(phase)
-        self.time_constant=time_constant=asarray(atleast_1d(time_constant))
+        self.f=f=np.asarray(np.atleast_1d(f))
+        self.c=c=np.atleast_1d(c)
+        self.phase=phase=np.atleast_1d(phase)
+        self.time_constant=time_constant=np.asarray(np.atleast_1d(time_constant))
         if len(time_constant)==1:
-            time_constant=asarray(time_constant*ones(len(f)))
+            time_constant=np.asarray(time_constant*np.ones(len(f)))
         if len(c)==1:
-            c=c*ones(len(f))
+            c=c*np.ones(len(f))
         if len(phase)==1:
-            phase=phase*ones(len(f))
+            phase=phase*np.ones(len(f))
         self.samplerate = source.samplerate
         
         Tcst_max=max(time_constant)
 
         t_start=float(-Tcst_max*6*second)
-        t=arange(t_start,-t_start,float(1./self.samplerate))
+        t=np.arange(t_start,-t_start,float(1./self.samplerate))
 
-        self.impulse_response=zeros((len(f),len(t)))
+        self.impulse_response=np.zeros((len(f),len(t)))
                                     
         for ich in xrange(len(f)):
-            env=exp(-(t/(2*time_constant[ich]))**2)   
-            self.impulse_response[ich,:]=env*cos(2*pi*(f[ich]*t+c[ich]/2*t**2)+phase[ich])
-            self.impulse_response[ich,:]=self.impulse_response[ich,:]/sqrt(sum(self.impulse_response[ich,:]**2))
+            env=np.exp(-(t/(2*time_constant[ich]))**2)   
+            self.impulse_response[ich,:]=env*np.cos(2*np.pi*(f[ich]*t+c[ich]/2*t**2)+phase[ich])
+            self.impulse_response[ich,:]=self.impulse_response[ich,:]/np.sqrt(np.sum(self.impulse_response[ich,:]**2))
 
         FIRFilterbank.__init__(self, source, self.impulse_response)
 
@@ -484,10 +492,10 @@ class IIRFilterbank(LinearFilterbank):
     
     def __init__(self, source, nchannels, passband, stopband, gpass, gstop, btype, ftype):
 
-        Wpassband = asarray(atleast_1d(passband).copy())
-        Wstopband = asarray(atleast_1d(stopband).copy())
-        gpass = atleast_1d(gpass)
-        gstop = atleast_1d(gstop)
+        Wpassband = np.asarray(np.atleast_1d(passband).copy())
+        Wstopband = np.asarray(np.atleast_1d(stopband).copy())
+        gpass = np.atleast_1d(gpass)
+        gstop = np.atleast_1d(gstop)
         
         self.samplerate=source.samplerate
         if Wpassband.shape != Wstopband.shape:
@@ -502,41 +510,41 @@ class IIRFilterbank(LinearFilterbank):
         if btype=='low' or btype=='high':
             if len(Wpassband)==1:     #if there is only one Wn value for all channel just repeat it
                 self.filt_b, self.filt_a = signal.iirdesign(Wpassband, Wstopband, gpass, gstop, ftype=ftype)
-                self.filt_b=kron(ones((nchannels,1)),self.filt_b)
-                self.filt_a=kron(ones((nchannels,1)),self.filt_a)
+                self.filt_b=np.kron(np.ones((nchannels,1)),self.filt_b)
+                self.filt_a=np.kron(np.ones((nchannels,1)),self.filt_a)
             else:               #else make nchannels different filters
                 if len(gstop) != nchannels: #if the ripple parameters are scalar make them as long as the number of channels
-                    gpass=repeat(gpass,nchannels)
+                    gpass=np.repeat(gpass,nchannels)
                 if len(gstop) != nchannels:
-                    gstop=repeat(gstop,nchannels)
+                    gstop=np.repeat(gstop,nchannels)
                 order=0
                 filt_b, filt_a =[1]*nchannels,[1]*nchannels  
                 for i in xrange((nchannels)): #generate the different filter coeffcients
                     filt_b[i], filt_a[i] = signal.iirdesign(Wpassband[i], Wstopband[i], gpass[i], gstop[i], ftype=ftype)
                 if len(filt_b[i])>order: #take the highst order of them to be the size of the filter coefficient matrix
                     order=len(filt_b[i])
-                self.filt_b=zeros((nchannels,order))
-                self.filt_a=zeros((nchannels,order))
+                self.filt_b=np.zeros((nchannels,order))
+                self.filt_a=np.zeros((nchannels,order))
                 for i in xrange((nchannels)): #fill the coefficient matrix 
                     self.filt_b[i,:len(filt_b[i])], self.filt_a[i,:len(filt_a[i])] = filt_b[i],filt_a[i]
         else:
             if Wpassband.ndim==1:     #if there is only one Wn pair of values for all channel just repeat it
                 self.filt_b, self.filt_a = signal.iirdesign(Wpassband, Wstopband, gpass, gstop, ftype=ftype)
-                self.filt_b=kron(ones((nchannels,1)),self.filt_b)
-                self.filt_a=kron(ones((nchannels,1)),self.filt_a)
+                self.filt_b=np.kron(np.ones((nchannels,1)),self.filt_b)
+                self.filt_a=np.kron(np.ones((nchannels,1)),self.filt_a)
             else:   
                 if len(gstop) != nchannels:#if the ripple parameters are scalar make them as long as the number of channels
-                    gpass=repeat(gpass,nchannels)
+                    gpass=np.repeat(gpass,nchannels)
                 if len(gstop) != nchannels:
-                    gstop=repeat(gstop,nchannels)
+                    gstop=np.repeat(gstop,nchannels)
                 order=0
                 filt_b, filt_a =[1]*nchannels,[1]*nchannels
                 for i in xrange((nchannels)):#take the highst order of them to be the size of the filter coefficient matrix
                     filt_b[i], filt_a[i] = signal.iirdesign(Wpassband[:,i], Wstopband[:,i], gpass[i], gstop[i], ftype=ftype)
                 if len(filt_b[i])>order:
                     order=len(filt_b[i])
-                self.filt_b=zeros((nchannels,order))
-                self.filt_a=zeros((nchannels,order))
+                self.filt_b=np.zeros((nchannels,order))
+                self.filt_a=np.zeros((nchannels,order))
                 for i in xrange((nchannels)):#fill the coefficient matrix 
                     self.filt_b[i,:len(filt_b[i])], self.filt_a[i,:len(filt_a[i])] = filt_b[i],filt_a[i]
                     
@@ -583,27 +591,27 @@ class Butterworth(LinearFilterbank):
     '''
 
     def __init__(self,source, nchannels, order, fc, btype='low'):
-        Wn = asarray(atleast_1d(fc)).copy() #Scalar inputs are converted to 1-dimensional arrays
+        Wn = np.asarray(np.atleast_1d(fc)).copy() #Scalar inputs are converted to 1-dimensional arrays
         self.samplerate = source.samplerate
         Wn= Wn/float(self.samplerate)*2    # wn=1 corresponding to half the sample rate
 
         if btype=='low' or btype=='high':
-            self.filt_b=zeros((nchannels,order+1))
-            self.filt_a=zeros((nchannels,order+1))
+            self.filt_b=np.zeros((nchannels,order+1))
+            self.filt_a=np.zeros((nchannels,order+1))
             if len(Wn)==1:     #if there is only one Wn value for all channel just repeat it
                 self.filt_b, self.filt_a = signal.butter(order, Wn, btype=btype)
-                self.filt_b=kron(ones((nchannels,1)),self.filt_b)
-                self.filt_a=kron(ones((nchannels,1)),self.filt_a)
+                self.filt_b=np.kron(np.ones((nchannels,1)),self.filt_b)
+                self.filt_a=np.kron(np.ones((nchannels,1)),self.filt_a)
             else:               #else make nchannels different filters
                 for i in xrange((nchannels)):
                     self.filt_b[i,:], self.filt_a[i,:] = signal.butter(order, Wn[i], btype=btype)
         else:
-            self.filt_b=zeros((nchannels,2*order+1))
-            self.filt_a=zeros((nchannels,2*order+1))
+            self.filt_b=np.zeros((nchannels,2*order+1))
+            self.filt_a=np.zeros((nchannels,2*order+1))
             if Wn.ndim==1:     #if there is only one Wn pair of values for all channel just repeat it
                 self.filt_b, self.filt_a = signal.butter(order, Wn, btype=btype)
-                self.filt_b=kron(ones((nchannels,1)),self.filt_b)
-                self.filt_a=kron(ones((nchannels,1)),self.filt_a)
+                self.filt_b=np.kron(np.ones((nchannels,1)),self.filt_b)
+                self.filt_a=np.kron(np.ones((nchannels,1)),self.filt_a)
             else:   
                 for i in xrange((nchannels)):
                     self.filt_b[i,:], self.filt_a[i,:] = signal.butter(order, Wn[:,i], btype=btype)   
@@ -633,19 +641,19 @@ class LowPass(LinearFilterbank):
         frequencies.
     '''
     def __init__(self,source,fc):
-        fc = asarray(atleast_1d(fc))
+        fc = np.asarray(np.atleast_1d(fc))
         if len(fc)==1:
-            fc = fc*ones(source.nchannels)
+            fc = fc*np.ones(source.nchannels)
         nchannels=len(fc)
         self.samplerate= source.samplerate
         dt=float(1./self.samplerate)
 
-        self.filt_b=zeros((nchannels, 2, 1))
-        self.filt_a=zeros((nchannels, 2, 1))
-        tau=1/(2*pi*fc)
+        self.filt_b=np.zeros((nchannels, 2, 1))
+        self.filt_a=np.zeros((nchannels, 2, 1))
+        tau=1/(2*np.pi*fc)
         self.filt_b[:,0,0]=dt/tau
-        self.filt_b[:,1,0]=0*ones(nchannels)
-        self.filt_a[:,0,0]=1*ones(nchannels)
+        self.filt_b[:,1,0]=0*np.ones(nchannels)
+        self.filt_a[:,0,0]=1*np.ones(nchannels)
         self.filt_a[:,1,0]=-(1-dt/tau)
         LinearFilterbank.__init__(self,source, self.filt_b, self.filt_a) 
 
@@ -671,8 +679,8 @@ class Cascade(LinearFilterbank):
         a=filterbank.filt_a
         self.samplerate =  source.samplerate
         self.nchannels=filterbank.nchannels
-        self.filt_b=zeros((b.shape[0], b.shape[1],n))
-        self.filt_a=zeros((a.shape[0], a.shape[1],n))
+        self.filt_b=np.zeros((b.shape[0], b.shape[1],n))
+        self.filt_a=np.zeros((a.shape[0], a.shape[1],n))
         for i in range((n)):
             self.filt_b[:,:,i]=b[:,:,0]
             self.filt_a[:,:,i]=a[:,:,0]
@@ -714,7 +722,7 @@ class AsymmetricCompensation(LinearFilterbank):
      
     def __init__(self, source, f,b=1.019, c=1,ncascades=4):
         
-        f = asarray(atleast_1d(f))
+        f = np.asarray(np.atleast_1d(f))
         self.f = f
         self.samplerate =  source.samplerate     
         ERBw=24.7*(4.37e-3*f+1.)
@@ -724,29 +732,29 @@ class AsymmetricCompensation(LinearFilterbank):
         p3=0.2523*(1-0.0244*b)*(1+0.0574*abs(c))
         p4=1.0724
 
-        self.filt_b=zeros((len(f), 3, ncascades))
-        self.filt_a=zeros((len(f), 3, ncascades))
+        self.filt_b=np.zeros((len(f), 3, ncascades))
+        self.filt_a=np.zeros((len(f), 3, ncascades))
 
-        for k in arange(ncascades):
+        for k in np.arange(ncascades):
 
-            r=exp(-p1*(p0/p4)**(k)*2*pi*b*ERBw/float(self.samplerate)) #k instead of k-1 because range 0 N-1
+            r=np.exp(-p1*(p0/p4)**(k)*2*np.pi*b*ERBw/float(self.samplerate)) #k instead of k-1 because range 0 N-1
             Df=(p0*p4)**(k)*p2*c*b*ERBw
 
-            phi=2*pi*maximum((f+Df), 0)/float(self.samplerate)
-            psy=2*pi*maximum((f-Df), 0)/float(self.samplerate)
+            phi=2*np.pi*np.maximum((f+Df), 0)/float(self.samplerate)
+            psy=2*np.pi*np.maximum((f-Df), 0)/float(self.samplerate)
 
-            ap=vstack((ones(r.shape),-2*r*cos(phi), r**2)).T
-            bz=vstack((ones(r.shape),-2*r*cos(psy), r**2)).T
+            ap=np.vstack((np.ones(r.shape),-2*r*np.cos(phi), r**2)).T
+            bz=np.vstack((np.ones(r.shape),-2*r*np.cos(psy), r**2)).T
 
             fn=f#+ compensation_filter_order* p3 *c *b *ERBw/4;
 
-            vwr=exp(1j*2*pi*fn/float(self.samplerate))
-            vwrs=vstack((ones(vwr.shape), vwr, vwr**2)).T
+            vwr=np.exp(1j*2*np.pi*fn/float(self.samplerate))
+            vwrs=np.vstack((np.ones(vwr.shape), vwr, vwr**2)).T
 
             ##normilization stuff
-            nrm=abs(sum(vwrs*ap, 1)/sum(vwrs*bz, 1))
+            nrm=np.abs(np.sum(vwrs*ap, 1)/np.sum(vwrs*bz, 1))
             
-            bz=bz*tile(nrm,[3,1]).T
+            bz=bz*np.tile(nrm,[3,1]).T
             self.filt_b[:, :, k]=bz
             self.filt_a[:, :, k]=ap
 
@@ -762,23 +770,23 @@ def asymmetric_compensation_coeffs(samplerate,fr,filt_b,filt_a,b,c,p0,p1,p2,p3,p
     samplerate = float(samplerate)
     ERBw=24.7*(4.37e-3*fr+1.)
     nbr_cascade=4
-    for k in arange(nbr_cascade):
-        r=exp(-p1*(p0/p4)**(k)*2*pi*b*ERBw/samplerate) #k instead of k-1 because range 0 N-1
+    for k in np.arange(nbr_cascade):
+        r=np.exp(-p1*(p0/p4)**(k)*2*np.pi*b*ERBw/samplerate) #k instead of k-1 because range 0 N-1
 
         Dfr=(p0*p4)**(k)*p2*c*b*ERBw
 
-        phi=2*pi*maximum((fr+Dfr), 0)/samplerate
-        psy=2*pi*maximum((fr-Dfr), 0)/samplerate
+        phi=2*np.pi*np.maximum((fr+Dfr), 0)/samplerate
+        psy=2*np.pi*np.maximum((fr-Dfr), 0)/samplerate
 
-        ap=vstack((ones(r.shape),-2*r*cos(phi), r**2)).T
-        bz=vstack((ones(r.shape),-2*r*cos(psy), r**2)).T
+        ap=np.vstack((np.ones(r.shape),-2*r*np.cos(phi), r**2)).T
+        bz=np.vstack((np.ones(r.shape),-2*r*np.cos(psy), r**2)).T
 
-        vwr=exp(1j*2*pi*fr/samplerate)
-        vwrs=vstack((ones(vwr.shape), vwr, vwr**2)).T
+        vwr=np.exp(1j*2*np.pi*fr/samplerate)
+        vwrs=np.vstack((np.ones(vwr.shape), vwr, vwr**2)).T
 
         ##normilization stuff
-        nrm=abs(sum(vwrs*ap, 1)/sum(vwrs*bz, 1))
-        bz=bz*tile(nrm,[3,1]).T
+        nrm=np.abs(np.sum(vwrs*ap, 1)/np.sum(vwrs*bz, 1))
+        bz=bz*np.tile(nrm,[3,1]).T
         filt_b[:, :, k]=bz
         filt_a[:, :, k]=ap
 

@@ -1,4 +1,5 @@
-from brian2 import *
+import numpy as np
+
 from brian2.codegen.cpp_prefs import get_compiler_and_args, update_for_cross_compilation
 from brian2.utils.logger import std_silent, get_logger
 from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
@@ -55,24 +56,24 @@ def _scipy_apply_linear_filterbank(b, a, x, zi):
         alf_cache_zi0[curf] = zi[:, 0:b.shape[1]-1, curf]
         alf_cache_zi1[curf] = zi[:, 1:b.shape[1], curf]
     X = x.copy()
-    output = empty_like(X)
+    output = np.empty_like(X)
     num_cascade = zi.shape[2]
     b_loop_size = b.shape[1]-2
-    y = zeros(zi.shape[0])
-    yr = reshape(y, (1, len(y))).T
-    t = zeros(alf_cache_b1[0].shape, order='F')
-    t2 = zeros(alf_cache_b1[0].shape, order='F')
+    y = np.zeros(zi.shape[0])
+    yr = np.reshape(y, (1, len(y))).T
+    t = np.zeros(alf_cache_b1[0].shape, order='F')
+    t2 = np.zeros(alf_cache_b1[0].shape, order='F')
     for sample, (x, o) in enumerate(izip(X, output)):
-        xr = reshape(x, (1, len(x))).T
+        xr = np.reshape(x, (1, len(x))).T
         for curf in xrange(num_cascade):
             #y = b[:, 0, curf]*x+zi[:, 0, curf]
-            multiply(alf_cache_b00[curf], x, y)
-            add(y, alf_cache_zi00[curf], y)
+            np.multiply(alf_cache_b00[curf], x, y)
+            np.add(y, alf_cache_zi00[curf], y)
             #zi[:, :i-1, curf] = b[:, 1:i, curf]*xr+zi[:, 1:i, curf]-a[:, 1:i, curf]*yr
-            multiply(alf_cache_b1[curf], xr, t)
-            add(t, alf_cache_zi1[curf], t)
-            multiply(alf_cache_a1[curf], yr, t2)
-            subtract(t, t2, alf_cache_zi0[curf])
+            np.multiply(alf_cache_b1[curf], xr, t)
+            np.add(t, alf_cache_zi1[curf], t)
+            np.multiply(alf_cache_a1[curf], yr, t2)
+            np.subtract(t, t2, alf_cache_zi0[curf])
             u = x
             ur = xr
             x = y
@@ -90,11 +91,11 @@ def _weave_apply_linear_filterbank(b, a, x, zi,
         # we need to do this so as not to alter the values in x in the C code below
         # but if zi.shape[2] is 1 there is only one filter in the chain and the
         # copy operation at the end of the C code will never happen.
-        x = array(x, copy=True, order='C')
+        x = np.array(x, copy=True, order='C')
     else:
         # make sure that the array is in C-order
-        x = asarray(x, order='C')
-    y = empty_like(x)
+        x = np.asarray(x, order='C')
+    y = np.empty_like(x)
     n, m, p = b.shape
     n1, m1, p1 = a.shape
     numsamples = x.shape[0]
@@ -217,11 +218,11 @@ cpdef parallel_lfilter(_numpy.ndarray[_numpy.float64_t, ndim=3] b,
             # we need to do this so as not to alter the values in x in the C code below
             # but if zi.shape[2] is 1 there is only one filter in the chain and the
             # copy operation at the end of the C code will never happen.
-            x = array(x, copy=True, order='C')
+            x = np.array(x, copy=True, order='C')
         else:
             # make sure that the array is in C-order
-            x = asarray(x, order='C')
-        y = empty_like(x)
+            x = np.asarray(x, order='C')
+        y = np.empty_like(x)
         n, m, p = b.shape
         n1, m1, p1 = a.shape
         numsamples = x.shape[0]
@@ -305,11 +306,11 @@ class LinearFilterbank(Filterbank):
         Filterbank.__init__(self, source)
         # Weave version of filtering requires Fortran ordering of filter params
         if len(b.shape)==2 and len(a.shape)==2:
-            b = reshape(b, b.shape+(1,))
-            a = reshape(a, a.shape+(1,))
-        self.filt_b = array(b, order='F')
-        self.filt_a = array(a, order='F')
-        self.filt_state = zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
+            b = np.reshape(b, b.shape+(1,))
+            a = np.reshape(a, a.shape+(1,))
+        self.filt_b = np.array(b, order='F')
+        self.filt_a = np.array(a, order='F')
+        self.filt_state = np.zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
         self.use_weave = weave is not None
         if self.use_weave:
             logger.debug("Using weave for LinearFilterbank")
@@ -350,15 +351,15 @@ class LinearFilterbank(Filterbank):
         n, m, p = self.filt_b.shape
         if p%ncascade!=0:
             raise ValueError('Number of cascades must be a divisor of original number of cascaded filters.')
-        b = zeros((n, (m-1)*(p/ncascade)+1, ncascade))
-        a = zeros((n, (m-1)*(p/ncascade)+1, ncascade))
+        b = np.zeros((n, (m-1)*(p/ncascade)+1, ncascade))
+        a = np.zeros((n, (m-1)*(p/ncascade)+1, ncascade))
         for i in xrange(n):
             for k in xrange(ncascade):
-                bp = ones(1)
-                ap = ones(1)
+                bp = np.ones(1)
+                ap = np.ones(1)
                 for j in xrange(k*(p/ncascade), (k+1)*(p/ncascade)):
-                    bp = polymul(bp, self.filt_b[i, ::-1, j])
-                    ap = polymul(ap, self.filt_a[i, ::-1, j])
+                    bp = np.polymul(bp, self.filt_b[i, ::-1, j])
+                    ap = np.polymul(ap, self.filt_a[i, ::-1, j])
                 bp = bp[::-1]
                 ap = ap[::-1]
                 a0 = ap[0]
@@ -366,9 +367,9 @@ class LinearFilterbank(Filterbank):
                 bp /= a0
                 b[i, :len(bp), k] = bp
                 a[i, :len(ap), k] = ap
-        self.filt_b = array(b, order='F')
-        self.filt_a = array(a, order='F')
-        self.filt_state = zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
+        self.filt_b = np.array(b, order='F')
+        self.filt_a = np.array(a, order='F')
+        self.filt_state = np.zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
                 
 # # Use the GPU version if available
 # try:

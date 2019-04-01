@@ -1,6 +1,8 @@
-from brian2 import *
-from numpy import *
-import numpy
+import numpy as np
+from numpy.fft import fft, ifft, fftfreq
+from numpy.random import randn
+
+import matplotlib.pyplot as plt
 import array as pyarray
 import time
 import struct
@@ -16,6 +18,9 @@ from .db import dB, dB_type, dB_error, gain
 from scipy.signal import fftconvolve, lfilter
 from scipy.special import factorial
 from six.moves import range as xrange
+
+from brian2 import (Hz, ms, second, check_units,
+                    have_same_dimensions, get_unit, DimensionMismatchError)
 
 __all__ = ['BaseSound', 'Sound',
            'pinknoise','brownnoise','powerlawnoise',
@@ -33,7 +38,7 @@ class BaseSound(Bufferable):
     '''
     pass
 
-class Sound(BaseSound, numpy.ndarray):
+class Sound(BaseSound, np.ndarray):
     '''
     Class for working with sounds, including loading/saving, manipulating and playing.
 
@@ -140,7 +145,7 @@ class Sound(BaseSound, numpy.ndarray):
                         doc='The length of the sound in seconds.')
     nsamples = property(fget=lambda self:len(self),
                         doc='The number of samples in the sound.')
-    times = property(fget=lambda self:arange(len(self), dtype=float) / self.samplerate,
+    times = property(fget=lambda self:np.arange(len(self), dtype=float) / self.samplerate,
                      doc='An array of times (in seconds) corresponding to each sample.')
     nchannels = property(fget=lambda self:self.shape[1],
                          doc='The number of channels in the sound.')
@@ -151,13 +156,13 @@ class Sound(BaseSound, numpy.ndarray):
 
     @check_units(samplerate=Hz, duration=second)
     def __new__(cls, data, samplerate=None, duration=None):
-        if isinstance(data, numpy.ndarray):
+        if isinstance(data, np.ndarray):
             samplerate = get_samplerate(samplerate)
 #            if samplerate is None:
 #                raise ValueError('Must specify samplerate to initialise Sound with array.')
             if duration is not None:
                 raise ValueError('Cannot specify duration when initialising Sound with array.')
-            x = array(data, dtype=float)
+            x = np.array(data, dtype=float)
         elif isinstance(data, str):
             if duration is not None:
                 raise ValueError('Cannot specify duration when initialising Sound from file.')
@@ -171,8 +176,8 @@ class Sound(BaseSound, numpy.ndarray):
 #                raise ValueError('Must specify samplerate to initialise Sound with function.')
             if duration is None:
                 raise ValueError('Must specify duration to initialise Sound with function.')
-            L = int(rint(duration * samplerate))
-            t = arange(L, dtype=float) / samplerate
+            L = int(np.rint(duration * samplerate))
+            t = np.arange(L, dtype=float) / samplerate
             x = data(t)
         elif isinstance(data, (list, tuple)):
             kwds = {}
@@ -181,7 +186,7 @@ class Sound(BaseSound, numpy.ndarray):
             if duration is not None:
                 kwds['duration'] = duration
             channels = tuple(Sound(c, **kwds) for c in data)
-            x = hstack(channels)
+            x = np.hstack(channels)
             samplerate = channels[0].samplerate
         else:
             raise TypeError('Cannot initialise Sound with data of class ' + str(data.__class__))
@@ -194,7 +199,7 @@ class Sound(BaseSound, numpy.ndarray):
 
     def __array_wrap__(self, obj, context=None):
         handled = False
-        x = numpy.ndarray.__array_wrap__(self, obj, context)
+        x = np.ndarray.__array_wrap__(self, obj, context)
         if not hasattr(x, 'samplerate') and hasattr(self, 'samplerate'):
             x.samplerate = self.samplerate
         if context is not None:
@@ -213,9 +218,9 @@ class Sound(BaseSound, numpy.ndarray):
         if start<0:
             raise IndexError('Can only use positive indices in buffer.')
         samples = end-start
-        X = asarray(self)[start:end, :]
+        X = np.asarray(self)[start:end, :]
         if X.shape[0]<samples:
-            X = vstack((X, zeros((samples-X.shape[0], X.shape[1]))))
+            X = np.vstack((X, np.zeros((samples-X.shape[0], X.shape[1]))))
         return X
 
     def channel(self, n):
@@ -236,9 +241,9 @@ class Sound(BaseSound, numpy.ndarray):
             elif len(self) < len(other):
                 self = self.resized(len(other))
 
-            return Sound(numpy.ndarray.__add__(self, other), samplerate=self.samplerate)
+            return Sound(np.ndarray.__add__(self, other), samplerate=self.samplerate)
         else:
-            x = numpy.ndarray.__add__(self, other)
+            x = np.ndarray.__add__(self, other)
             return Sound(x, self.samplerate)
     __radd__ = __add__
 
@@ -254,8 +259,8 @@ class Sound(BaseSound, numpy.ndarray):
             return np.ndarray.__getitem__(self, round(key*self.samplerate))
 
         sliceattr = [v for v in [key.start, key.stop] if v is not None]
-        slicedims = array([units.have_same_dimensions(flag, second) for flag in sliceattr])
-        attrisint = array([isinstance(v, int) for v in sliceattr])
+        slicedims = np.array([have_same_dimensions(flag, second) for flag in sliceattr])
+        attrisint = np.array([isinstance(v, int) for v in sliceattr])
         s = sum(attrisint)
         if s!=0 and s!=len(sliceattr):
             raise ValueError('Slice attributes must be all ints or all times')
@@ -271,23 +276,23 @@ class Sound(BaseSound, numpy.ndarray):
                 endpad = max(stop-self.shape[0], 0)
                 startmid = max(start, 0)
                 endmid = min(stop, self.shape[0])
-                atstart = zeros((startpad, self.shape[1]))
-                atend = zeros((endpad, self.shape[1]))
-                return Sound(vstack((atstart,
-                                     asarray(self)[startmid:endmid:step],
+                atstart = np.zeros((startpad, self.shape[1]))
+                atend = np.zeros((endpad, self.shape[1]))
+                return Sound(np.vstack((atstart,
+                                     np.asarray(self)[startmid:endmid:step],
                                      atend)), self.samplerate)
         if not slicedims.all():
             raise DimensionMismatchError('Slicing',
-                                        *[units.get_unit(d) for d in sliceattr])
+                                        *[get_unit(d) for d in sliceattr])
         
-        start = key.start or 0*msecond
+        start = key.start or 0*ms
         stop = key.stop or self.duration
         step = key.step or 1
         if int(step)!=step:
             #resampling
             raise NotImplementedError
-        start = int(rint(start*self.samplerate))
-        stop = int(rint(stop*self.samplerate))
+        start = int(np.rint(start*self.samplerate))
+        stop = int(np.rint(stop*self.samplerate))
         return self.__getitem__((slice(start,stop,step),channel))
     
     def __setitem__(self,key,value):
@@ -299,11 +304,11 @@ class Sound(BaseSound, numpy.ndarray):
         if isinstance(key,int):
             return np.ndarray.__setitem__(self,(key,channel),value)
         if isinstance(key,float):
-            return np.ndarray.__setitem__(self,(int(rint(key*self.samplerate)),channel),value)
+            return np.ndarray.__setitem__(self,(int(np.rint(key*self.samplerate)),channel),value)
 
         sliceattr = [v for v in [key.start, key.step, key.stop] if v is not None]
-        slicedims = array([units.have_same_dimensions(flag, second) for flag in sliceattr])
-        attrisint = array([isinstance(v, int) for v in sliceattr])
+        slicedims = np.array([have_same_dimensions(flag, second) for flag in sliceattr])
+        attrisint = np.array([isinstance(v, int) for v in sliceattr])
         s = sum(attrisint)
         if s!=0 and s!=len(sliceattr):
             raise ValueError('Slice attributes must be all ints or all times')
@@ -313,10 +318,11 @@ class Sound(BaseSound, numpy.ndarray):
             # so we squeeze the array to make sure this doesn't happen.
             if isinstance(value,Sound) and channel!=slice(None):
                 value=value.squeeze()
-            return asarray(self).__setitem__((key,channel),value) # returns None
+            return np.asarray(self).__setitem__((key,channel),value) # returns None
 
         if not slicedims.all():
-            raise DimensionMismatchError('Slicing',*[units.get_unit(d) for d in sliceattr])
+            raise DimensionMismatchError('Slicing',
+                                         *[get_unit(d) for d in sliceattr])
 
         if key.__getattribute__('step') is not None:
             # resampling?
@@ -326,8 +332,8 @@ class Sound(BaseSound, numpy.ndarray):
         stop = key.stop or self.duration
         if (start is not None and start<0*ms) or stop > self.duration:
             raise IndexError('Slice bigger than Sound object')
-        if start is not None: start = int(rint(start*self.samplerate))
-        stop = int(rint(stop*self.samplerate))
+        if start is not None: start = int(np.rint(start*self.samplerate))
+        stop = int(np.rint(stop*self.samplerate))
         return self.__setitem__((slice(start,stop),channel),value)
 
     def extended(self, duration):
@@ -347,8 +353,8 @@ class Sound(BaseSound, numpy.ndarray):
         elif L < len(self):
             return Sound(self[:L, :], samplerate=self.samplerate)
         else:
-            padding = zeros((L - len(self), self.nchannels))
-            return Sound(concatenate((self, padding)), samplerate=self.samplerate)
+            padding = np.zeros((L - len(self), self.nchannels))
+            return Sound(np.concatenate((self, padding)), samplerate=self.samplerate)
 
     def shifted(self, duration, fractional=False, filter_length=2048):
         '''
@@ -368,16 +374,16 @@ class Sound(BaseSound, numpy.ndarray):
         '''
         if not fractional:
             if not isinstance(duration, int):
-                duration = int(rint(duration*self.samplerate))
+                duration = int(np.rint(duration*self.samplerate))
             if duration>=0:
-                y = vstack((zeros((duration, self.nchannels)), self))
+                y = np.vstack((np.zeros((duration, self.nchannels)), self))
                 return Sound(y, samplerate=self.samplerate)
             else:
                 return self[-duration:, :]
         else:
             if self.nchannels>1:
                 sounds = [self.channel(i).shifted(duration, fractional=True, filter_length=filter_length) for i in xrange(self.nchannels)]
-                return Sound(hstack(sounds), samplerate=self.samplerate)
+                return Sound(np.hstack(sounds), samplerate=self.samplerate)
             # Adapted from
             # http://www.labbookpages.co.uk/audio/beamforming/fractionalDelay.html
             delay = duration*self.samplerate
@@ -387,16 +393,16 @@ class Sound(BaseSound, numpy.ndarray):
                 idelay = -int(-delay)
             delay -= idelay
             centre_tap = filter_length // 2
-            t = arange(filter_length)
+            t = np.arange(filter_length)
             x = t-delay
             if abs(round(delay)-delay)<1e-10:
-                tap_weight = array(x==centre_tap, dtype=float)
+                tap_weight = np.array(x==centre_tap, dtype=float)
             else:
-                sinc = sin(pi*(x-centre_tap))/(pi*(x-centre_tap))
-                window = 0.54-0.46*cos(2.0*pi*(x+0.5)/filter_length) # Hamming window
+                sinc = np.sin(np.pi*(x-centre_tap))/(np.pi*(x-centre_tap))
+                window = 0.54-0.46*np.cos(2.0*np.pi*(x+0.5)/filter_length) # Hamming window
                 tap_weight = window*sinc
             if filter_length<256:
-                y = convolve(tap_weight, self.flatten())
+                y = np.convolve(tap_weight, self.flatten())
             else:
                 y = fftconvolve(tap_weight, self.flatten())
             y = y[filter_length/2:-filter_length/2]
@@ -408,7 +414,7 @@ class Sound(BaseSound, numpy.ndarray):
         '''
         Repeats the sound n times
         '''
-        x = vstack((self,)*n)
+        x = np.vstack((self,)*n)
         return Sound(x, samplerate=self.samplerate)
 
     ### TODO: test this - I haven't installed scikits.samplerate on windows
@@ -421,8 +427,8 @@ class Sound(BaseSound, numpy.ndarray):
         '''
         if not have_scikits_samplerate:
             raise ImportError('Need scikits.samplerate package for resampling')
-        y = array(resample(self, float(samplerate / self.samplerate), resample_type),
-                  dtype=float64)
+        y = np.array(resample(self, float(samplerate / self.samplerate), resample_type),
+                  dtype=np.float64)
         return Sound(y, samplerate=samplerate)
 
     def _init_mixer(self):
@@ -450,14 +456,14 @@ class Sound(BaseSound, numpy.ndarray):
             raise ValueError("Can only play sounds with 1 or 2 channels.")
         self._init_mixer()
         if normalise:
-            a = amax(abs(self))
+            a = np.amax(np.abs(self))
         else:
             a = 1
-        x = array((2 ** 15 - 1) * clip(self / a, -1, 1), dtype=int16)
+        x = np.array((2 ** 15 - 1) * np.clip(self / a, -1, 1), dtype=np.int16)
         if self.nchannels==1:
             x.shape = x.size
         # Make sure pygame receives an array in C-order        
-        x = pygame.sndarray.make_sound(ascontiguousarray(x))
+        x = pygame.sndarray.make_sound(np.ascontiguousarray(x))
         x.play()
         if sleep:
             time.sleep(self.duration)
@@ -487,15 +493,15 @@ class Sound(BaseSound, numpy.ndarray):
             x = self.flatten()-other.flatten()
         else:
             x = self.flatten()
-        pxx, freqs, bins, im = specgram(x, Fs=float(self.samplerate), **kwds)
+        pxx, freqs, bins, im = plt.specgram(x, Fs=float(self.samplerate), **kwds)
         if low is not None or high is not None:
             restricted = True
             if low is None:
                 low = 0*Hz
             if high is None:
-                high = amax(freqs)*Hz
-            I = logical_and(low <= freqs, freqs <= high)
-            I2 = where(I)[0]
+                high = np.amax(freqs)*Hz
+            I = np.logical_and(low <= freqs, freqs <= high)
+            I2 = np.where(I)[0]
             I2 = [max(min(I2) - 1, 0), min(max(I2) + 1, len(freqs) - 1)]
             Z = pxx[I2[0]:I2[-1], :]
         else:
@@ -503,16 +509,16 @@ class Sound(BaseSound, numpy.ndarray):
             Z = pxx
         if log_power:
             Z[Z < 1e-20] = 1e-20 # no zeros because we take logs
-            Z = 10 * log10(Z)
-        Z = flipud(Z)
+            Z = 10 * np.log10(Z)
+        Z = np.flipud(Z)
         if restricted:
-            imshow(Z, extent=(0, amax(bins), freqs[I2[0]], freqs[I2[-1]]),
+            plt.imshow(Z, extent=(0, np.amax(bins), freqs[I2[0]], freqs[I2[-1]]),
                    origin='upper', aspect='auto')
         else:
-            imshow(Z, extent=(0, amax(bins), freqs[0], freqs[-1]),
+            plt.imshow(Z, extent=(0, np.amax(bins), freqs[0], freqs[-1]),
                    origin='upper', aspect='auto')
-        xlabel('Time (s)')
-        ylabel('Frequency (Hz)')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Frequency (Hz)')
         return (pxx, freqs*Hz, bins*second, im)
 
     @check_units(low=Hz, high=Hz)
@@ -538,18 +544,18 @@ class Sound(BaseSound, numpy.ndarray):
             raise ValueError('Can only plot spectrum for mono sounds.')
 
         # Flatten array, fft operates on the last axis by default
-        sp = numpy.fft.fft(array(self).flatten())
-        freqs = array(range(len(sp)), dtype=float64) / len(sp) * float64(self.samplerate)
+        sp = fft(np.array(self).flatten())
+        freqs = np.array(range(len(sp)), dtype=np.float64) / len(sp) * np.float64(self.samplerate)
         pxx = abs(sp) ** 2
-        phase = unwrap(mod(angle(sp), 2 * pi))
+        phase = np.unwrap(np.mod(np.angle(sp), 2 * np.pi))
         if low is not None or high is not None:
             restricted = True
             if low is None:
                 low = 0*Hz
             if high is None:
-                high = amax(freqs)*Hz
-            I = logical_and(low <= freqs, freqs <= high)
-            I2 = where(I)[0]
+                high = np.amax(freqs)*Hz
+            I = np.logical_and(low <= freqs, freqs <= high)
+            I2 = np.where(I)[0]
             Z = pxx[I2]
             freqs = freqs[I2]
             phase = phase[I2]
@@ -558,24 +564,24 @@ class Sound(BaseSound, numpy.ndarray):
             Z = pxx
         if log_power:
             Z[Z < 1e-20] = 1e-20 # no zeros because we take logs
-            Z = 10 * log10(Z)
+            Z = 10 * np.log10(Z)
         if display:
             Zp = Z[freqs>0]
             phasep = phase[freqs>0]
             freqsp = freqs[freqs>0]
-            subplot(211)
-            semilogx(freqsp, Zp)
-            grid()
-            xlim((freqsp[0], freqsp[-1]))
-            xlabel('Frequency (Hz)')
-            ylabel('Power (dB/Hz)') if log_power else ylabel('Power')
-            subplot(212)
-            semilogx(freqsp, phasep)
-            grid()
-            xlim((freqsp[0], freqsp[-1]))
-            xlabel('Frequency (Hz)')
-            ylabel('Phase (rad)')
-            tight_layout()
+            plt.subplot(211)
+            plt.semilogx(freqsp, Zp)
+            plt.grid()
+            plt.xlim((freqsp[0], freqsp[-1]))
+            plt.xlabel('Frequency (Hz)')
+            plt.ylabel('Power (dB/Hz)') if log_power else plt.ylabel('Power')
+            plt.subplot(212)
+            plt.semilogx(freqsp, phasep)
+            plt.grid()
+            plt.xlim((freqsp[0], freqsp[-1]))
+            plt.xlabel('Frequency (Hz)')
+            plt.ylabel('Phase (rad)')
+            plt.tight_layout()
         return (Z, freqs*Hz, phase)
 
     def get_level(self):
@@ -585,11 +591,11 @@ class Sound(BaseSound, numpy.ndarray):
         for each channel, otherwise returns a float.
         '''
         if self.nchannels==1:
-            rms_value = sqrt(mean((asarray(self)-mean(asarray(self)))**2))
-            rms_dB = 20.0*log10(rms_value/2e-5)
+            rms_value = np.sqrt(np.mean((np.asarray(self)-np.mean(np.asarray(self)))**2))
+            rms_dB = 20.0*np.log10(rms_value/2e-5)
             return rms_dB*dB
         else:
-            return array(tuple(self.channel(i).get_level() for i in xrange(self.nchannels)))
+            return np.array(tuple(self.channel(i).get_level() for i in xrange(self.nchannels)))
 
     def set_level(self, level):
         '''
@@ -598,11 +604,11 @@ class Sound(BaseSound, numpy.ndarray):
         '''
         rms_dB = self.get_level()
         if self.nchannels>1:
-            level = array(level)
+            level = np.array(level)
             if level.size==1:
                 level = level.repeat(self.nchannels)
-            level = reshape(level, (1, self.nchannels))
-            rms_dB = reshape(rms_dB, (1, self.nchannels))
+            level = np.reshape(level, (1, self.nchannels))
+            rms_dB = np.reshape(rms_dB, (1, self.nchannels))
         else:
             if not isinstance(level, dB_type):
                 raise dB_error('Must specify level in dB')
@@ -630,7 +636,7 @@ class Sound(BaseSound, numpy.ndarray):
         return newsound
     
     def get_maxlevel(self):
-        return amax(self.level)*dB
+        return np.amax(self.level)*dB
     
     def set_maxlevel(self, level):
         self.level += level-self.maxlevel
@@ -671,16 +677,16 @@ class Sound(BaseSound, numpy.ndarray):
             Whether to apply ramping to current sound or return a new array.
         '''
         when = when.lower().strip()
-        if envelope is None: envelope = lambda t:sin(pi * t / 2) ** 2
+        if envelope is None: envelope = lambda t:np.sin(np.pi * t / 2) ** 2
         if not isinstance(duration, int):
-            sz = int(rint(duration * self.samplerate))
+            sz = int(np.rint(duration * self.samplerate))
         else:
             sz = duration
-        multiplier = envelope(reshape(linspace(0.0, 1.0, sz), (sz, 1)))
+        multiplier = envelope(np.reshape(np.linspace(0.0, 1.0, sz), (sz, 1)))
         if inplace:
             target = self
         else:
-            target = Sound(copy(self), self.samplerate)
+            target = Sound(np.copy(self), self.samplerate)
         if when == 'onset' or when == 'both':
             target[:sz, :] *= multiplier
         if when == 'offset' or when == 'both':
@@ -702,9 +708,9 @@ class Sound(BaseSound, numpy.ndarray):
         '''
         if n is None:
             n=self.shape[0]
-        res=zeros(n,self.nchannels)
+        res=np.zeros(n,self.nchannels)
         for i in range(self.nchannels):
-            res[:,i]=fft(asarray(self)[:,i].flatten(),n=n)
+            res[:,i]=fft(np.asarray(self)[:,i].flatten(),n=n)
         return res
             
         
@@ -722,8 +728,8 @@ class Sound(BaseSound, numpy.ndarray):
         '''
         samplerate = get_samplerate(samplerate)
         duration = get_duration(duration, samplerate)
-        frequency = asarray(frequency)*Hz
-        phase = array(phase)
+        frequency = np.asarray(frequency)*Hz
+        phase = np.array(phase)
         if frequency.size>nchannels and nchannels==1:
             nchannels = frequency.size
         if phase.size>nchannels and nchannels==1:
@@ -732,9 +738,9 @@ class Sound(BaseSound, numpy.ndarray):
             frequency.shape = (1, nchannels)
         if phase.size==nchannels:
             phase.shape =(nchannels, 1)
-        t = arange(0, duration, 1)/samplerate
+        t = np.arange(0, duration, 1)/samplerate
         t.shape = (t.size, 1) # ensures C-order (in contrast to tile(...).T )
-        x = sin(phase + 2.0 * pi * frequency * tile(t, (1, nchannels)))
+        x = np.sin(phase + 2.0 * np.pi * frequency * np.tile(t, (1, nchannels)))
         return Sound(x, samplerate)
 
     @staticmethod
@@ -815,9 +821,9 @@ class Sound(BaseSound, numpy.ndarray):
         n=duration
         n2=int(n/2)
         
-        f=array(fftfreq(n,d=1.0/samplerate), dtype=complex)
+        f=np.array(fftfreq(n,d=1.0/samplerate), dtype=complex)
         f.shape=(len(f),1)
-        f=tile(f,(1,nchannels))
+        f=np.tile(f,(1,nchannels))
         
         if n%2==1:
             z=(randn(n2,nchannels)+1j*randn(n2,nchannels))
@@ -829,22 +835,22 @@ class Sound(BaseSound, numpy.ndarray):
         a2*=z
         
         if n%2==1:
-            d=vstack((ones((1,nchannels)),a2,
-                      flipud(conj(a2))))
+            d=np.vstack((np.ones((1,nchannels)),a2,
+                         np.flipud(np.conj(a2))))
         else:
-            d=vstack((ones((1,nchannels)),a2,
-                      1.0/( abs(f[n2])**(alpha/2.0) )*
-                      randn(1,nchannels),
-                      flipud(conj(a2))))
+            d=np.vstack((np.ones((1,nchannels)),a2,
+                         1.0/( abs(f[n2])**(alpha/2.0) )*
+                         randn(1,nchannels),
+                         np.flipud(np.conj(a2))))
         
         
-        x=real(ifft(d.flatten()))                  
+        x=np.real(ifft(d.flatten()))
         x.shape=(n,nchannels)
 
         if normalise:
             for i in range(nchannels):
                 #x[:,i]=normalise_rms(x[:,i])
-                x[:,i] = ((x[:,i] - amin(x[:,i]))/(amax(x[:,i]) - amin(x[:,i])) - 0.5) * 2;
+                x[:,i] = ((x[:,i] - np.amin(x[:,i]))/(np.amax(x[:,i]) - np.amin(x[:,i])) - 0.5) * 2;
         
         return Sound(x,samplerate)
     
@@ -880,16 +886,16 @@ class Sound(BaseSound, numpy.ndarray):
         samplerate = get_samplerate(samplerate)
         noise=Sound.whitenoise(duration)
         splrate=noise.samplerate
-        x=array(noise.T)[0]
-        IRNfft=np.fft.fft(x)
+        x=np.array(noise.T)[0]
+        IRNfft=fft(x)
         Nspl,spl_dur=len(IRNfft),float(1.0/splrate)
-        w=2*pi*fftfreq(Nspl,spl_dur)
+        w=2*np.pi*fftfreq(Nspl,spl_dur)
         d=float(delay)
         for k in range(1,niter+1):
             nchoosek=factorial(niter)/(factorial(niter-k)*factorial(k))
-            IRNfft+=nchoosek*(gain**k)*IRNfft*exp(-1j*w*k*d)
-        IRNadd = np.fft.ifft(IRNfft)
-        x=real(IRNadd)
+            IRNfft+=nchoosek*(gain**k)*IRNfft*np.exp(-1j*w*k*d)
+        IRNadd = ifft(IRNfft)
+        x=np.real(IRNadd)
         return Sound(x,samplerate)
     
     @staticmethod
@@ -903,15 +909,15 @@ class Sound(BaseSound, numpy.ndarray):
         samplerate = get_samplerate(samplerate)
         noise=Sound.whitenoise(duration)
         splrate=noise.samplerate
-        x=array(noise.T)[0]
-        IRNadd=np.fft.fft(x)
+        x=np.array(noise.T)[0]
+        IRNadd=fft(x)
         Nspl,spl_dur=len(IRNadd),float(1.0/splrate)
-        w=2*pi*fftfreq(Nspl,spl_dur)
+        w=2*np.pi*fftfreq(Nspl,spl_dur)
         d=float(delay)
         for k in range(1,niter+1):
-            IRNadd+=(gain**k)*IRNadd*exp(-1j*w*k*d)
-        IRNadd = np.fft.ifft(IRNadd)
-        x=real(IRNadd)
+            IRNadd+=(gain**k)*IRNadd*np.exp(-1j*w*k*d)
+        IRNadd = ifft(IRNadd)
+        x=np.real(IRNadd)
         return Sound(x, samplerate)
 
     @staticmethod
@@ -932,7 +938,7 @@ class Sound(BaseSound, numpy.ndarray):
             amplitude = 28e-6*10**(float(peak)/20.)
         else:
             amplitude = 1
-        x = amplitude*ones((duration,nchannels))
+        x = amplitude*np.ones((duration,nchannels))
         return Sound(x, samplerate)
     
     @staticmethod
@@ -952,7 +958,7 @@ class Sound(BaseSound, numpy.ndarray):
         '''
         samplerate = get_samplerate(samplerate)
         duration = get_duration(duration,samplerate)
-        x=numpy.zeros((duration,nchannels))
+        x=np.zeros((duration,nchannels))
         return Sound(x, samplerate)
 
     @staticmethod
@@ -1038,10 +1044,10 @@ class Sound(BaseSound, numpy.ndarray):
                 sounds.append(arg)
         if samplerate is None:
             samplerate = max(s.samplerate for s in sounds)
-            rates = unique([int(s.samplerate) for s in sounds])
+            rates = np.unique([int(s.samplerate) for s in sounds])
             if len(rates)>1:
                 sounds = tuple(s.resample(samplerate) for s in sounds)
-        x = vstack(sounds)
+        x = np.vstack(sounds)
         return Sound(x, samplerate)
 
     def save(self, filename, normalise=False, samplewidth=2):
@@ -1067,26 +1073,26 @@ class Sound(BaseSound, numpy.ndarray):
         scale = {2:2**15-1, 1: 2**7-1}[samplewidth]
         if ext=='wav':
             meanval = {2:0, 1:2**7}[samplewidth]
-            dtype = {2:int16, 1:uint8}[samplewidth]
+            dtype = {2:np.int16, 1:np.uint8}[samplewidth]
             typecode = {2:'h', 1:'B'}[samplewidth]
         else:
             meanval = {2:0, 1:2**7}[samplewidth]
-            dtype = {2:int16, 1:uint8}[samplewidth]
+            dtype = {2:np.int16, 1:np.uint8}[samplewidth]
             typecode = {2:'h', 1:'B'}[samplewidth]
         w = sndmodule.open(filename, 'wb')
         w.setnchannels(self.nchannels)
         w.setsampwidth(samplewidth)
         w.setframerate(int(self.samplerate))
-        x = array(self,copy=True)
-        am=amax(x)
-        z = zeros(x.shape[0]*self.nchannels, dtype=x.dtype)
+        x = np.array(self,copy=True)
+        am=np.amax(x)
+        z = np.zeros(x.shape[0]*self.nchannels, dtype=x.dtype)
         x.shape=(x.shape[0],self.nchannels)
         for i in range(self.nchannels):
             if normalise:
                 x[:,i] /= am
             x[:,i] = (x[:,i]) * scale + meanval
             z[i::self.nchannels] = x[::1,i]
-        data = array(z, dtype=dtype)
+        data = np.array(z, dtype=dtype)
         data = pyarray.array(typecode, data)
         try:
             out = data.tobytes()
@@ -1112,11 +1118,11 @@ class Sound(BaseSound, numpy.ndarray):
         nchannels, sampwidth, framerate, nframes, comptype, compname = wav.getparams()
         frames = wav.readframes(nframes * nchannels)
         typecode = {2:'h', 1:'B'}[sampwidth]
-        out = frombuffer(frames, dtype=dtype(typecode))
+        out = np.frombuffer(frames, dtype=np.dtype(typecode))
         scale = {2:2 ** 15, 1:2 ** 7-1}[sampwidth]
         meanval = {2:0, 1:2**7}[sampwidth]
         
-        data = zeros((nframes, nchannels))
+        data = np.zeros((nframes, nchannels))
         for i in range(nchannels):
             data[:, i] = out[i::nchannels]
             data[:, i] /= scale
@@ -1125,7 +1131,7 @@ class Sound(BaseSound, numpy.ndarray):
         return Sound(data, samplerate=framerate*Hz)
 
     def __repr__(self):
-        arrayrep = repr(asarray(self))
+        arrayrep = repr(np.asarray(self))
         arrayrep = '\n'.join('    '+l for l in arrayrep.split('\n'))
         return 'Sound(\n'+arrayrep+',\n    '+repr(self.samplerate)+')'
     
@@ -1135,7 +1141,7 @@ class Sound(BaseSound, numpy.ndarray):
                                                                   self.samplerate)
 
     def __reduce__(self):
-        return (_load_Sound_from_pickle, (asarray(self), float(self.samplerate)))
+        return (_load_Sound_from_pickle, (np.asarray(self), float(self.samplerate)))
 
 
 def _load_Sound_from_pickle(arr, samplerate):
@@ -1167,7 +1173,7 @@ savesound.__doc__ = Sound.save.__doc__
 
 def get_duration(duration,samplerate):
     if not isinstance(duration, int):
-        duration = int(rint(duration * samplerate))
+        duration = int(np.rint(duration * samplerate))
     return duration
 
 

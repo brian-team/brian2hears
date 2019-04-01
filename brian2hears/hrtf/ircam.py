@@ -1,9 +1,12 @@
-from brian2 import *
 from scipy.io import loadmat # NOTE: this requires scipy 0.7+
 from glob import glob
 from copy import copy
 from scipy.io.wavfile import *
 import os, re
+import numpy as np
+
+from brian2 import kHz
+
 from .hrtf import *
 
 __all__ = ['IRCAM_LISTEN']
@@ -111,7 +114,8 @@ class IRCAM_LISTEN(HRTFDatabase):
         l = l['content_m'][0][0]
         r = r['content_m'][0][0]
         # self.data has shape (num_ears=2, num_indices, hrir_length)
-        data = vstack((reshape(l, (1,) + l.shape), reshape(r, (1,) + r.shape)))
+        data = np.vstack((np.reshape(l, (1,) + l.shape),
+                          np.reshape(r, (1,) + r.shape)))
         hrtfset = HRTFSet(data, samplerate, coords)
         hrtfset.name = 'IRCAM_'+subject
         return hrtfset

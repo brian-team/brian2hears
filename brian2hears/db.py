@@ -1,5 +1,4 @@
-from brian2 import *
-from numpy import *
+import numpy as np
 
 __all__ = ['dB', 'dB_type', 'dB_error', 'gain']
 
@@ -9,7 +8,7 @@ class dB_error(ValueError):
     '''
     pass
 
-class dB_type(float64):
+class dB_type(np.float64):
     '''
     The type of values in dB.
     

@@ -1,4 +1,6 @@
-from brian2 import *
+import numpy as np
+from numpy.fft import fft, ifft
+
 from brian2hears.sounds import Sound
 from brian2hears.filtering import FIRFilterbank
 from copy import copy
@@ -52,9 +54,10 @@ class HRTF(object):
         # in practice) and around 100x faster.
         if not sound.nchannels==1:
             raise ValueError('HRTF can only be applied to mono sounds')
-        if len(unique(array([self.samplerate, sound.samplerate], dtype=int)))>1:
+        if len(np.unique(np.array([self.samplerate, sound.samplerate],
+                                  dtype=int))) > 1:
             raise ValueError('HRTF and sound samplerates do not match.')
-        sound = asarray(sound).flatten()
+        sound = np.asarray(sound).flatten()
         # Pad left/right/sound with zeros of length max(impulse response length)
         # at the beginning, and at the end so that they are all the same length
         # which should be a power of 2 for efficiency. The reason to pad at
@@ -63,14 +66,16 @@ class HRTF(object):
         # exactly equalise after the length of the impulse response, so we just
         # zero pad. The reason for padding at the end is so that for the FFT we
         # can just multiply the arrays, which should have the same shape.
-        left = asarray(self.left).flatten()
-        right = asarray(self.right).flatten()
+        left = np.asarray(self.left).flatten()
+        right =np.asarray(self.right).flatten()
         ir_nmax = max(len(left), len(right))
         nmax = max(ir_nmax, len(sound))+ir_nmax
-        nmax = 2**int(ceil(log2(nmax)))
-        leftpad = hstack((left, zeros(nmax-len(left))))
-        rightpad = hstack((right, zeros(nmax-len(right))))
-        soundpad = hstack((zeros(ir_nmax), sound, zeros(nmax-ir_nmax-len(sound))))
+        nmax = 2**int(np.ceil(np.log2(nmax)))
+        leftpad = np.hstack((left, np.zeros(nmax-len(left))))
+        rightpad = np.hstack((right, np.zeros(nmax-len(right))))
+        soundpad = np.hstack((np.zeros(ir_nmax),
+                              sound,
+                              np.zeros(nmax-ir_nmax-len(sound))))
         # Compute FFTs, multiply and compute IFFT
         left_fft = fft(leftpad, n=nmax)
         right_fft = fft(rightpad, n=nmax)
@@ -86,7 +91,7 @@ class HRTF(object):
     __call__ = apply
 
     def get_fir(self):
-        return array(self.impulse_response.T, copy=True)
+        return np.array(self.impulse_response.T, copy=True)
     fir = property(fget=get_fir)
 
     def filterbank(self, source, **kwds):
@@ -112,7 +117,7 @@ def make_coordinates(**kwds):
     '''
     dtype = [(name, float) for name in kwds.keys()]
     n = len(next(iter(kwds.values())))
-    x = zeros(n, dtype=dtype)
+    x = np.zeros(n, dtype=dtype)
     for name, values in kwds.items():
         x[name] = values
     return x
@@ -174,9 +179,9 @@ class HRTFSet(object):
         '''
         Return the index of the HRTF with the coords specified by keyword.
         '''
-        I = ones(self.num_indices, dtype=bool)
+        I = np.ones(self.num_indices, dtype=bool)
         for key, value in kwds.items():
-            I = logical_and(I, abs(self.coordinates[key]-value)<1e-10)
+            I = np.logical_and(I, abs(self.coordinates[key]-value)<1e-10)
         indices = I.nonzero()[0]
         if len(indices)==0:
             raise IndexError('No HRTF exists with those coordinates')
@@ -209,7 +214,7 @@ class HRTFSet(object):
                 I = False
             if isinstance(I, bool): # vector-based calculation doesn't work
                 n = len(ns[fvars[0]])
-                I = array([condition(**dict((name, ns[name][j]) for name in fvars)) for j in range(n)])
+                I = np.array([condition(**dict((name, ns[name][j]) for name in fvars)) for j in range(n)])
                 I = I.nonzero()[0]
         else:
             if condition.dtype==bool:
@@ -238,11 +243,11 @@ class HRTFSet(object):
     
     @property
     def fir_serial(self):
-        return reshape(self.data, (self.num_indices*2, self.num_samples))
+        return np.reshape(self.data, (self.num_indices*2, self.num_samples))
     
     @property
     def fir_interleaved(self):
-        fir = empty((self.num_indices*2, self.num_samples))
+        fir = np.empty((self.num_indices*2, self.num_samples))
         fir[::2, :] = self.data[0, :, :]
         fir[1::2, :] = self.data[1, :, :]
         return fir

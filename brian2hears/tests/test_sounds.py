@@ -1,5 +1,7 @@
-from brian2 import *
-del test  ## prevent Brian's test suite from getting picked up
+import numpy as np
+
+from brian2 import ms, Hz, kHz
+
 from brian2hears import *
 import os
 
@@ -23,17 +25,21 @@ def test_sounds():
     s = loadsound('test.wav')
     s = Sound('test.wav')
     os.remove('test.wav')
-    s = asarray(s)
+    s = np.asarray(s)
     s = Sound(s)
-    s = Sound(lambda t: sin(2*pi*1000*Hz*t), duration=20*ms)
+    s = Sound(lambda t: np.sin(2*np.pi*1000*Hz*t), duration=20*ms)
     s = s.ramp()
     s = tone([1, 2] * kHz, 300 * ms)
     s[slice(100*ms, 200*ms)] = 0
     s = s.shifted(0.5/(44.1*kHz))
 
+
 if __name__=='__main__':
     test_sounds()
-    s = Sound(lambda t: sin(2*pi*1000*Hz*t), duration=20*ms)
+
+    import matplotlib.pyplot as plt
+
+    s = Sound(lambda t: np.sin(2*np.pi*1000*Hz*t), duration=20*ms)
     s = s.ramp()
     # plot(s)
     # #plot(s.shifted(0.5/(44.1*kHz), fractional=True))
@@ -41,6 +47,6 @@ if __name__=='__main__':
     # print s.level
     # plot(s)
     # s.level = s.level-5*dB
-    plot(s.times/ms, s)
+    plt.plot(s.times/ms, s)
     # print s.level
-    show()
+    plt.show()

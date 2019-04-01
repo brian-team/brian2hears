@@ -1,7 +1,9 @@
 '''
 Utility functions adapted from MAP 
 '''
-from brian2 import *
+import numpy as np
+
+from brian2 import Hz, kHz, check_units
 
 __all__ = ['erbspace']
 
@@ -19,15 +21,16 @@ def erbspace(low, high, N, earQ=9.26449, minBW=24.7, order=1):
     '''
     low = float(low)
     high = float(high)
-    cf = -(earQ * minBW) + exp((arange(N)) * (-log(high + earQ * minBW) + \
-            log(low + earQ * minBW)) / (N-1)) * (high + earQ * minBW)
+    cf = -(earQ * minBW) + np.exp((np.arange(N)) * (-np.log(high + earQ * minBW) +
+                                                    np.log(low + earQ * minBW)) / (N-1)) * (high + earQ * minBW)
     cf = cf[::-1]
     return cf*Hz
 
-# Testing
+
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
     cf = erbspace(20 * Hz, 20 * kHz, 3000)
-    print(amin(cf), amax(cf))
-    print(diff(cf)[-5:])
-    plot(cf)
-    show()
+    print(np.amin(cf), np.amax(cf))
+    print(np.diff(cf)[-5:])
+    plt.plot(cf)
+    plt.show()

@@ -1,4 +1,6 @@
-from brian2 import *
+import numpy as np
+
+from brian2 import metre, second, ms, usecond
 
 from brian2hears.prefs import get_samplerate
 from brian2hears.filtering.fractionaldelay import FractionalDelay
@@ -53,12 +55,12 @@ class HeadlessDatabase(HRTFDatabase):
     If ``fractional_itds=True`` then delays in the left and right channels will
     be symmetric around a global offset of ``delay_offset``.
     '''
-    def __init__(self, n=None, azim_max=pi/2,
+    def __init__(self, n=None, azim_max=np.pi/2,
                  diameter=speed_of_sound_in_air*650*usecond,
                  itd=None, samplerate=None, fractional_itds=False):
         if itd is None:
-            azim = linspace(-azim_max, azim_max, n)
-            itd = diameter*sin(azim)/speed_of_sound_in_air
+            azim = np.linspace(-azim_max, azim_max, n)
+            itd = diameter*np.sin(azim)/speed_of_sound_in_air
             coords = make_coordinates(azim=azim, itd=itd)
         else:
             coords = make_coordinates(itd=itd)
@@ -69,17 +71,17 @@ class HeadlessDatabase(HRTFDatabase):
             dr = -itd
             dl[dl<0] = 0
             dr[dr<0] = 0
-            dl = array(rint(dl*samplerate), dtype=int)
-            dr = array(rint(dr*samplerate), dtype=int)
-            idxmax = max(amax(dl), amax(dr))
-            data = zeros((2, len(itd), idxmax+1))
-            data[0, arange(len(itd)), dl] = 1
-            data[1, arange(len(itd)), dr] = 1
+            dl = np.array(np.rint(dl*samplerate), dtype=int)
+            dr = np.array(np.rint(dr*samplerate), dtype=int)
+            idxmax = max(np.amax(dl), np.amax(dr))
+            data = np.zeros((2, len(itd), idxmax+1))
+            data[0, np.arange(len(itd)), dl] = 1
+            data[1, np.arange(len(itd)), dr] = 1
         else:
-            delays = hstack((itd/2, -itd/2))
+            delays = np.hstack((itd/2, -itd/2))
             fd = FractionalDelay(silence(1*ms, samplerate=samplerate), delays)
             ir = fd.impulse_response
-            data = zeros((2, len(itd), fd.filter_length))
+            data = np.zeros((2, len(itd), fd.filter_length))
             data[0, :, :] = ir[:len(itd), :]
             data[1, :, :] = ir[len(itd):, :]
             self.delay_offset = fd.delay_offset
