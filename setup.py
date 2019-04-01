@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="brian2hears",
-    version="2.0b1",
+    version="0.9",
     author="Bertrand Fontaine, Dan Goodman, Marcel Stimberg, Victor Benichoux, Romain Brette",
     author_email="team@briansimulator.org",
     description="Auditory modelling package for brian2 simulator",

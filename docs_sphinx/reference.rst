@@ -1,11 +1,7 @@
 .. currentmodule:: brian2hears
 
-.. _brian-hears-reference:
-
-Brian hears
-===========
-
-.. seealso:: User guide for :ref:`brian2hears`.
+Reference
+=========
 
 .. autofunction:: set_default_samplerate
 
@@ -121,14 +117,12 @@ Useful for understanding more about the internals.
 
 .. autoclass:: BaseSound
 
-.. autoclass:: OnlineSound
-
 .. _brian-hears-class-diagram:
 
 Class diagram
 -------------
 
-.. inheritance-diagram:: Sound OnlineSound
+.. inheritance-diagram:: Sound
 						 Filterbank
 						   LinearFilterbank
 						     Gammatone ApproximateGammatone LogGammachirp
