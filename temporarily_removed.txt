@@ -1,2 +1,0 @@
-- GPU support
-- onlinesounds.py: I think it was never finished anyway?

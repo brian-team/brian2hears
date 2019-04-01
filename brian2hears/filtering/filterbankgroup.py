@@ -34,8 +34,7 @@ class FilterbankGroup(NeuronGroup):
     Initialised as a standard :class:`NeuronGroup` object, but with two
     additional arguments at the beginning, and no ``N`` (number of neurons)
     argument.  The number of neurons in the group will be the number of
-    channels in the filterbank. (TODO: add reference to interleave/serial
-    channel stuff here.)
+    channels in the filterbank.
     
     ``filterbank``
         The Filterbank object to be used by the group. In fact, any Bufferable

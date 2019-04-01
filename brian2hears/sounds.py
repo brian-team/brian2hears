@@ -97,7 +97,6 @@ class Sound(BaseSound, numpy.ndarray):
     .. automethod:: resized
 
     **Slicing**
-    
 
     One can slice sound objects in various ways, for example ``sound[100*ms:200*ms]``
     returns the part of the sound between 100 ms and 200 ms (not including the
@@ -109,6 +108,11 @@ class Sound(BaseSound, numpy.ndarray):
     the last 5 channels. For time indices, either times or samples can be given,
     e.g. ``sound[:100]`` gives the first 100 samples. In addition, steps can
     be used for example to reverse a sound as ``sound[::-1]``.
+
+    Note that slicing with units of time rather than samples will only work in
+    Python 3. In Python 2, you can get the same effect by writing, for example,
+    ``sound[slice(0*ms, 10*ms)]``. This is a change from the original version of
+    ``brian.hears``.
     
     **Arithmetic operations**
     
