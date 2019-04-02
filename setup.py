@@ -7,6 +7,7 @@ with open(os.path.join(os.path.dirname(__file__), 'VERSION')) as version_file:
 setup(
     name="brian2hears",
     version=version,
+    url='https://github.com/brian-team/brian2hears',
     author="Bertrand Fontaine, Dan Goodman, Marcel Stimberg, Victor Benichoux, Romain Brette",
     author_email="team@briansimulator.org",
     description="Auditory modelling package for brian2 simulator",
