@@ -20,7 +20,7 @@ jobs:
   steps:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
-  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future
+  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future matplotlib=2.1
     displayName: 'Install dependencies'
   - script: |
       source activate test_env
@@ -47,7 +47,7 @@ jobs:
   steps:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
-  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future
+  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future matplotlib=2.1
     displayName: 'Install dependencies'
   - script: |
       source activate test_env
@@ -74,7 +74,7 @@ jobs:
   steps:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: Add conda to PATH
-  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future
+  - script: conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest six future matplotlib=2.1
     displayName: 'Install dependencies'
   - script: |
       call activate test_env
