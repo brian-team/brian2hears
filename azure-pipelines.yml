@@ -21,6 +21,7 @@ jobs:
   - script: |
       conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib=2.1
       source activate test_env
+      sudo apt-get install -y libsamplerate0
       python -m pip install samplerate
     displayName: 'Install dependencies'
   - script: |
