@@ -12,11 +12,11 @@ First, a series of standard filters widely used in audio processing are availabl
 +------------------------------------+---------------------------------------------------------------------------------------------------+----------------------------------------------+
 | Class                              | Descripition                                                                                      |  Example                                     |
 +====================================+===================================================================================================+==============================================+
-| :class:`IIRFilterbank`             | Bank of low, high, bandpass or bandstop filter of type Chebyshef, Elliptic, etc...                | :ref:`example-hears_IIRfilterbank`           |
+| :class:`IIRFilterbank`             | Bank of low, high, bandpass or bandstop filter of type Chebyshef, Elliptic, etc...                | :ref:`IIR filterbank`                        |
 +------------------------------------+---------------------------------------------------------------------------------------------------+----------------------------------------------+
-| :class:`Butterworth`               | Bank of low, high, bandpass or bandstop Butterworth filters                                       | :ref:`example-hears_butterworth`             |
+| :class:`Butterworth`               | Bank of low, high, bandpass or bandstop Butterworth filters                                       | :ref:`Butterworth filters`                   |
 +------------------------------------+---------------------------------------------------------------------------------------------------+----------------------------------------------+
-| :class:`LowPass`                   | Bank of lowpass filters of order 1                                                                | :ref:`example-hears_cochleagram`             |
+| :class:`LowPass`                   | Bank of lowpass filters of order 1                                                                | :ref:`Cochleagram`                           |
 +------------------------------------+---------------------------------------------------------------------------------------------------+----------------------------------------------+
 
 Second, the library provides linear auditory filters developed to model the
@@ -27,15 +27,15 @@ middle ear transfer function and the frequency analysis of the cochlea:
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
 | Class                              | Description                                                                                       |  Example                                                   |
 +====================================+===================================================================================================+============================================================+
-| :class:`MiddleEar`                 | Linear bandpass filter, based on middle-ear frequency response properties                         | :ref:`example-hears-tan_carney_2003_tan_carney_simple_test`|
+| :class:`MiddleEar`                 | Linear bandpass filter, based on middle-ear frequency response properties                         | :ref:`Spiking output of the Tan&Carney model`              |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
-| :class:`Gammatone`                 | Bank of IIR gammatone filters  (based on Slaney implementation)                                   | :ref:`example-hears_gammatone`                             |
+| :class:`Gammatone`                 | Bank of IIR gammatone filters  (based on Slaney implementation)                                   | :ref:`Gammatone filters`                                   |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
-| :class:`ApproximateGammatone`      | Bank of IIR gammatone filters  (based on Hohmann implementation)                                  | :ref:`example-hears_approximate_gammatone`                 |
+| :class:`ApproximateGammatone`      | Bank of IIR gammatone filters  (based on Hohmann implementation)                                  | :ref:`Approximate Gammatone filters`                       |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
-| :class:`LogGammachirp`             | Bank of IIR gammachirp filters with logarithmic sweep (based on Irino implementation)             | :ref:`example-hears_log_gammachirp`                        |
+| :class:`LogGammachirp`             | Bank of IIR gammachirp filters with logarithmic sweep (based on Irino implementation)             | :ref:`Logarithmic Gammachirp filters`                      |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
-| :class:`LinearGammachirp`          | Bank of FIR chirp filters with linear sweep and gamma envelope                                    | :ref:`example-hears_linear_gammachirp`                     |
+| :class:`LinearGammachirp`          | Bank of FIR chirp filters with linear sweep and gamma envelope                                    | :ref:`Linear Gammachirp filters`                           |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
 | :class:`LinearGaborchirp`          | Bank of FIR chirp filters with linear sweep and gaussian envelope                                 |                                                            |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
@@ -49,11 +49,11 @@ two-tones suppression, peak position level dependency, etc.
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
 | Class                              | Description                                                                                       |  Example                                                   |
 +====================================+===================================================================================================+============================================================+
-| :class:`DRNL`                      | Dual resonance nonlinear filter as described in Lopez-Paveda and Meddis, JASA 2001                | :ref:`example-hears_drnl`                                  |
+| :class:`DRNL`                      | Dual resonance nonlinear filter as described in Lopez-Paveda and Meddis, JASA 2001                | :ref:`Dual resonance nonlinear filter (DRNL)`              |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
-| :class:`DCGC`                      | Compressive gammachirp auditory filter as described in  Irino and Patterson, JASA 2001            | :ref:`example-hears_dcgc`                                  |
+| :class:`DCGC`                      | Compressive gammachirp auditory filter as described in  Irino and Patterson, JASA 2001            | :ref:`Compressive Gammachirp filter (DCGC)`                |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
-| :class:`TanCarney`                 | Auditory phenomenological model as described in  Tan and Carney, JASA 2003                        | :ref:`example-hears-tan_carney_2003_tan_carney_simple_test`|
+| :class:`TanCarney`                 | Auditory phenomenological model as described in  Tan and Carney, JASA 2003                        | :ref:`Spiking output of the Tan&Carney model`              |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+
-| :class:`ZhangSynapse`              | Model of an inner hair cell -- auditory nerve synapse (Zhang et al., JASA 2001)                   | :ref:`example-hears-tan_carney_2003_tan_carney_simple_test`|
+| :class:`ZhangSynapse`              | Model of an inner hair cell -- auditory nerve synapse (Zhang et al., JASA 2001)                   | :ref:`Spiking output of the Tan&Carney model`              |
 +------------------------------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------+

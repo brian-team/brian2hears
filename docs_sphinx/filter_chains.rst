@@ -78,6 +78,6 @@ to modify the parameters of another filter chain path) using
 :class:`ControlFilterbank` (see reference documentation for more details).
 For examples of this in action, see the following:
 
- * :ref:`example-hears_time_varying_filter1`.
- * :ref:`example-hears_time_varying_filter2`.
- * :ref:`example-hears_dcgc`.
+ * :ref:`Time varying filter (1)`.
+ * :ref:`Time varying filter (2)`.
+ * :ref:`Compressive Gammachirp filter (DCGC)`.

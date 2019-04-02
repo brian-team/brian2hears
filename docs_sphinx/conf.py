@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 brian2hears_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                '..', 'brian2hears'))
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -41,8 +42,18 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.extlinks',
-    'sphinx.ext.inheritance_diagram'
+    'sphinx.ext.inheritance_diagram',
+    'sphinx_gallery.gen_gallery'
 ]
+
+sphinx_gallery_conf = {
+     'examples_dirs': '../examples',   # path to your example scripts
+     'gallery_dirs': 'auto_examples',  # path where to save gallery generated examples
+     'filename_pattern': '/',
+     'reference_url': {
+        'brian2hears': None,  # None means "this project"
+     }
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -63,58 +74,52 @@ project = u'brian2hears'
 copyright = u'2019, Brian authors'
 author = u'Brian authors'
 
-# We mock modules that are not needed just for building the documentation
-import sys
-try:
-    from unittest.mock import Mock, MagicMock
-except ImportError:
-    from mock import Mock, MagicMock
+# By default, e.g. when running on readthedocs, we do not run the example files
+# and mock most dependencies (except for matplotlib and numpy which are needed
+# by sphinx-gallery even when not running the examples)
+if not os.environ.get('RUN_EXAMPLES', 'FALSE').lower() == 'true':
+    import sys
+    try:
+        from unittest.mock import Mock, MagicMock
+    except ImportError:
+        from mock import Mock, MagicMock
+    MOCK_MODULES = ['scipy',
+                        'scipy.io',
+                            'scipy.io.wavfile',
+                        'scipy.signal',
+                        'scipy.special',
+                    'brian2',
+                        'brian2.core',
+                            'brian2.core.functions',
+                        'brian2.codegen',
+                            'brian2.codegen.cpp_prefs', 'brian2.codegen.runtime',
+                                'brian2.codegen.runtime.cython_rt',
+                                    'brian2.codegen.runtime.cython_rt.cython_rt',
+                                    'brian2.codegen.runtime.cython_rt.extension_manager',
+                                'brian2.codegen.runtime.weave_rt'
+                        'brian2.devices',
+                            'brian2.devices.device',
+                        'brian2.utils', 'brian2.utils.logger']
+    sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+    # Additional hacks to get the documentation to build (numbers/units that appear
+    # as default arguments of functions are evaluated and need to support multiply
+    # divide, etc. – the Mock objects don't)
+    sys.modules['brian2'].kHz = 1000.0
+    sys.modules['brian2'].ms = 0.001
+    sys.modules['brian2'].usecond = 0.000001
+    sys.modules['brian2'].second = 1.
+    sys.modules['brian2'].metre = 1.
+    sys.modules['brian2'].Hz = 1.
+    sys.modules['brian2.devices.device'].all_devices = MagicMock()
 
-MOCK_MODULES = ['numpy', 'numpy.fft', 'numpy.random',
-                'matplotlib', 'matplotlib.pyplot',
-                'scipy',
-                    'scipy.io',
-                        'scipy.io.wavfile',
-                    'scipy.signal',
-                    'scipy.special',
-                'brian2',
-                    'brian2.core',
-                        'brian2.core.functions',
-                    'brian2.codegen',
-                        'brian2.codegen.cpp_prefs', 'brian2.codegen.runtime',
-                            'brian2.codegen.runtime.cython_rt',
-                                'brian2.codegen.runtime.cython_rt.cython_rt',
-                                'brian2.codegen.runtime.cython_rt.extension_manager',
-                            'brian2.codegen.runtime.weave_rt'
-                    'brian2.devices',
-                        'brian2.devices.device',
-                    'brian2.utils', 'brian2.utils.logger']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-# Additional hacks to get the documentation to build (numbers/units that appear
-# as default arguments of functions are evaluated and need to support multiply
-# divide, etc. – the Mock objects don't)
-sys.modules['brian2'].kHz = 1000.0
-sys.modules['brian2'].ms = 0.001
-sys.modules['brian2'].usecond = 0.000001
-sys.modules['brian2'].second = 1.
-sys.modules['brian2'].metre = 1.
-sys.modules['brian2'].Hz = 1.
-sys.modules['numpy'].ndarray = object
-sys.modules['numpy'].pi = 3.14159265359
-# sys.modules['brian2.devices.device'].all_devices = MagicMock()
+    # Do not execute the examples
+    sphinx_gallery_conf['plot_gallery'] = 'False'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
-import brian2hears
-version = brian2hears.__version__
-if version is None:
-    try:
-        from setuptools_scm import get_version
-        version = get_version(relative_to=brian2hears_dir)
-    except ImportError:
-        pass
+
+version = '0.9'
 
 # The language for content autogenerated by Sphinx. Refer to documentation
 # for a list of supported languages.

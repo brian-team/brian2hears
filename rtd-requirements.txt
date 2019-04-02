@@ -1,0 +1,4 @@
+sphinx>=1.5
+sphinx-rtd-theme
+sphinx-gallery
+matplotlib==2.1

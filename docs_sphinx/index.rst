@@ -31,4 +31,5 @@ Contents
    library
    hrtf
    Reference documentation <reference>
+   auto_examples/index
 

@@ -3,6 +3,7 @@
 /.idea/
 /dist/
 /build/
+/docs/
 /brian2hears.egg-info/
 # Compiled Python files
 *.py[cod]
