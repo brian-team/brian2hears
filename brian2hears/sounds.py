@@ -10,10 +10,10 @@ from scipy.signal import fftconvolve, lfilter
 from scipy.special import factorial
 
 try:
-    from scikits.samplerate import resample
-    have_scikits_samplerate = True
-except (ImportError, ValueError):
-    have_scikits_samplerate = False
+    from samplerate import resample
+    have_resample = True
+except (ImportError):
+    have_resample = False
 
 from brian2 import (Hz, ms, second, check_units,
                     have_same_dimensions, get_unit, DimensionMismatchError)
@@ -420,18 +420,15 @@ class Sound(BaseSound, np.ndarray):
         x = np.vstack((self,)*n)
         return Sound(x, samplerate=self.samplerate)
 
-    ### TODO: test this - I haven't installed scikits.samplerate on windows
-    # it should work, according to the documentation 2D arrays are acceptable
-    # in the format we use fof sounds here
     @check_units(samplerate=Hz)
     def resample(self, samplerate, resample_type='sinc_best'):
         '''
         Returns a resampled version of the sound.
         '''
-        if not have_scikits_samplerate:
-            raise ImportError('Need scikits.samplerate package for resampling')
+        if not have_resample:
+            raise ImportError('Need samplerate package for resampling')
         y = np.array(resample(self, float(samplerate / self.samplerate), resample_type),
-                  dtype=np.float64)
+                     dtype=np.float64)
         return Sound(y, samplerate=samplerate)
 
     def _init_mixer(self):

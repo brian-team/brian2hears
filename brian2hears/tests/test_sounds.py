@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from brian2 import ms, Hz, kHz
 
@@ -32,6 +33,16 @@ def test_sounds():
     s = tone([1, 2] * kHz, 300 * ms)
     s[slice(100*ms, 200*ms)] = 0
     s = s.shifted(0.5/(44.1*kHz))
+
+
+def test_resampling():
+    s = tone([1, 2]*kHz, 10*ms)
+    try:
+        s2 = s.resample(22*kHz)
+    except ImportError:
+        pytest.skip("Resampling requires the samplerate package.")
+    assert s2.duration == s.duration
+    assert s2.samplerate == 22*kHz
 
 
 if __name__=='__main__':
