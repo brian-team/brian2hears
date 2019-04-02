@@ -1,3 +1,5 @@
+from builtins import all, sum, range
+
 try:
     import weave
 except ImportError:
@@ -6,9 +8,7 @@ except ImportError:
     except ImportError:
         weave = None
 from scipy import signal, random
-from builtins import all, sum
-from six import get_function_code
-from six.moves import range as xrange
+
 import numpy as np
 
 from brian2hears.bufferable import Bufferable
@@ -219,7 +219,7 @@ class Filterbank(Bufferable):
         if func is None:
             return np.vstack(tuple(self.buffer_fetch(start, end) for start, end in zendpoints))
         else:
-            if get_function_code(func).co_argcount==1:
+            if func.__code__.co_argcount==1:
                 for start, end in zendpoints:
                     func(self.buffer_fetch(start, end))
             else:
@@ -419,7 +419,7 @@ class RestructureFilterbank(Filterbank):
             sourceoffsets = np.hstack((0, np.cumsum(sourcesizes)))
             # gives the index of the source of each element of indexmapping
             sourceindices = np.digitize(indexmapping, np.cumsum(sourcesizes))
-            for i in xrange(len(indexmapping)):
+            for i in range(len(indexmapping)):
                 source_index = sourceindices[i]
                 s = source[source_index]
                 relative_index = indexmapping[i]-sourceoffsets[source_index]

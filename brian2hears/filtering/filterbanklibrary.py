@@ -1,3 +1,4 @@
+from builtins import range
 import numpy as np
 
 try:
@@ -12,7 +13,7 @@ from math import factorial
 from .filterbank import Filterbank,RestructureFilterbank
 from .linearfilterbank import *
 from .firfilterbank import *
-from six.moves import range as xrange
+
 
 from brian2 import second, DimensionMismatchError
 
@@ -30,7 +31,6 @@ __all__ = ['Cascade',
            ]
 
 
-    
 class Gammatone(LinearFilterbank):
     '''
     Bank of gammatone filters.
@@ -348,7 +348,7 @@ class LinearGammachirp(FIRFilterbank):
 
         self.impulse_response=np.zeros((len(f),len(t)))
                                     
-        for ich in xrange(len(f)):
+        for ich in range(len(f)):
             env=(t-t_start)**3*np.exp(-(t-t_start)/time_constant[ich])        
             self.impulse_response[ich,:]=env*np.cos(2*np.pi*(f[ich]*t+c[ich]/2*t**2)+phase[ich])
 #            self.impulse_response[ich,:]=self.impulse_response[ich,:]/np.sqrt(sum(self.impulse_response[ich,:]**2))
@@ -429,7 +429,7 @@ class LinearGaborchirp(FIRFilterbank):
 
         self.impulse_response=np.zeros((len(f),len(t)))
                                     
-        for ich in xrange(len(f)):
+        for ich in range(len(f)):
             env=np.exp(-(t/(2*time_constant[ich]))**2)   
             self.impulse_response[ich,:]=env*np.cos(2*np.pi*(f[ich]*t+c[ich]/2*t**2)+phase[ich])
             self.impulse_response[ich,:]=self.impulse_response[ich,:]/np.sqrt(np.sum(self.impulse_response[ich,:]**2))
@@ -519,13 +519,13 @@ class IIRFilterbank(LinearFilterbank):
                     gstop=np.repeat(gstop,nchannels)
                 order=0
                 filt_b, filt_a =[1]*nchannels,[1]*nchannels  
-                for i in xrange((nchannels)): #generate the different filter coeffcients
+                for i in range((nchannels)): #generate the different filter coeffcients
                     filt_b[i], filt_a[i] = signal.iirdesign(Wpassband[i], Wstopband[i], gpass[i], gstop[i], ftype=ftype)
                 if len(filt_b[i])>order: #take the highst order of them to be the size of the filter coefficient matrix
                     order=len(filt_b[i])
                 self.filt_b=np.zeros((nchannels,order))
                 self.filt_a=np.zeros((nchannels,order))
-                for i in xrange((nchannels)): #fill the coefficient matrix 
+                for i in range((nchannels)): #fill the coefficient matrix 
                     self.filt_b[i,:len(filt_b[i])], self.filt_a[i,:len(filt_a[i])] = filt_b[i],filt_a[i]
         else:
             if Wpassband.ndim==1:     #if there is only one Wn pair of values for all channel just repeat it
@@ -539,13 +539,13 @@ class IIRFilterbank(LinearFilterbank):
                     gstop=np.repeat(gstop,nchannels)
                 order=0
                 filt_b, filt_a =[1]*nchannels,[1]*nchannels
-                for i in xrange((nchannels)):#take the highst order of them to be the size of the filter coefficient matrix
+                for i in range((nchannels)):#take the highst order of them to be the size of the filter coefficient matrix
                     filt_b[i], filt_a[i] = signal.iirdesign(Wpassband[:,i], Wstopband[:,i], gpass[i], gstop[i], ftype=ftype)
                 if len(filt_b[i])>order:
                     order=len(filt_b[i])
                 self.filt_b=np.zeros((nchannels,order))
                 self.filt_a=np.zeros((nchannels,order))
-                for i in xrange((nchannels)):#fill the coefficient matrix 
+                for i in range((nchannels)):#fill the coefficient matrix 
                     self.filt_b[i,:len(filt_b[i])], self.filt_a[i,:len(filt_a[i])] = filt_b[i],filt_a[i]
                     
         
@@ -603,7 +603,7 @@ class Butterworth(LinearFilterbank):
                 self.filt_b=np.kron(np.ones((nchannels,1)),self.filt_b)
                 self.filt_a=np.kron(np.ones((nchannels,1)),self.filt_a)
             else:               #else make nchannels different filters
-                for i in xrange((nchannels)):
+                for i in range((nchannels)):
                     self.filt_b[i,:], self.filt_a[i,:] = signal.butter(order, Wn[i], btype=btype)
         else:
             self.filt_b=np.zeros((nchannels,2*order+1))
@@ -613,7 +613,7 @@ class Butterworth(LinearFilterbank):
                 self.filt_b=np.kron(np.ones((nchannels,1)),self.filt_b)
                 self.filt_a=np.kron(np.ones((nchannels,1)),self.filt_a)
             else:   
-                for i in xrange((nchannels)):
+                for i in range((nchannels)):
                     self.filt_b[i,:], self.filt_a[i,:] = signal.butter(order, Wn[:,i], btype=btype)   
                     
                     

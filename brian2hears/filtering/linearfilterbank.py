@@ -1,3 +1,5 @@
+from builtins import range, zip
+
 import numpy as np
 
 from brian2.codegen.cpp_prefs import get_compiler_and_args, update_for_cross_compilation
@@ -20,11 +22,7 @@ except ImportError:
 from scipy import signal, random
 from .filterbank import Filterbank, RestructureFilterbank
 from ..bufferable import Bufferable
-try:
-    from itertools import izip
-except ImportError:
-    izip = zip
-from six.moves import range as xrange
+
 
 __all__ = ['LinearFilterbank']
 
@@ -48,7 +46,7 @@ def _scipy_apply_linear_filterbank(b, a, x, zi):
     alf_cache_zi00 = [0]*zi.shape[2]
     alf_cache_zi0 = [0]*zi.shape[2]
     alf_cache_zi1 = [0]*zi.shape[2]
-    for curf in xrange(zi.shape[2]):
+    for curf in range(zi.shape[2]):
         alf_cache_b00[curf] = b[:, 0, curf]
         alf_cache_zi00[curf] = zi[:, 0, curf]
         alf_cache_b1[curf] = b[:, 1:b.shape[1], curf]
@@ -63,9 +61,9 @@ def _scipy_apply_linear_filterbank(b, a, x, zi):
     yr = np.reshape(y, (1, len(y))).T
     t = np.zeros(alf_cache_b1[0].shape, order='F')
     t2 = np.zeros(alf_cache_b1[0].shape, order='F')
-    for sample, (x, o) in enumerate(izip(X, output)):
+    for sample, (x, o) in enumerate(zip(X, output)):
         xr = np.reshape(x, (1, len(x))).T
-        for curf in xrange(num_cascade):
+        for curf in range(num_cascade):
             #y = b[:, 0, curf]*x+zi[:, 0, curf]
             np.multiply(alf_cache_b00[curf], x, y)
             np.add(y, alf_cache_zi00[curf], y)
@@ -353,11 +351,11 @@ class LinearFilterbank(Filterbank):
             raise ValueError('Number of cascades must be a divisor of original number of cascaded filters.')
         b = np.zeros((n, (m-1)*(p/ncascade)+1, ncascade))
         a = np.zeros((n, (m-1)*(p/ncascade)+1, ncascade))
-        for i in xrange(n):
-            for k in xrange(ncascade):
+        for i in range(n):
+            for k in range(ncascade):
                 bp = np.ones(1)
                 ap = np.ones(1)
-                for j in xrange(k*(p/ncascade), (k+1)*(p/ncascade)):
+                for j in range(k*(p/ncascade), (k+1)*(p/ncascade)):
                     bp = np.polymul(bp, self.filt_b[i, ::-1, j])
                     ap = np.polymul(ap, self.filt_a[i, ::-1, j])
                 bp = bp[::-1]

@@ -1,11 +1,11 @@
+from builtins import range
+
 import numpy as np
 from numpy.fft import fft, ifft
 
 from brian2hears.sounds import Sound
 from brian2hears.filtering import FIRFilterbank
 from copy import copy
-from six.moves import range as xrange
-from six import get_function_code
 
 __all__ = ['HRTF', 'HRTFSet', 'HRTFDatabase',
            'make_coordinates']
@@ -167,7 +167,7 @@ class HRTFSet(object):
         self.samplerate = samplerate
         self.coordinates = coordinates
         self.hrtf = []
-        for i in xrange(self.num_indices):
+        for i in range(self.num_indices):
             l = Sound(self.data[0, i, :], samplerate=self.samplerate)
             r = Sound(self.data[1, i, :], samplerate=self.samplerate)
             self.hrtf.append(HRTF(l, r))
@@ -204,7 +204,7 @@ class HRTFSet(object):
         ``condition=lambda azim:azim<pi/2``.
         '''
         if callable(condition):
-            fcode = get_function_code(condition)
+            fcode = condition.__code__
             fvars = fcode.co_varnames
             ns = dict((name, self.coordinates[name]) for name in fvars)
             try:

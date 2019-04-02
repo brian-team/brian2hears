@@ -1,3 +1,5 @@
+from builtins import range
+
 import numpy as np
 from numpy.fft import fft, ifft, fftfreq
 from numpy.random import randn
@@ -17,7 +19,6 @@ from .prefs import get_samplerate
 from .db import dB, dB_type, dB_error, gain
 from scipy.signal import fftconvolve, lfilter
 from scipy.special import factorial
-from six.moves import range as xrange
 
 from brian2 import (Hz, ms, second, check_units,
                     have_same_dimensions, get_unit, DimensionMismatchError)
@@ -382,7 +383,7 @@ class Sound(BaseSound, np.ndarray):
                 return self[-duration:, :]
         else:
             if self.nchannels>1:
-                sounds = [self.channel(i).shifted(duration, fractional=True, filter_length=filter_length) for i in xrange(self.nchannels)]
+                sounds = [self.channel(i).shifted(duration, fractional=True, filter_length=filter_length) for i in range(self.nchannels)]
                 return Sound(np.hstack(sounds), samplerate=self.samplerate)
             # Adapted from
             # http://www.labbookpages.co.uk/audio/beamforming/fractionalDelay.html
@@ -595,7 +596,7 @@ class Sound(BaseSound, np.ndarray):
             rms_dB = 20.0*np.log10(rms_value/2e-5)
             return rms_dB*dB
         else:
-            return np.array(tuple(self.channel(i).get_level() for i in xrange(self.nchannels)))
+            return np.array(tuple(self.channel(i).get_level() for i in range(self.nchannels)))
 
     def set_level(self, level):
         '''

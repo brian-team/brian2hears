@@ -11,7 +11,7 @@ setup(
     author="Bertrand Fontaine, Dan Goodman, Marcel Stimberg, Victor Benichoux, Romain Brette",
     author_email="team@briansimulator.org",
     description="Auditory modelling package for brian2 simulator",
-    install_requires=['numpy', 'scipy', 'brian2', 'six', 'future'],
+    install_requires=['numpy', 'scipy', 'brian2', 'future'],
     packages=find_packages(),
     use_2to3=False,
     zip_safe=False,
