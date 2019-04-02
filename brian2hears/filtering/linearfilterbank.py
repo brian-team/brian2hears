@@ -368,15 +368,4 @@ class LinearFilterbank(Filterbank):
         self.filt_b = np.array(b, order='F')
         self.filt_a = np.array(a, order='F')
         self.filt_state = np.zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
-                
-# # Use the GPU version if available
-# try:
-#     if get_global_preference('brianhears_usegpu'):
-#         import pycuda
-#         from gpulinearfilterbank import LinearFilterbank
-#         use_gpu = True
-#     else:
-#         use_gpu = False
-# except ImportError:
-#     use_gpu = False
-use_gpu = False
+
