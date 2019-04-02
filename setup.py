@@ -14,7 +14,6 @@ setup(
     packages=find_packages(),
     use_2to3=False,
     zip_safe=False,
-    license='CeCILL-2.1',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
