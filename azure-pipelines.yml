@@ -12,17 +12,15 @@ jobs:
     matrix:
       Python27:
         python.version: '2.7'
-        script_name: dev/runtests.py
       Python37:
         python.version: '3.7'
-        script_name: dev/runtests.py
 
   steps:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
   - script: |
       conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib=2.1
-      conda activate test_env
+      source activate test_env
       python -m pip install samplerate
     displayName: 'Install dependencies'
   - script: |
@@ -42,17 +40,15 @@ jobs:
     matrix:
       Python27:
         python.version: '2.7'
-        script_name: dev/runtests.py
       Python37:
         python.version: '3.7'
-        script_name: dev/runtests.py
 
   steps:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
   - script: |
       conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib=2.1
-      conda activate test_env
+      source activate test_env
       python -m pip install samplerate
     displayName: 'Install dependencies'
   - script: |
@@ -72,17 +68,15 @@ jobs:
     matrix:
       Python27:
         python.version: '2.7'
-        script_name: dev/runtests.py
       Python37:
         python.version: '3.7'
-        script_name: dev/runtests.py
 
   steps:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: Add conda to PATH
   - script: |
       conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib=2.1
-      conda activate test_env
+      call activate test_env
       python -m pip install samplerate
     displayName: 'Install dependencies'
   - script: |
