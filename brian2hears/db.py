@@ -2,11 +2,13 @@ import numpy as np
 
 __all__ = ['dB', 'dB_type', 'dB_error', 'gain']
 
+
 class dB_error(ValueError):
     '''
     Error raised when values in dB are used inconsistently with other units.
     '''
     pass
+
 
 class dB_type(np.float64):
     '''

@@ -1,7 +1,7 @@
-import numpy as np
-from numpy import pi
-import scipy.signal as signal
 import warnings
+
+import numpy as np
+import scipy.signal as signal
 
 from brian2 import (NeuronGroup, network_operation,
                     Hz, ms)
@@ -411,9 +411,9 @@ class Signal_Coefficients:
 
         
         self.cfmat = np.tile(self.cf.reshape(self.nch,-1),20)  
-        self.gain_norm = np.sqrt(np.prod((2*pi*self.cfmat-self.pimg[:,0:20])**2+self.preal[:,0:20]**2,axis=1))
+        self.gain_norm = np.sqrt(np.prod((2*np.pi*self.cfmat-self.pimg[:,0:20])**2+self.preal[:,0:20]**2,axis=1))
 
-        self.gain_norm = self.gain_norm /(np.sqrt((2*pi*self.cf)**2+self.zeroa**2))**self.order_of_zero
+        self.gain_norm = self.gain_norm /(np.sqrt((2*np.pi*self.cf)**2+self.zeroa**2))**self.order_of_zero
         
     def return_coefficients(self,control_signal):
         self.preal,self.pimg = self.analog_poles(control_signal)
@@ -478,7 +478,7 @@ class Filter_Update:
 class LowPass_IHC(LinearFilterbank):
     def __init__(self,source,cf,fc,gain,order): 
         nch = len(cf)
-        TWOPI = 2*pi
+        TWOPI = 2*np.pi
         self.samplerate =  source.samplerate
         c = 2.0 * self.samplerate
         c1LP = ( c/Hz - TWOPI*fc ) / ( c/Hz + TWOPI*fc )
@@ -497,7 +497,7 @@ class LowPass_IHC(LinearFilterbank):
 class LowPass_filter(LinearFilterbank):
     def __init__(self,source,cf,fc,gain,order):
         nch = len(cf)
-        TWOPI = 2*pi
+        TWOPI = 2*np.pi
         self.samplerate =  source.samplerate
         c = 2.0 * self.samplerate
         c1LP = ( c/Hz - TWOPI*fc ) 
@@ -563,10 +563,10 @@ class TanCarneyControl(CombinedFilterbank):
         NL2_control=FunctionFilterbank(NL1_control,func_NL2_control)
 
         #control low pass filter (its output will be used to control the signal path)
-        gain_lp_con = (2*pi*parameters['fc_LP_control'])**3*1.5
+        gain_lp_con = (2*np.pi*parameters['fc_LP_control'])**3*1.5
         LP_control = LowPass_filter(NL2_control,cf,parameters['fc_LP_control'],gain_lp_con,3)   
         #low pass filter for feedback to control band pass (its output will be used to control the control path)
-        gain_lp_fb = parameters['fc_LP_fb']*2*pi*10
+        gain_lp_fb = parameters['fc_LP_fb']*2*np.pi*10
         LP_feed_back = LowPass_filter(LP_control,cf,parameters['fc_LP_fb'],gain_lp_fb,1)
         
         updater = Filter_Update(BP_control, control_coef) #instantiation of the updater for the control path

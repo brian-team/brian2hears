@@ -1,7 +1,8 @@
 '''
 The Bufferable class serves as a base for all the other brian2hears classes
 '''
-from numpy import zeros, empty, hstack, vstack, arange, diff
+import numpy as np
+
 
 class Bufferable(object):
     '''
@@ -99,7 +100,7 @@ class Bufferable(object):
         # will have to increase the size of the cache
         new_start = min(new_end-self.cached_buffer_output.shape[0], start)
         new_size = new_end-new_start
-        new_output = empty((new_size, self.nchannels))
+        new_output = np.empty((new_size, self.nchannels))
         if samples!=new_size:
             new_output[:new_size-samples, :] = self.cached_buffer_output[samples-new_size:, :]
         new_output[new_size-samples:, :] = newsegment
@@ -115,12 +116,12 @@ class Bufferable(object):
         if not hasattr(self, 'maximum_buffer_size'):
             return self.buffer_fetch_next(samples)
         bufsize = self.maximum_buffer_size
-        endpoints = hstack((arange(0, samples, bufsize), samples))
-        sizes = diff(endpoints)
-        return vstack(tuple(self.buffer_fetch_next(size) for size in sizes))
+        endpoints = np.hstack((np.arange(0, samples, bufsize), samples))
+        sizes = np.diff(endpoints)
+        return np.vstack(tuple(self.buffer_fetch_next(size) for size in sizes))
     
     def buffer_init(self):
-        self.cached_buffer_output = zeros((0, self.nchannels))
+        self.cached_buffer_output = np.zeros((0, self.nchannels))
         self.cached_buffer_start = 0
         self.cached_buffer_end = 0
     

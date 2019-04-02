@@ -1,6 +1,6 @@
 from builtins import range
-import numpy as np
 
+import numpy as np
 try:
     import weave
 except ImportError:
@@ -8,9 +8,8 @@ except ImportError:
         from scipy import weave
     except ImportError:
         weave = None
-from scipy import signal, random
-from math import factorial
-from .filterbank import Filterbank,RestructureFilterbank
+from scipy import signal
+
 from .linearfilterbank import *
 from .firfilterbank import *
 

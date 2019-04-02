@@ -7,6 +7,7 @@ from brian2 import Hz, kHz, check_units
 
 __all__ = ['erbspace']
 
+
 @check_units(low=Hz, high=Hz)
 def erbspace(low, high, N, earQ=9.26449, minBW=24.7, order=1):
     '''

@@ -4,6 +4,7 @@ __all__ = ['get_samplerate', 'set_default_samplerate']
 
 default_samplerate = 44.1*kHz
 
+
 def get_samplerate(samplerate):
     if samplerate is None:
         return default_samplerate

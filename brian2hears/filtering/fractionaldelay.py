@@ -1,9 +1,9 @@
 import numpy as np
 
-from .filterbank import *
 from .firfilterbank import *
 
 __all__ = ['FractionalDelay']
+
 
 class FractionalDelay(FIRFilterbank):
     '''

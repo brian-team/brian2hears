@@ -12,6 +12,7 @@ __all__ = ['HeadlessDatabase']
 
 speed_of_sound_in_air = 343.2*metre/second
 
+
 class HeadlessDatabase(HRTFDatabase):
     '''
     Database for creating HRTFSet with artificial interaural time-differences

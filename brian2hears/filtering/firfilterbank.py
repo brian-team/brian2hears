@@ -13,6 +13,7 @@ from .linearfilterbank import *
 
 __all__ = ['FIRFilterbank', 'LinearFIRFilterbank', 'FFTFIRFilterbank']
 
+
 class LinearFIRFilterbank(LinearFilterbank):
     def __init__(self, source, impulse_response, minimum_buffer_size=None):
         # if a 1D impulse response is given we apply it to every channel

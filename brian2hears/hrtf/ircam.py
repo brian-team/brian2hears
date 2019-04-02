@@ -1,8 +1,8 @@
-from scipy.io import loadmat # NOTE: this requires scipy 0.7+
+import os
+import re
 from glob import glob
-from copy import copy
-from scipy.io.wavfile import *
-import os, re
+
+from scipy.io import loadmat  # NOTE: this requires scipy 0.7+
 import numpy as np
 
 from brian2 import kHz
@@ -10,6 +10,7 @@ from brian2 import kHz
 from .hrtf import *
 
 __all__ = ['IRCAM_LISTEN']
+
 
 class IRCAM_LISTEN(HRTFDatabase):
     '''

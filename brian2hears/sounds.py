@@ -1,27 +1,29 @@
 from builtins import range
+import array as pyarray
+import time
 
 import numpy as np
 from numpy.fft import fft, ifft, fftfreq
 from numpy.random import randn
-
 import matplotlib.pyplot as plt
-import array as pyarray
-import time
-import struct
-pygame_loaded = False
+from scipy.signal import fftconvolve, lfilter
+from scipy.special import factorial
+
 try:
     from scikits.samplerate import resample
     have_scikits_samplerate = True
 except (ImportError, ValueError):
     have_scikits_samplerate = False
-from .bufferable import Bufferable
-from .prefs import get_samplerate
-from .db import dB, dB_type, dB_error, gain
-from scipy.signal import fftconvolve, lfilter
-from scipy.special import factorial
 
 from brian2 import (Hz, ms, second, check_units,
                     have_same_dimensions, get_unit, DimensionMismatchError)
+
+from .bufferable import Bufferable
+from .prefs import get_samplerate
+from .db import dB, dB_type, dB_error
+
+pygame_loaded = False
+
 
 __all__ = ['BaseSound', 'Sound',
            'pinknoise','brownnoise','powerlawnoise',

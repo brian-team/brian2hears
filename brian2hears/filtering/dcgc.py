@@ -2,9 +2,9 @@ import numpy as np
 
 from brian2 import ms, kHz
 
-from .filterbank import Filterbank,FunctionFilterbank,ControlFilterbank,CombinedFilterbank,RestructureFilterbank
+from .filterbank import (ControlFilterbank, CombinedFilterbank,
+                         RestructureFilterbank)
 from .filterbanklibrary import *
-from .linearfilterbank import *
 
 __all__ = ['DCGC']
 

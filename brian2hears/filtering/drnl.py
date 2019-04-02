@@ -1,6 +1,6 @@
 import numpy as np
 
-from .filterbank import Filterbank, FunctionFilterbank, CombinedFilterbank
+from .filterbank import FunctionFilterbank, CombinedFilterbank
 from .filterbanklibrary import *
 
 __all__ = ['DRNL']

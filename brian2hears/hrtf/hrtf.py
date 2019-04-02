@@ -1,11 +1,12 @@
 from builtins import range
+from copy import copy
 
 import numpy as np
 from numpy.fft import fft, ifft
 
 from brian2hears.sounds import Sound
 from brian2hears.filtering import FIRFilterbank
-from copy import copy
+
 
 __all__ = ['HRTF', 'HRTFSet', 'HRTFDatabase',
            'make_coordinates']

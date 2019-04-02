@@ -1,7 +1,9 @@
+import weakref
+
 from brian2 import NeuronGroup, Clock, NetworkOperation, get_device
 from brian2.devices.device import RuntimeDevice
 from brian2.core.functions import timestep
-import weakref
+
 
 __all__ = ['FilterbankGroup']
 

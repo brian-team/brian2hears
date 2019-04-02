@@ -1,11 +1,6 @@
 from builtins import range, zip
 
 import numpy as np
-
-from brian2.codegen.cpp_prefs import get_compiler_and_args, update_for_cross_compilation
-from brian2.utils.logger import std_silent, get_logger
-from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
-from brian2.codegen.runtime.cython_rt.cython_rt import CythonCodeObject
 try:
     import weave
 except ImportError:
@@ -13,15 +8,20 @@ except ImportError:
         from scipy import weave
     except ImportError:
         weave = None
+
+from brian2.codegen.cpp_prefs import get_compiler_and_args
+from brian2.utils.logger import get_logger
+from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
+from brian2.codegen.runtime.cython_rt.cython_rt import CythonCodeObject
 try:
     import Cython
     if not CythonCodeObject.is_available():
         Cython = None
 except ImportError:
     Cython = None
-from scipy import signal, random
+
 from .filterbank import Filterbank, RestructureFilterbank
-from ..bufferable import Bufferable
+
 
 
 __all__ = ['LinearFilterbank']

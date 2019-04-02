@@ -7,8 +7,6 @@ except ImportError:
         from scipy import weave
     except ImportError:
         weave = None
-from scipy import signal, random
-
 import numpy as np
 
 from brian2hears.bufferable import Bufferable

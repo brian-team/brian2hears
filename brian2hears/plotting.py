@@ -7,6 +7,7 @@ from .erb import *
 
 __all__ = ['log_frequency_xaxis_labels', 'log_frequency_yaxis_labels']
 
+
 def log_frequency_xaxis_labels(ax=None, freqs=None):
     '''
     Sets tick positions for log-scale frequency x-axis at sensible locations.
