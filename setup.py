@@ -1,7 +1,8 @@
 from setuptools import setup, find_packages
 import os
 
-with open(os.path.join(os.path.dirname(__file__), 'VERSION')) as version_file:
+with open(os.path.join(os.path.dirname(__file__),
+                       'brian2hears', 'VERSION')) as version_file:
     version = version_file.read().strip()
 
 setup(
@@ -13,6 +14,7 @@ setup(
     description="Auditory modelling package for brian2 simulator",
     install_requires=['numpy', 'scipy>=0.7', 'brian2>=2.1.3', 'future'],
     packages=find_packages(),
+    package_data={'brian2hears': 'VERSION'},
     use_2to3=False,
     zip_safe=False,
     classifiers=[
