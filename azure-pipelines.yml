@@ -50,7 +50,7 @@ jobs:
   - script: |
       conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib
       source activate test_env
-      python -m pip install samplerate
+      #python -m pip install samplerate
     displayName: 'Install dependencies'
   - script: |
       source activate test_env
