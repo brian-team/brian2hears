@@ -1,8 +1,9 @@
 import weakref
 
-from brian2 import NeuronGroup, Clock, NetworkOperation, get_device
+from brian2 import NeuronGroup, Clock, NetworkOperation, get_device, second
 from brian2.devices.device import RuntimeDevice
 from brian2.core.functions import timestep
+from brian2.units.fundamentalunits import have_same_dimensions, DimensionMismatchError
 
 
 __all__ = ['FilterbankGroup']
@@ -72,12 +73,17 @@ class FilterbankGroup(NeuronGroup):
         if 'clock' in kwds:
             if int(1/kwds['clock'].dt)!=int(filterbank.samplerate):
                 raise ValueError('Clock should have 1/dt=samplerate')
+        elif 'dt' in kwds:
+            if int(1 / kwds['dt']) != int(filterbank.samplerate):
+                raise ValueError('Require 1/dt=samplerate')
         else:
-            kwds['clock'] = Clock(dt=1/filterbank.samplerate)        
+            kwds['dt'] = 1/filterbank.samplerate
         
         buffersize = kwds.pop('buffersize', 32)
         if not isinstance(buffersize, int):
-            buffersize = int(buffersize*self.samplerate)
+            if not have_same_dimensions(buffersize, second):
+                raise DimensionMismatchError("buffersize argument should be an integer or in seconds")
+            buffersize = int(buffersize*filterbank.samplerate)
 
         self.buffersize = buffersize
 
