@@ -46,7 +46,7 @@ class Gammatone(LinearFilterbank):
     "An Efficient Implementation of the Patterson-Holdsworth 
     Auditory Filter Bank". Apple Computer Technical Report #35). The code is
     based on
-    `Slaney's Matlab implementation <http://cobweb.ecn.purdue.edu/~malcolm/interval/1998-010/>`__.
+    `Slaney's Matlab implementation <https://engineering.purdue.edu/~malcolm/interval/1998-010/>`__.
     
     Initialised with arguments:
     
@@ -151,7 +151,7 @@ class ApproximateGammatone(LinearFilterbank):
     Hohmann, V., 2002, "Frequency analysis and synthesis using a Gammatone
     filterbank", Acta Acustica United with Acustica. The code is based on the
     Matlab gammatone implementation from
-    `Meddis' toolbox <http://www.essex.ac.uk/psychology/psy/PEOPLE/meddis/webFolder08/WebIntro.htm>`__. 
+    `Meddis' toolbox <https://github.com/rmeddis/MAP/>`__.
     
     Initialised with arguments:
     
@@ -627,7 +627,7 @@ class LowPass(LinearFilterbank):
     Bank of 1st-order lowpass filters
     
     The code is based on the code found in the
-    `Meddis toolbox <http://www.essex.ac.uk/psychology/psy/PEOPLE/meddis/webFolder08/WebIntro.htm>`__. 
+    `Meddis toolbox <https://github.com/rmeddis/MAP/>`__.
     It was implemented here to be used in the DRNL cochlear model implementation.
 
     Initialised with arguments:
@@ -695,7 +695,7 @@ class AsymmetricCompensation(LinearFilterbank):
     an IIR asymmetric compensation gammachirp filter, Acoust. Sci. & Tech.).
     They are implemented a a cascade of low order filters. The code 
     is based on the implementation found in the
-    `AIM-MAT toolbox <http://www.pdn.cam.ac.uk/groups/cnbh/aimmanual/index.html>`__.
+    `AIM-MAT toolbox <https://code.soundsoftware.ac.uk/projects/aimmat>`__.
 
     Initialised with arguments:
     

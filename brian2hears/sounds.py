@@ -977,7 +977,7 @@ class Sound(BaseSound, np.ndarray):
         
         The implementation is based on the MakeVowel function written by Richard
         O. Duda, part of the Auditory Toolbox for Matlab by Malcolm Slaney:
-        http://cobweb.ecn.purdue.edu/~malcolm/interval/1998-010/                
+        https://engineering.purdue.edu/~malcolm/interval/1998-010/
         '''    
         
         samplerate = get_samplerate(samplerate)
