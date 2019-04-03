@@ -26,7 +26,7 @@ From the user point of view, all you need to do, having set up a chain of
 repeatedly. If the output of a :class:`Filterbank` is being plugged into a
 :class:`FilterbankGroup` object, everything is handled automatically. For cases
 where the number of channels is small or the length of the input source is short,
-you can use the :meth:`Filterbank.fetch` method to automatically
+you can use the :meth:`Filterbank.process` method to automatically
 handle the initialisation and repeated application of ``buffer_fetch``.
 
 To extend :class:`Filterbank`, it is often sufficient just to implement the
