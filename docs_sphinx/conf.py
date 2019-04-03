@@ -408,8 +408,7 @@ intersphinx_mapping = {'python': ('https://docs.python.org/', None),
                        'brian2': ('https://brian2.readthedocs.org/en/stable/', None),
                        'matplotlib': ('http://matplotlib.org/', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                       'mayavi': ('http://docs.enthought.com/mayavi/mayavi/', None)}
+                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None)}
 
 # Configure linking to github
 extlinks = {'issue': ('https://github.com/brian-team/brian2hears/issues/%s','#')}

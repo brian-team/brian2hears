@@ -56,6 +56,7 @@ Filterbanks
 .. autoclass:: DoNothingFilterbank
 .. autoclass:: ControlFilterbank
 .. autoclass:: CombinedFilterbank
+.. autoclass:: FractionalDelay
 
 Filterbank library
 ------------------
@@ -77,6 +78,8 @@ Auditory model library
 .. autoclass:: MiddleEar
 .. autoclass:: TanCarney
 .. autoclass:: ZhangSynapse
+.. autoclass:: ZhangSynapseRate
+.. autoclass:: ZhangSynapseSpikes
 
 Filterbank group
 ----------------

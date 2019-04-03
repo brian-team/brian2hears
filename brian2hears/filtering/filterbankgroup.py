@@ -36,18 +36,19 @@ class FilterbankGroup(NeuronGroup):
     '''
     Allows a Filterbank object to be used as a NeuronGroup
     
-    Initialised as a standard :class:`NeuronGroup` object, but with two
-    additional arguments at the beginning, and no ``N`` (number of neurons)
-    argument.  The number of neurons in the group will be the number of
+    Initialised as a standard `~brian2.groups.neurongroup.NeuronGroup` object,
+    but with two additional arguments at the beginning, and no ``N`` (number of
+    neurons) argument.  The number of neurons in the group will be the number of
     channels in the filterbank.
     
     ``filterbank``
-        The Filterbank object to be used by the group. In fact, any Bufferable
+        The Filterbank object to be used by the group. In fact, any `.Bufferable`
         object can be used.
     ``targetvar``
         The target variable to put the filterbank output into.
         
-    One additional keyword is available beyond that of :class:`NeuronGroup`:
+    One additional keyword is available beyond that of
+    `~brian2.groups.neurongroup.NeuronGroup`:
     
     ``buffersize=32``
         The size of the buffered segments to fetch each time. The efficiency
@@ -56,8 +57,8 @@ class FilterbankGroup(NeuronGroup):
         the default value is a good tradeoff. Values can be given as a number
         of samples, or a length of time in seconds.
         
-    Note that if you specify your own :class:`Clock`, it should have
-    1/dt=samplerate.
+    Note that if you specify your own `~brian2.core.clocks.Clock`, it should
+    have 1/dt=samplerate.
     '''
     
     def __init__(self, filterbank, targetvar, *args, **kwds):

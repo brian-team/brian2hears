@@ -165,8 +165,7 @@ class Filterbank(Bufferable):
     duration = property(fget=get_duration, fset=set_duration, doc='''
         The duration of the filterbank. If it is not specified by the user, it
         is computed by finding the maximum of its source durations. If these are
-        not specified a :class:`KeyError` will be raised (for example, using
-        :class:`OnlineSound` as a source).
+        not specified a :class:`KeyError` will be raised.
         ''')
 
     def process(self, func=None, duration=None, buffersize=32):
@@ -190,8 +189,7 @@ class Filterbank(Bufferable):
             will want to process the filtered outputs online, by providing
             a function ``func`` (see example below). If no duration is specified,
             the maximum duration of the inputs to the filterbank will be used,
-            or an error raised if they do not have durations (e.g. in the case
-            of :class:`OnlineSound`).
+            or an error raised if they do not have durations.
         ``buffersize=32``
             The size of the buffered segments to fetch, as a length of time or
             number of samples. 32 samples typically gives reasonably good

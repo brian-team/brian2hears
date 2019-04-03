@@ -14,7 +14,8 @@ from brian2hears.filtering.linearfilterbank import LinearFilterbank
 from brian2hears.filtering.filterbankgroup import FilterbankGroup
 
 
-__all__=['TanCarney', 'MiddleEar', 'ZhangSynapse']
+__all__=['TanCarney', 'MiddleEar', 'ZhangSynapse', 'ZhangSynapseSpikes',
+         'ZhangSynapseRate']
 
 class MiddleEar(LinearFilterbank):
     '''
@@ -23,7 +24,7 @@ class MiddleEar(LinearFilterbank):
     response of the analog filter at 1000Hz as in the model of Tan & Carney
     (their actual C code does however result in a slightly different
     normalization, the difference in overall level is about 0.33dB (to get
-    exactly the same output as in their model, set the `gain` parameter to
+    exactly the same output as in their model, set the ``gain`` parameter to
     0.962512703689).
 
     Tan, Q., and L. H. Carney.
@@ -59,10 +60,10 @@ class ZhangSynapseSpikes(NeuronGroup):
     '''
     The spike-generating Poisson process (with absolute and relative
     refractoriness) of an IHC-AN synapse according to the Zhang et al. (2001)
-    model. The `source` has to have a state variable `s`, representing the
-    firing rate (e.g. the class `ZhangSynapseRate`).
+    model. The ``source`` has to have a state variable ``s``, representing the
+    firing rate (e.g. the class `.ZhangSynapseRate`).
     
-    The `n_per_channel` argument can be used to generate multiple spike trains
+    The ``n_per_channel`` argument can be used to generate multiple spike trains
     for every channel of the source group.
     '''
     def __init__(self, source, n_per_channel=1, params=None):
@@ -110,9 +111,9 @@ class ZhangSynapseSpikes(NeuronGroup):
 class ZhangSynapse(ZhangSynapseSpikes):
     '''
     A `FilterbankGroup` that represents an IHC-AN synapse according to the
-    Zhang et al. (2001) model. The `source` should be a filterbank, producing
-    V_ihc (e.g. `TanCarney`). `CF` specifies the characteristic frequencies of
-    the AN fibers. `params` overwrites any parameters values given in the
+    Zhang et al. (2001) model. The ``source`` should be a filterbank, producing
+    V_ihc (e.g. `TanCarney`). ``CF`` specifies the characteristic frequencies of
+    the AN fibers. ``params`` overwrites any parameters values given in the
     publication.
 
     The group emits spikes according to a time-varying Poisson process with
@@ -120,11 +121,11 @@ class ZhangSynapse(ZhangSynapseSpikes):
     state variable ``R``). The continuous probability of spiking without
     refractoriness is available in the state variable ``s``. 
 
-    The `n_per_channel` argument can be used to generate multiple spike trains
+    The ``n_per_channel`` argument can be used to generate multiple spike trains
     for every channel.
 
     If all you need is the state variable ``s``, you can use the class
-    `ZhangSynapseRate` instead which does not simulate the spike-generating
+    `.ZhangSynapseRate` instead which does not simulate the spike-generating
     Poisson process.
 
     For details see:
@@ -176,7 +177,7 @@ class ZhangSynapseRate(FilterbankGroup):
     A `FilterbankGroup` that represents an IHC-AN synapse according to the
     Zhang et al. (2001) model, see `ZhangSynapse` for details. This class does
     not actually generate any spikes, it only simulates the time-varying
-    firing rate (not taking refractory effects into account) `s`.
+    firing rate (not taking refractory effects into account) ``s``.
     '''
 
     def __init__(self, source, CF, params=None):

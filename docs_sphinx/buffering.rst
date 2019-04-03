@@ -6,7 +6,7 @@
 Buffering interface
 -------------------
 
-The :class:`Sound`, :class:`OnlineSound` and :class:`Filterbank` classes
+The :class:`Sound` and :class:`Filterbank` classes
 (and all classes derived from them) all implement the same buffering
 mechanism. The purpose of this is to allow for efficient processing of
 multiple channels in buffers. Rather than precomputing the application of
@@ -26,7 +26,7 @@ From the user point of view, all you need to do, having set up a chain of
 repeatedly. If the output of a :class:`Filterbank` is being plugged into a
 :class:`FilterbankGroup` object, everything is handled automatically. For cases
 where the number of channels is small or the length of the input source is short,
-you can use the :meth:`Filterbank.fetch(duration)` method to automatically
+you can use the :meth:`Filterbank.fetch` method to automatically
 handle the initialisation and repeated application of ``buffer_fetch``.
 
 To extend :class:`Filterbank`, it is often sufficient just to implement the

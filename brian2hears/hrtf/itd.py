@@ -36,7 +36,7 @@ class HeadlessDatabase(HRTFDatabase):
         timestep ``1/samplerate``. Note that the filters used to do this are
         not perfect and so this will introduce a small amount of numerical
         error, and so shouldn't be used unless this level of timing precision
-        is required. See :class:`FractionalDelay` for more details.
+        is required. See `.FractionalDelay` for more details.
         
     To get the HRTFSet, the simplest thing to do is just::
     

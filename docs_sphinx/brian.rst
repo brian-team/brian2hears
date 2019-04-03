@@ -5,10 +5,11 @@ Connecting with Brian
 
 To create spiking neuron models based on filter chains, you use the
 :class:`FilterbankGroup` class. This acts exactly like a standard Brian
-:class:`~brian2.NeuronGroup` except that you give a source filterbank and choose
-a state variable in the target equations for the output of the filterbank.
-A simple auditory nerve fibre model would take the inner hair cell model from
-earlier, and feed it into a noisy leaky integrate-and-fire model as follows::
+:class:`~brian2.groups.neurongroup.NeuronGroup` except that you give a source
+filterbank and choose a state variable in the target equations for the output
+of the filterbank. A simple auditory nerve fibre model would take the inner hair
+cell model from earlier, and feed it into a noisy leaky integrate-and-fire model
+as follows::
 
 	# Inner hair cell model as before
 	cfmin, cfmax, cfN = 20*Hz, 20*kHz, 3000
