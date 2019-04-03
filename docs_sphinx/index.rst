@@ -1,7 +1,5 @@
 .. currentmodule:: brian2hears
 
-.. _brian2hears:
-
 Brian 2 hears
 =============
 

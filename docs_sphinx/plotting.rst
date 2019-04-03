@@ -1,3 +1,5 @@
+.. currentmodule:: brian2hears
+
 Plotting
 --------
 
