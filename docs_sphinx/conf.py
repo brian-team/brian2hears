@@ -117,6 +117,17 @@ if not os.environ.get('RUN_EXAMPLES', 'FALSE').lower() == 'true':
     # Used as a parent class
     sys.modules['brian2'].NeuronGroup = object
 
+    # The mocked check_units decorator hides all the docstrings
+    from functools import wraps
+    def check_units(*args, **kwds):
+        def do_check_units(f):
+            @wraps(f)
+            def new_f(*args, **kwds):
+                return f(*args, **kwds)
+            return new_f
+        return do_check_units
+    sys.modules['brian2'].check_units = check_units
+
     # Do not execute the examples
     sphinx_gallery_conf['plot_gallery'] = 'False'
 
