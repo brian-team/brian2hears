@@ -3,7 +3,7 @@ import weakref
 from brian2 import NeuronGroup, Clock, NetworkOperation, get_device, second
 from brian2.devices.device import RuntimeDevice
 from brian2.core.functions import timestep
-from brian2.units.fundamentalunits import have_same_dimensions, DimensionMismatchError
+from brian2.units.fundamentalunits import have_same_dimensions, DimensionMismatchError, DIMENSIONLESS
 
 
 __all__ = ['FilterbankGroup']
@@ -90,6 +90,9 @@ class FilterbankGroup(NeuronGroup):
         self.apply_filterbank = ApplyFilterbank(self, targetvar, filterbank, buffersize)
 
         NeuronGroup.__init__(self, filterbank.nchannels, *args, **kwds)
+
+        if self.variables[targetvar].dim is not DIMENSIONLESS:
+            raise DimensionMismatchError("Target variable must be dimensionless")
 
         apply_filterbank_output = NetworkOperation(self.apply_filterbank.__call__, when='start', clock=self.clock)
         self.contained_objects.append(apply_filterbank_output)
