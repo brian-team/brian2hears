@@ -111,6 +111,7 @@ if not os.environ.get('RUN_EXAMPLES', 'FALSE').lower() == 'true':
     sys.modules['brian2'].metre = 1.
     sys.modules['brian2'].Hz = 1.
     sys.modules['brian2.devices.device'].all_devices = MagicMock()
+    sys.modules['brian2.devices.device'].RuntimeDevice = MagicMock()
 
     # Do not execute the examples
     sphinx_gallery_conf['plot_gallery'] = 'False'
