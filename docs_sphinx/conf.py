@@ -114,6 +114,9 @@ if not os.environ.get('RUN_EXAMPLES', 'FALSE').lower() == 'true':
     sys.modules['brian2'].metre = 1.
     sys.modules['brian2'].Hz = 1.
 
+    # Used as a parent class
+    sys.modules['brian2'].NeuronGroup = object
+
     # Do not execute the examples
     sphinx_gallery_conf['plot_gallery'] = 'False'
 
