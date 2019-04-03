@@ -19,6 +19,8 @@ class ApplyFilterbank(object):
         self.buffer = None
 
     def __call__(self, t):
+        if not hasattr(self, 'target_variable'):
+            self.target_variable = weakref.ref(self.group().variables[self.targetvar])
         i = timestep(t, self.dt)
         if not (self.buffer_start<=i<self.buffer_end):
             if i==0:
@@ -26,7 +28,7 @@ class ApplyFilterbank(object):
             self.buffer_start = i
             self.buffer_end = self.buffer_start+self.buffersize
             self.buffer = self.filterbank.buffer_fetch(self.buffer_start, self.buffer_end)
-        setattr(self.group(), self.targetvar, self.buffer[i-self.buffer_start, :])
+        self.target_variable().set_value(self.buffer[i-self.buffer_start, :])
 
 
 class FilterbankGroup(NeuronGroup):
