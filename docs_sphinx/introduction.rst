@@ -73,11 +73,11 @@ human monaural or binaural processing is straightforward, and even much larger
 banks of filters can be used (for example, around 30,000 in
 `Goodman DFM, Brette R (2010). Spike-timing-based computation in sound localization. PLoS Comput. Biol. 6(11): e1000993. doi:10.1371/journal.pcbi.1000993 <http://www.ploscompbiol.org/article/info:doi/10.1371/journal.pcbi.1000993>`__).
 Techniques for online computation are discussed below in the section
-`Online computation`_.
+:doc:`online`.
 
 Brian hears consists of classes and functions
-for defining `sounds`_, `filter chains`_, cochlear models, neuron models and
-`head-related transfer functions`_.
+for defining :doc:`sounds`, :doc:`filter_chains`, cochlear models, neuron models
+and :doc:`hrtf`.
 These classes
 are designed to be modular and easily extendable. Typically, a model will
 consist of a chain starting with a sound which is plugged into a chain of
@@ -98,9 +98,9 @@ hears packages as follows::
 
 .. seealso::
 
-    Reference documentation for :ref:`brian-hears-reference`, which
+    :doc:`Reference documentation <reference>` for Brian2Hears, which
     covers everything in this overview in detail, and more. List of
-    :ref:`examples of using Brian hears <examples-hears>`.
+    :doc:`examples of using Brian hears <auto_examples/index>`.
 
 Update for Brian 2
 ~~~~~~~~~~~~~~~~~~
