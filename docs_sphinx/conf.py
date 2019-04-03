@@ -96,10 +96,13 @@ if not os.environ.get('RUN_EXAMPLES', 'FALSE').lower() == 'true':
                                 'brian2.codegen.runtime.cython_rt',
                                     'brian2.codegen.runtime.cython_rt.cython_rt',
                                     'brian2.codegen.runtime.cython_rt.extension_manager',
-                                'brian2.codegen.runtime.weave_rt'
+                                'brian2.codegen.runtime.weave_rt',
                         'brian2.devices',
                             'brian2.devices.device',
-                        'brian2.utils', 'brian2.utils.logger']
+                        'brian2.units',
+                            'brian2.units.fundamentalunits',
+                        'brian2.utils',
+                            'brian2.utils.logger']
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
     # Additional hacks to get the documentation to build (numbers/units that appear
     # as default arguments of functions are evaluated and need to support multiply
@@ -110,8 +113,6 @@ if not os.environ.get('RUN_EXAMPLES', 'FALSE').lower() == 'true':
     sys.modules['brian2'].second = 1.
     sys.modules['brian2'].metre = 1.
     sys.modules['brian2'].Hz = 1.
-    sys.modules['brian2.devices.device'].all_devices = MagicMock()
-    sys.modules['brian2.devices.device'].RuntimeDevice = MagicMock()
 
     # Do not execute the examples
     sphinx_gallery_conf['plot_gallery'] = 'False'
