@@ -3,7 +3,7 @@
 HRTFs
 -----
 Example showing the use of HRTFs in Brian hears. Note that you will need to
-download the :class:`IRCAM_LISTEN` database and set the IRCAM_LISTEN environment variable to point to the location
+download the `.IRCAM_LISTEN` database and set the IRCAM_LISTEN environment variable to point to the location
 where you saved it.
 '''
 from brian2 import *

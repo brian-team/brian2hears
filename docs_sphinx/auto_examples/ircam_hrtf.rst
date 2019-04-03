@@ -10,7 +10,7 @@
 HRTFs
 -----
 Example showing the use of HRTFs in Brian hears. Note that you will need to
-download the :class:`IRCAM_LISTEN` database and set the IRCAM_LISTEN environment variable to point to the location
+download the `.IRCAM_LISTEN` database and set the IRCAM_LISTEN environment variable to point to the location
 where you saved it.
 
 
@@ -55,7 +55,7 @@ where you saved it.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.130 seconds)
+   **Total running time of the script:** ( 0 minutes  5.153 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ircam_hrtf.py:

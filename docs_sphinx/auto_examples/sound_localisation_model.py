@@ -14,8 +14,8 @@ strongly responding assembly is indicated by the green x, which is the estimate
 of the location by the model.
 
 Note that you will need to
-download the :class:`IRCAM_LISTEN` database and set the IRCAM_LISTEN environment variable to point to the location
-where you saved it.
+download the `.IRCAM_LISTEN` database and set the ``IRCAM_LISTEN`` environment
+variable to point to the location where you saved it.
 
 Reference:
 

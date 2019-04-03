@@ -21,8 +21,8 @@ strongly responding assembly is indicated by the green x, which is the estimate
 of the location by the model.
 
 Note that you will need to
-download the :class:`IRCAM_LISTEN` database and set the IRCAM_LISTEN environment variable to point to the location
-where you saved it.
+download the `.IRCAM_LISTEN` database and set the ``IRCAM_LISTEN`` environment
+variable to point to the location where you saved it.
 
 Reference:
 
@@ -115,7 +115,7 @@ localization. PLoS Comput. Biol. 6(11) <http://www.ploscompbiol.org/article/info
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  42.021 seconds)
+   **Total running time of the script:** ( 0 minutes  43.445 seconds)
 
 
 .. _sphx_glr_download_auto_examples_sound_localisation_model.py:

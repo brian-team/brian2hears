@@ -5,10 +5,10 @@
 
 Computation times
 =================
-**00:43.151** total execution time for **auto_examples** files:
+**00:48.598** total execution time for **auto_examples** files:
 
-- **00:42.021**: :ref:`sphx_glr_auto_examples_sound_localisation_model.py` (``sound_localisation_model.py``)
-- **00:01.130**: :ref:`sphx_glr_auto_examples_ircam_hrtf.py` (``ircam_hrtf.py``)
+- **00:43.445**: :ref:`sphx_glr_auto_examples_sound_localisation_model.py` (``sound_localisation_model.py``)
+- **00:05.153**: :ref:`sphx_glr_auto_examples_ircam_hrtf.py` (``ircam_hrtf.py``)
 - **00:00.000**: :ref:`sphx_glr_auto_examples_IIRfilterbank.py` (``IIRfilterbank.py``)
 - **00:00.000**: :ref:`sphx_glr_auto_examples_approximate_gammatone.py` (``approximate_gammatone.py``)
 - **00:00.000**: :ref:`sphx_glr_auto_examples_artificial_vowels.py` (``artificial_vowels.py``)
