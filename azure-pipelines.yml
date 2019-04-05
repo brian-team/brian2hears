@@ -1,0 +1,98 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+jobs:
+
+- job: 'Linux'
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+      Python37:
+        python.version: '3.7'
+
+  steps:
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+    displayName: Add conda to PATH
+  - script: |
+      conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib
+      source activate test_env
+      sudo apt-get install -y libsamplerate0
+      python -m pip install samplerate
+    displayName: 'Install dependencies'
+  - script: |
+      source activate test_env
+      python -m pip install --no-deps --ignore-installed --user .
+    displayName: 'Install Brian2Hears'
+  - script: |
+      source activate test_env
+      cd ..  # move out of the source directory to avoid direct import
+      pytest --pyargs brian2hears
+    displayName: 'Run tests'
+
+- job: 'OSX'
+  pool:
+    vmImage: 'macOS-10.13'
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+      Python37:
+        python.version: '3.7'
+
+  steps:
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+    displayName: Add conda to PATH
+  - script: |
+      conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib
+      source activate test_env
+      #python -m pip install samplerate
+    displayName: 'Install dependencies'
+  - script: |
+      source activate test_env
+      python -m pip install --no-deps --ignore-installed --user .
+    displayName: 'Install Brian2Hears'
+  - script: |
+      source activate test_env
+      cd ..  # move out of the source directory to avoid direct import
+      pytest --pyargs brian2hears
+    displayName: 'Run tests'
+
+- job: 'Windows'
+  pool:
+    vmImage: 'vs2017-win2016'
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+      Python37:
+        python.version: '3.7'
+
+  steps:
+  - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+    displayName: Add conda to PATH
+  - script: |
+      @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+    displayName: Install chocolatey
+    condition: eq(variables['python.version'], '2.7')
+  - script: choco install vcpython27
+    displayName: Install Visual C++ for Python 2.7
+    condition: eq(variables['python.version'], '2.7')
+  - script: |
+      conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib
+      call activate test_env
+      python -m pip install samplerate
+    displayName: 'Install dependencies'
+  - script: |
+      call activate test_env
+      python -m pip install --no-deps --ignore-installed --user .
+    displayName: 'Install Brian2Hears'
+  - script: |
+      call activate test_env
+      cd ..  # move out of the source directory to avoid direct import
+      pytest --pyargs brian2hears
+    displayName: 'Run tests'
