@@ -5,8 +5,13 @@ Introduction
 
 Download and installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~
+If you do not already have a recent version of
+`Brian2 <http://brian2.readthedocs.io/>`_, please install it following the
+`installation instructions in its documentation <https://brian2.readthedocs.io/en/stable/introduction/install.html>`_.
 
-To download Brian hears, TODO.
+To download and install Brian2Hears, use pip::
+
+    pip install brian2hears
 
 Getting started
 ~~~~~~~~~~~~~~~
