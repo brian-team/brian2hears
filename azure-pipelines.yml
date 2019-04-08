@@ -71,17 +71,9 @@ jobs:
         python.version: '2.7'
       Python37:
         python.version: '3.7'
-
   steps:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: Add conda to PATH
-  - script: |
-      @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-    displayName: Install chocolatey
-    condition: eq(variables['python.version'], '2.7')
-  - script: choco install vcpython27
-    displayName: Install Visual C++ for Python 2.7
-    condition: eq(variables['python.version'], '2.7')
   - script: |
       conda create -c conda-forge -n test_env --yes python=$(python.version) brian2 pip pytest future matplotlib
       call activate test_env
