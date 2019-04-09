@@ -1,13 +1,6 @@
 from builtins import range
 
 import numpy as np
-try:
-    import weave
-except ImportError:
-    try:
-        from scipy import weave
-    except ImportError:
-        weave = None
 from scipy import signal
 
 from .linearfilterbank import *

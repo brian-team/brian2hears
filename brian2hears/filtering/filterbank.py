@@ -1,12 +1,5 @@
 from builtins import all, sum, range
 
-try:
-    import weave
-except ImportError:
-    try:
-        from scipy import weave
-    except ImportError:
-        weave = None
 import numpy as np
 
 from brian2hears.bufferable import Bufferable
