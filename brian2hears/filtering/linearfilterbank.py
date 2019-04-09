@@ -8,7 +8,11 @@ except ImportError:
         from scipy import weave
     except ImportError:
         weave = None
-
+if weave is not None:
+    # If weave is available but compilation does not work, abandon weave
+    from brian2.codegen.runtime.weave_rt.weave_rt import WeaveCodeObject
+    if not WeaveCodeObject.is_available():
+        weave = None
 from brian2.codegen.cpp_prefs import get_compiler_and_args
 from brian2.utils.logger import get_logger
 from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
