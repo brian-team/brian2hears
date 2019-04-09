@@ -8,22 +8,15 @@ except ImportError:
         from scipy import weave
     except ImportError:
         weave = None
-if weave is not None:
-    # If weave is available but compilation does not work, abandon weave
-    from brian2.codegen.runtime.weave_rt.weave_rt import WeaveCodeObject
-    if not WeaveCodeObject.is_available():
-        weave = None
+
 from brian2.codegen.cpp_prefs import get_compiler_and_args
 from brian2.utils.logger import get_logger
-if weave is None:
-    from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
-    from brian2.codegen.runtime.cython_rt.cython_rt import CythonCodeObject
-    try:
-        import Cython
-        if not CythonCodeObject.is_available():
-            Cython = None
-    except ImportError:
-        Cython = None
+
+from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
+try:
+    import Cython
+except ImportError:
+    Cython = None
 
 from .filterbank import Filterbank, RestructureFilterbank
 
@@ -314,14 +307,26 @@ class LinearFilterbank(Filterbank):
         self.filt_b = np.array(b, order='F')
         self.filt_a = np.array(a, order='F')
         self.filt_state = np.zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
-        self.use_weave = weave is not None
+        # Check not only for the availability of weave/Cython, but also whether
+        # they can successfully compile a simple test program
+        from brian2.codegen.runtime.weave_rt.weave_rt import WeaveCodeObject
+        from brian2.codegen.runtime.cython_rt.cython_rt import CythonCodeObject
+        if weave is not None and WeaveCodeObject.is_available():
+            self.use_weave = True
+            self.use_cython = False
+        else:
+            self.use_weave = False
+            if Cython is not None and CythonCodeObject.is_available():
+                self.use_cython = True
+            else:
+                self.use_cython = False
+
         if self.use_weave:
             logger.debug("Using weave for LinearFilterbank")
             self.cpp_compiler, self.extra_compile_args = get_compiler_and_args()
-        else:
-            self.use_cython = Cython is not None
-            if self.use_cython:
-                self.cython_func = CythonLinearFilterbankApply()
+        elif self.use_cython:
+            logger.debug("Using Cython for LinearFilterbank")
+            self.cython_func = CythonLinearFilterbankApply()
 
     def reset(self):
         self.buffer_init()
