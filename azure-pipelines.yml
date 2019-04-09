@@ -23,7 +23,6 @@ jobs:
       source activate test_env
       sudo apt-get install -y libsamplerate0
       python -m pip install samplerate
-      python -m pip install pytest-timeout
     displayName: 'Install dependencies'
   - script: |
       source activate test_env
@@ -32,7 +31,7 @@ jobs:
   - script: |
       source activate test_env
       cd ..  # move out of the source directory to avoid direct import
-      pytest --pyargs brian2hears --timeout=60
+      pytest --pyargs brian2hears
     displayName: 'Run tests'
 
 - job: 'OSX'
@@ -52,7 +51,6 @@ jobs:
       conda create -c conda-forge -n test_env --yes --quiet python=$(python.version) brian2 pip pytest future matplotlib
       source activate test_env
       #python -m pip install samplerate
-      python -m pip install pytest-timeout
     displayName: 'Install dependencies'
   - script: |
       source activate test_env
@@ -61,7 +59,7 @@ jobs:
   - script: |
       source activate test_env
       cd ..  # move out of the source directory to avoid direct import
-      pytest --pyargs brian2hears --timeout=60
+      pytest --pyargs brian2hears
     displayName: 'Run tests'
 
 - job: 'Windows'
