@@ -15,14 +15,15 @@ if weave is not None:
         weave = None
 from brian2.codegen.cpp_prefs import get_compiler_and_args
 from brian2.utils.logger import get_logger
-from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
-from brian2.codegen.runtime.cython_rt.cython_rt import CythonCodeObject
-try:
-    import Cython
-    if not CythonCodeObject.is_available():
+if weave is None:
+    from brian2.codegen.runtime.cython_rt.extension_manager import cython_extension_manager
+    from brian2.codegen.runtime.cython_rt.cython_rt import CythonCodeObject
+    try:
+        import Cython
+        if not CythonCodeObject.is_available():
+            Cython = None
+    except ImportError:
         Cython = None
-except ImportError:
-    Cython = None
 
 from .filterbank import Filterbank, RestructureFilterbank
 
@@ -372,4 +373,3 @@ class LinearFilterbank(Filterbank):
         self.filt_b = np.array(b, order='F')
         self.filt_a = np.array(a, order='F')
         self.filt_state = np.zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
-
