@@ -25,7 +25,7 @@ gammatone = Gammatone(sound, center_frequencies, b=b1)
 gt_mon = gammatone.process()
 
 figure()
-imshow(gt_mon.T, aspect='auto', origin='lower left',
+imshow(gt_mon.T, aspect='auto', origin='lower',
        extent=(0, sound.duration/ms,
                center_frequencies[0]/Hz, center_frequencies[-1]/Hz))
 pyplot.yscale('log')

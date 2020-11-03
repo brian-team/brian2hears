@@ -20,13 +20,13 @@ def test_ircam_listen():
     # img_left = img[:img.shape[0]/2, :]
     # img_right = img[img.shape[0]/2:, :]
     # subplot(121)
-    # imshow(img_left, origin='lower left', aspect='auto',
+    # imshow(img_left, origin='lower', aspect='auto',
     #        extent=(0, sound.duration/ms, 0, 360))
     # xlabel('Time (ms)')
     # ylabel('Azimuth')
     # title('Left ear')
     # subplot(122)
-    # imshow(img_right, origin='lower left', aspect='auto',
+    # imshow(img_right, origin='lower', aspect='auto',
     #        extent=(0, sound.duration/ms, 0, 360))
     # xlabel('Time (ms)')
     # ylabel('Azimuth')
@@ -45,13 +45,13 @@ def test_headless_database():
     # img_left = img[:img.shape[0]/2, :]
     # img_right = img[img.shape[0]/2:, :]
     # subplot(121)
-    # imshow(img_left, origin='lower left', aspect='auto',
+    # imshow(img_left, origin='lower', aspect='auto',
     #        extent=(0, sound.duration/ms, 0, 360))
     # xlabel('Time (ms)')
     # ylabel('Azimuth')
     # title('Left ear')
     # subplot(122)
-    # imshow(img_right, origin='lower left', aspect='auto',
+    # imshow(img_right, origin='lower', aspect='auto',
     #        extent=(0, sound.duration/ms, 0, 360))
     # xlabel('Time (ms)')
     # ylabel('Azimuth')

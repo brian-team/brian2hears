@@ -96,7 +96,6 @@ if not os.environ.get('RUN_EXAMPLES', 'FALSE').lower() == 'true':
                                 'brian2.codegen.runtime.cython_rt',
                                     'brian2.codegen.runtime.cython_rt.cython_rt',
                                     'brian2.codegen.runtime.cython_rt.extension_manager',
-                                'brian2.codegen.runtime.weave_rt',
                         'brian2.devices',
                             'brian2.devices.device',
                         'brian2.units',

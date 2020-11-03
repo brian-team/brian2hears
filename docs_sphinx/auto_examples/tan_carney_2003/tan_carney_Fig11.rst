@@ -33,7 +33,6 @@ Tan, Q., and L. H. Carney.
     import numpy as np
 
     from brian2 import *
-    # set_global_preferences(useweave=True)
     from brian2hears import *
     from six.moves import range as xrange
 
