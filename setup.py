@@ -13,6 +13,7 @@ setup(
     author_email="team@briansimulator.org",
     description="Auditory modelling package for brian2 simulator",
     install_requires=['numpy', 'scipy>=0.7', 'brian2>=2.1.3', 'matplotlib'],
+    python_requires='>=3.6',
     packages=find_packages(),
     package_data={'brian2hears': ['VERSION']},
     use_2to3=False,
