@@ -14,15 +14,8 @@ jobs:
         python.version: '3.7'
 
   steps:
-  - bash: echo "##vso[task.prependpath]$CONDA/Scripts"
-    displayName: Add conda to PATH
-    condition: eq(variables['agent.os'], 'Windows_NT')
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
-    condition: in(variables['agent.os'], 'Darwin', 'Linux')
-  - bash: sudo chown -R $USER $CONDA
-    displayName: Take ownership of conda directory
-    condition: eq(variables['agent.os'], 'Darwin')
   - script: |
       conda create -c conda-forge -n test_env --yes --quiet python=$(python.version) brian2 pip pytest future matplotlib
       source activate test_env
@@ -50,6 +43,8 @@ jobs:
   steps:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
+  - bash: sudo chown -R $USER $CONDA
+    displayName: Take ownership of conda directory
   - script: |
       conda create -c conda-forge -n test_env --yes --quiet python=$(python.version) brian2 pip pytest future matplotlib
       source activate test_env
