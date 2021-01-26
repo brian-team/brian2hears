@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from brian2 import *
-# set_global_preferences(useweave=True)
 from brian2hears import *
 from six.moves import range as xrange
 
@@ -32,10 +31,10 @@ duration = 50*ms
 samplerate = 50*kHz
 set_default_samplerate(samplerate)
 CF = 2200
-freqs = np.arange(250.0, 3501., 50.)
+freqs = np.arange(250.0, 3501., 50.)*Hz
 levels = [10, 30, 50, 70, 90]
 cf_level = product(freqs, levels)
-tones = Sound([Sound.sequence([tone(freq * Hz, duration).atlevel(level*dB).ramp(when='both',
+tones = Sound([Sound.sequence([tone(freq, duration).atlevel(level*dB).ramp(when='both',
                                                                                 duration=2.5*ms,
                                                                                 inplace=False)])
                for freq, level in cf_level])
@@ -50,16 +49,16 @@ reshaped = s_mon.s[:].reshape((len(freqs), len(levels), -1))
 
 # calculate the phase with respect to the stimulus
 pi = np.pi
-min_freq, max_freq = 1100, 2900
+min_freq, max_freq = 1100*Hz, 2900*Hz
 freq_subset = freqs[(freqs>=min_freq) & (freqs<=max_freq)]
 reshaped_subset = reshaped[(freqs>=min_freq) & (freqs<=max_freq), :, :]
 phases = np.zeros((reshaped_subset.shape[0], len(levels)))
 for f_idx, freq in enumerate(freq_subset):
     period = 1.0 / freq
     for l_idx in xrange(len(levels)):
-        phase_angles = np.arange(reshaped_subset.shape[2])/float(samplerate) % period / period * 2*pi
+        phase_angles = np.arange(reshaped_subset.shape[2])/samplerate % period / period * 2*pi
         temp_phases = (np.exp(1j * phase_angles) *
-                       reshaped_subset[f_idx, l_idx, :])
+                       reshaped_subset[f_idx, l_idx, :]/Hz)
         phases[f_idx, l_idx] = np.angle(np.sum(temp_phases))
 
 plt.subplot(2, 1, 1)

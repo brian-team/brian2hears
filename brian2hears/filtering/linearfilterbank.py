@@ -1,14 +1,6 @@
 from builtins import range, zip
 
 import numpy as np
-try:
-    import weave
-except ImportError:
-    try:
-        from scipy import weave
-    except ImportError:
-        weave = None
-
 from brian2.codegen.cpp_prefs import get_compiler_and_args
 from brian2.utils.logger import get_logger
 
@@ -79,75 +71,6 @@ def _scipy_apply_linear_filterbank(b, a, x, zi):
         #output[sample] = y
         o[:] = x
     return output
-
-
-def _weave_apply_linear_filterbank(b, a, x, zi,
-                                   cpp_compiler, extra_compile_args):
-    if zi.shape[2]>1:
-        # we need to do this so as not to alter the values in x in the C code below
-        # but if zi.shape[2] is 1 there is only one filter in the chain and the
-        # copy operation at the end of the C code will never happen.
-        x = np.array(x, copy=True, order='C')
-    else:
-        # make sure that the array is in C-order
-        x = np.asarray(x, order='C')
-    y = np.empty_like(x)
-    n, m, p = b.shape
-    n1, m1, p1 = a.shape
-    numsamples = x.shape[0]
-    n = int(n)
-    m = int(m)
-    p = int(p)
-    n1 = int(n1)
-    m1 = int(m1)
-    p1 = int(p1)
-    numsamples = int(numsamples)
-    if n1!=n or m1!=m or p1!=p or x.shape!=(numsamples, n) or zi.shape!=(n, m, p):
-        raise ValueError('Data has wrong shape.')
-    if numsamples>1 and not x.flags['C_CONTIGUOUS']:
-        raise ValueError('Input data must be C_CONTIGUOUS')
-    if not b.flags['F_CONTIGUOUS'] or not a.flags['F_CONTIGUOUS'] or not zi.flags['F_CONTIGUOUS']:
-        raise ValueError('Filter parameters must be F_CONTIGUOUS')
-    code = '''
-    #define X(s,i) x[(s)*n+(i)]
-    #define Y(s,i) y[(s)*n+(i)]
-    #define A(i,j,k) a[(i)+(j)*n+(k)*n*m]
-    #define B(i,j,k) b[(i)+(j)*n+(k)*n*m]
-    #define Zi(i,j,k) zi[(i)+(j)*n+(k)*n*(m-1)]
-    for(int s=0; s<numsamples; s++)
-    {
-        for(int k=0; k<p; k++)
-        {
-            double * rp_y = &(Y(s, 0));
-            const double * rp_b1 = &(B(0, 0, k));
-            double * rp_x = &(X(s, 0));
-            double * rp_zi1 = &(Zi(0, 0, k));
-            for(int j=0; j<n; j++)
-                         rp_y[j] =   rp_b1[j]*rp_x[j] + rp_zi1[j];
-            for(int i=0; i<m-2; i++)
-            {
-                const double * rp_b2 = &(B(0, i+1, k));
-                const double * rp_a2 = &(A(0, i+1, k));
-                double * rp_zi20 = &(Zi(0, i, k));
-                double * rp_zi21 = &(Zi(0, i+1, k));
-                for(int j=0;j<n;j++)
-                    rp_zi20[j] = rp_b2[j]*rp_x[j] + rp_zi21[j] - rp_a2[j]*rp_y[j];
-            }
-            const double * rp_b3 = &(B(0, m-1, k));
-            const double * rp_a3 = &(A(0, m-1, k));
-            double * rp_zi3 = &(Zi(0, m-2, k));
-            for(int j=0; j<n; j++)
-                  rp_zi3[j] = rp_b3[j]*rp_x[j] - rp_a3[j]*rp_y[j];
-            if(k<p-1)
-                for(int j=0; j<n; j++)
-                    rp_x[j] = rp_y[j];            
-        }
-    }
-    '''
-    weave.inline(code, ['b', 'a', 'x', 'zi', 'y', 'n', 'm', 'p', 'numsamples'],
-                 compiler=cpp_compiler,
-                 extra_compile_args=extra_compile_args)
-    return y
 
 
 class CythonLinearFilterbankApply(object):
@@ -300,31 +223,22 @@ class LinearFilterbank(Filterbank):
                 raise ValueError('Can only automatically duplicate source channels for mono sources, use RestructureFilterbank.')
             source = RestructureFilterbank(source, b.shape[0])
         Filterbank.__init__(self, source)
-        # Weave version of filtering requires Fortran ordering of filter params
+        # Compiled version of filtering requires Fortran ordering of filter params
         if len(b.shape)==2 and len(a.shape)==2:
             b = np.reshape(b, b.shape+(1,))
             a = np.reshape(a, a.shape+(1,))
         self.filt_b = np.array(b, order='F')
         self.filt_a = np.array(a, order='F')
         self.filt_state = np.zeros((b.shape[0], b.shape[1], b.shape[2]), order='F')
-        # Check not only for the availability of weave/Cython, but also whether
+        # Check not only for the availability of Cython, but also whether
         # they can successfully compile a simple test program
-        from brian2.codegen.runtime.weave_rt.weave_rt import WeaveCodeObject
         from brian2.codegen.runtime.cython_rt.cython_rt import CythonCodeObject
-        if weave is not None and WeaveCodeObject.is_available():
-            self.use_weave = True
-            self.use_cython = False
+        if Cython is not None and CythonCodeObject.is_available():
+            self.use_cython = True
         else:
-            self.use_weave = False
-            if Cython is not None and CythonCodeObject.is_available():
-                self.use_cython = True
-            else:
-                self.use_cython = False
+            self.use_cython = False
 
-        if self.use_weave:
-            logger.debug("Using weave for LinearFilterbank")
-            self.cpp_compiler, self.extra_compile_args = get_compiler_and_args()
-        elif self.use_cython:
+        if self.use_cython:
             logger.debug("Using Cython for LinearFilterbank")
             self.cython_func = CythonLinearFilterbankApply()
 
@@ -337,11 +251,7 @@ class LinearFilterbank(Filterbank):
     
     def buffer_apply(self, input):
         
-        if self.use_weave:
-            return _weave_apply_linear_filterbank(self.filt_b, self.filt_a, input,
-                                                  self.filt_state, self.cpp_compiler,
-                                                  self.extra_compile_args)
-        elif self.use_cython:
+        if self.use_cython:
             return self.cython_func(self.filt_b, self.filt_a, input, self.filt_state)
         else:
             return _scipy_apply_linear_filterbank(self.filt_b, self.filt_a, input,

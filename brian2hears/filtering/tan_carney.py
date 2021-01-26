@@ -261,7 +261,8 @@ class ZhangSynapseRate(FilterbankGroup):
         # Equation 17 with some corrections to fix overflow problems
         base_P_I_exponent = p_2 * V_ihc : 1
         clip_base_P_I_exponent = clip(base_P_I_exponent, -1e100, 100) : 1
-        P_I_exponent = base_P_I_exponent*(base_P_I_exponent>=100)+log(1+exp(clip_base_P_I_exponent))*(base_P_I_exponent<100) : 1
+        P_I_exponent = base_P_I_exponent*int(base_P_I_exponent>=100) + 
+                       log(1+exp(clip_base_P_I_exponent))*int(base_P_I_exponent<100) : 1
         P_I = p_1 * P_I_exponent : 1
     
         # Following Equation A16 (p_2 is the same as P_ST)

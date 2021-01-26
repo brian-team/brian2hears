@@ -466,7 +466,7 @@ class Sound(BaseSound, np.ndarray):
         x = pygame.sndarray.make_sound(np.ascontiguousarray(x))
         x.play()
         if sleep:
-            time.sleep(self.duration)
+            time.sleep(float(self.duration))
 
     def spectrogram(self, low=None, high=None, log_power=True, other = None,  **kwds):
         '''

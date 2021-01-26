@@ -22,5 +22,5 @@ cochlea = FunctionFilterbank(gammatone, lambda x: clip(x, 0, Inf)**(1.0/3.0))
 lowpass = LowPass(cochlea, 10*Hz)
 output = lowpass.process()
 
-imshow(output.T, origin='lower left', aspect='auto', vmin=0)
+imshow(output.T, origin='lower', aspect='auto', vmin=0)
 show()
