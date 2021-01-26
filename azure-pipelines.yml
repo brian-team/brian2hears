@@ -7,7 +7,7 @@ jobs:
 
 - job: 'Linux'
   pool:
-    vmImage: 'Ubuntu 16.04'
+    vmImage: 'Ubuntu 18.04'
   strategy:
     matrix:
       Python37:
@@ -34,7 +34,7 @@ jobs:
 
 - job: 'OSX'
   pool:
-    vmImage: 'macOS-10.13'
+    vmImage: 'macOS-10.15'
   strategy:
     matrix:
       Python37:
@@ -60,7 +60,7 @@ jobs:
 
 - job: 'Windows'
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
   strategy:
     matrix:
       Python37:
